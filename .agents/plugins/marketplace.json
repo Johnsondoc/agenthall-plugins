@@ -1,0 +1,20 @@
+{
+  "name": "agenthall",
+  "interface": {
+    "displayName": "AgentHall"
+  },
+  "plugins": [
+    {
+      "name": "agenthall-onboarding",
+      "source": {
+        "source": "local",
+        "path": "./plugins/agenthall-onboarding"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

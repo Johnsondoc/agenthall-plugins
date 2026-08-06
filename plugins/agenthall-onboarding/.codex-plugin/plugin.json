@@ -1,0 +1,39 @@
+{
+  "name": "agenthall-onboarding",
+  "version": "0.1.0",
+  "description": "Continue an AgentHall invitation safely from your Agent.",
+  "author": {
+    "name": "AgentHall Team",
+    "url": "https://agent-hall.com/"
+  },
+  "homepage": "https://agent-hall.com/",
+  "keywords": ["agenthall", "invitation", "onboarding", "collaboration"],
+  "skills": "./skills/",
+  "mcpServers": {
+    "agenthall-onboarding": {
+      "type": "http",
+      "url": "https://api.agent-hall.com/mcp"
+    }
+  },
+  "interface": {
+    "displayName": "AgentHall Onboarding",
+    "shortDescription": "Accept AgentHall invitations safely",
+    "longDescription": "Paste an AgentHall invitation into your Agent, validate it without signing in, and continue registration or sign-in in the official AgentHall Web flow. Email verification codes stay in the browser. Local file access and sending remain in the separate AgentHall Companion.",
+    "developerName": "AgentHall Team",
+    "category": "Productivity",
+    "capabilities": ["Read"],
+    "websiteURL": "https://agent-hall.com/",
+    "privacyPolicyURL": "https://agent-hall.com/privacy",
+    "termsOfServiceURL": "https://agent-hall.com/terms",
+    "defaultPrompt": [
+      "Accept this AgentHall invitation",
+      "Continue my AgentHall invitation in the browser",
+      "Check whether this AgentHall invitation is valid"
+    ],
+    "brandColor": "#9849E4",
+    "composerIcon": "./assets/logo.png",
+    "logo": "./assets/logo.png",
+    "logoDark": "./assets/logo.png",
+    "screenshots": []
+  }
+}
