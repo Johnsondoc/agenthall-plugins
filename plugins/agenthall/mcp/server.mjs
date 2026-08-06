@@ -38268,7 +38268,7 @@ function prepareConfirmableAttachmentDraft(input) {
   });
 }
 function normalizeKeySet(input) {
-  if (!Array.isArray(input) || input.length === 0 || input.length > 20) {
+  if (!Array.isArray(input) || input.length > 20) {
     throw new TypeError("recipient key set is invalid");
   }
   const seenConnectors = /* @__PURE__ */ new Set();
@@ -38758,7 +38758,7 @@ function validateUnsigned(input) {
   assertId4(input.senderConnectorId, "conn_");
   assertConnectorKeyId3(input.senderSigningKeyId);
   assertId4(input.recipientAccountId, "acct_");
-  if (typeof input.displayName !== "string" || input.displayName.length === 0 || typeof input.mediaType !== "string" || input.mediaType.length === 0 || !Number.isSafeInteger(input.originalBytes) || input.originalBytes < 0 || input.originalBytes > 5 * 1024 * 1024 || !Number.isSafeInteger(input.encryptedBytes) || input.encryptedBytes <= 0 || input.encryptedBytes > 5 * 1024 * 1024 + 16 * 1024 || !SHA256_BASE64URL.test(input.originalSha256) || !SHA256_BASE64URL.test(input.encryptedSha256) || !SHA256_BASE64URL.test(input.confirmationDigest) || !SHA256_BASE64URL.test(input.idempotencyRequestDigest) || !Array.isArray(input.recipientKeyWraps) || input.recipientKeyWraps.length === 0 || !isIsoDate(input.createdAt) || !isIsoDate(input.expiresAt) || !isIsoDate(input.confirmedAt) || !isConfirmationSource(input.confirmationSource) || !ALLOWED_MEDIA_TYPES.has(input.mediaType)) {
+  if (typeof input.displayName !== "string" || input.displayName.length === 0 || typeof input.mediaType !== "string" || input.mediaType.length === 0 || !Number.isSafeInteger(input.originalBytes) || input.originalBytes < 0 || input.originalBytes > 5 * 1024 * 1024 || !Number.isSafeInteger(input.encryptedBytes) || input.encryptedBytes <= 0 || input.encryptedBytes > 5 * 1024 * 1024 + 16 * 1024 || !SHA256_BASE64URL.test(input.originalSha256) || !SHA256_BASE64URL.test(input.encryptedSha256) || !SHA256_BASE64URL.test(input.confirmationDigest) || !SHA256_BASE64URL.test(input.idempotencyRequestDigest) || !Array.isArray(input.recipientKeyWraps) || input.recipientKeyWraps.length > 50 || !isIsoDate(input.createdAt) || !isIsoDate(input.expiresAt) || !isIsoDate(input.confirmedAt) || !isConfirmationSource(input.confirmationSource) || !ALLOWED_MEDIA_TYPES.has(input.mediaType)) {
     throw new TypeError("Handoff Envelope is invalid");
   }
   assertBase64UrlBytes(input.originalSha256, 32);
@@ -39233,16 +39233,13 @@ var OutgoingHandoffCoordinator = class {
     try {
       contentKey = this.draft.openContentKey(this.localStorageMasterKey);
       const context = this.draft.artifactContext();
-      const recipientKeyWraps = wrapContentKeyForRecipients(
-        contentKey,
-        this.draft.recipientReceivingKeys(),
-        {
-          protocolVersion: "agenthall.v0.1",
-          handoffId: context.handoffId,
-          senderConnectorId: context.senderConnectorId,
-          recipientAccountId: context.recipientAccountId
-        }
-      );
+      const recipientKeys = this.draft.recipientReceivingKeys();
+      const recipientKeyWraps = recipientKeys.length === 0 ? [] : wrapContentKeyForRecipients(contentKey, recipientKeys, {
+        protocolVersion: "agenthall.v0.1",
+        handoffId: context.handoffId,
+        senderConnectorId: context.senderConnectorId,
+        recipientAccountId: context.recipientAccountId
+      });
       const envelope = signHandoffEnvelope(
         {
           protocolVersion: "agenthall.v0.1",
@@ -39272,6 +39269,7 @@ var OutgoingHandoffCoordinator = class {
       );
       const created = await this.gateway.create({
         envelope,
+        managedContentKey: contentKey,
         idempotencyKey: confirmed.idempotencyKey,
         now: input.now
       });
@@ -39631,7 +39629,12 @@ var ConnectorApiClient = class {
     const body = await this.authorizedJson("/v1/handoffs", {
       method: "POST",
       headers: { "idempotency-key": input.idempotencyKey },
-      body: JSON.stringify(wireEnvelope(input.envelope))
+      body: JSON.stringify({
+        ...wireEnvelope(input.envelope),
+        managed_content_key: Buffer.from(input.managedContentKey).toString(
+          "base64url"
+        )
+      })
     });
     const upload = readObject(body, "upload");
     if (readString2(upload, "method") !== "PUT") responseInvalid();
@@ -40349,8 +40352,12 @@ var AgentHallMcpRuntime = class {
       );
       try {
         const gateway = {
-          create: async ({ envelope, idempotencyKey }) => ({
-            grant: await client.createHandoff({ envelope, idempotencyKey })
+          create: async ({ envelope, managedContentKey, idempotencyKey }) => ({
+            grant: await client.createHandoff({
+              envelope,
+              managedContentKey,
+              idempotencyKey
+            })
           }),
           upload: async ({ grant, encryptedArtifact }) => client.upload(grant.url, grant.requiredHeaders, encryptedArtifact),
           finalize: async ({ handoffId: id, idempotencyKey }) => client.finalizeHandoff(id, idempotencyKey)
@@ -40952,7 +40959,7 @@ function createAgentHallMcpServer(runtime = new AgentHallMcpRuntime(), serverNam
     server,
     "agenthall_prepare_handoff",
     {
-      description: "Prepare exactly one supported local file up to 5 MiB for an existing AgentHall connection. This reads and encrypts locally and never sends. The user-facing confirmation table must contain exactly two rows: \u6536\u4EF6\u4EBA and \u6587\u4EF6\u540D. Render sourceFile as a clickable local-file link or file chip whose click only opens the source read-only. Never show size, media type, hashes, Handoff ID, status, or deadline in that table. Show the returned confirmationPrompt outside the table. Mention a secure send button only when the host actually renders one; otherwise tell the user only to reply with the exact phrase \u53D1\u9001. If the result error code is RECIPIENT_NOT_READY, say that the named recipient has not connected an Agent that can receive files, ask them to complete the AgentHall connection before retrying, and clearly state that the file was not sent. Do not describe this state as a server error or recommend an immediate retry.",
+      description: "Prepare exactly one supported local file up to 5 MiB for an existing active AgentHall connection. This creates an immutable local snapshot and never sends. The recipient does not need an installed or online AgentHall plugin. The user-facing confirmation table must contain exactly two rows: \u6536\u4EF6\u4EBA and \u6587\u4EF6\u540D. Render sourceFile as a clickable local-file link or file chip whose click only opens the source read-only. Never show size, media type, hashes, Handoff ID, status, or deadline in that table. Show the returned confirmationPrompt outside the table. Mention a secure send button only when the host actually renders one; otherwise tell the user only to reply with the exact phrase \u53D1\u9001.",
       inputSchema: {
         recipient: string2().min(1).max(100),
         file_path: string2().min(1)

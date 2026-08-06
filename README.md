@@ -2,7 +2,7 @@
 
 Temporary GitHub distribution for the unified AgentHall plugin while the public plugin-directory submission is pending.
 
-One install includes the public read-only invitation validator and the local AgentHall Companion. Registration and current-Agent approval stay in the official Web flow; credentials and private keys stay on the user's device, and every file send still requires explicit confirmation.
+Registration, email verification, and relationship setup can be completed in the official AgentHall Web flow before installing a plugin. Install AgentHall when you want the Agent to send or receive files. One install then includes the public read-only invitation validator and the local AgentHall Companion; credentials and private keys stay on the user's device, and every file send still requires explicit confirmation.
 
 ## Install in Codex
 
@@ -13,7 +13,7 @@ codex plugin marketplace add Johnsondoc/agenthall-plugins --ref main
 codex plugin add agenthall@agenthall
 ```
 
-Start a new Codex task after installation, then paste the original AgentHall invitation again. Installation always requires the user's explicit approval.
+Start a new Codex task after installation, then paste the original AgentHall invitation again. Installation always requires the user's explicit approval. A recipient may register and connect the relationship on the Web first, receive an asynchronous Handoff on the server, and install this latest plugin later to claim it.
 
 The invitation flow requires the Codex in-app Browser. The plugin must not automatically fall back to the system browser, Chrome, Edge, or Safari. If the in-app Browser is unavailable, it stops and presents the official invitation URL instead.
 
@@ -23,6 +23,8 @@ The invitation flow requires the Codex in-app Browser. The plugin must not autom
 codex plugin marketplace upgrade agenthall
 codex plugin add agenthall@agenthall
 ```
+
+Restart Codex after upgrading so the local Companion process loads the new version.
 
 ## Install in WorkBuddy
 
