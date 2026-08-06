@@ -15,6 +15,8 @@ codex plugin add agenthall-onboarding@agenthall
 
 Start a new Codex task after installation, then paste the original AgentHall invitation again. Installation always requires the user's explicit approval.
 
+The invitation flow requires the Codex in-app Browser. The plugin must not automatically fall back to the system browser, Chrome, Edge, or Safari. If the in-app Browser is unavailable, it stops and presents the official invitation URL instead.
+
 ## Upgrade
 
 ```bash
