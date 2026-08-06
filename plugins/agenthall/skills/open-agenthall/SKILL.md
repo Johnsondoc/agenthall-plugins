@@ -45,12 +45,6 @@ When the user enters or pastes an AgentHall invitation code or `https://agent-ha
 - Keep credentials, private keys, absolute quarantine paths, and attachment contents out of the component.
 - Do not claim that a third-party plugin registered a native desktop sidebar. In Codex, the supported visual surface is the in-app browser; Agent actions remain MCP tools in the conversation.
 
-## Handle recipient readiness
-
-- If `agenthall_prepare_handoff` returns `RECIPIENT_NOT_READY`, tell the user: “<recipient> 尚未连接可接收文件的 Agent，请对方完成 AgentHall 连接后重试。文件尚未发送。”
-- Do not call this a server error and do not recommend an immediate retry. The next useful action is for the recipient to connect AgentHall in one of their supported Agents.
-- Never imply that a preview exists or that the file was sent when this error is returned.
-
 ## Resolve recipient language semantically
 
 - A recipient expression can be a relationship, alias, abbreviation, or natural-language equivalent of the user's private note. Do not require literal text equality; for example, `老婆` can match a private note such as `媳妇儿`.
