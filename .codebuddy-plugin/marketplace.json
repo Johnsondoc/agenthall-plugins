@@ -1,0 +1,22 @@
+{
+  "name": "agenthall-workbuddy",
+  "description": "Official temporary GitHub distribution for AgentHall on WorkBuddy.",
+  "owner": {
+    "name": "AgentHall Team"
+  },
+  "metadata": {
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "agenthall-workbuddy",
+      "description": "AgentHall local Companion and safety workflow for WorkBuddy.",
+      "source": "./plugins/agenthall-workbuddy",
+      "version": "0.1.0",
+      "author": {
+        "name": "AgentHall Team"
+      },
+      "category": "办公协作"
+    }
+  ]
+}

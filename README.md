@@ -24,6 +24,26 @@ codex plugin marketplace upgrade agenthall
 codex plugin add agenthall@agenthall
 ```
 
+## Install in WorkBuddy
+
+WorkBuddy uses its own CodeBuddy plugin format. Do not run the Codex commands above in WorkBuddy.
+Review this fixed GitHub repository, approve the installation once, then run:
+
+```bash
+codebuddy plugin marketplace add Johnsondoc/agenthall-plugins
+codebuddy plugin install agenthall-workbuddy@agenthall-workbuddy
+```
+
+Restart WorkBuddy, start a new task, and paste the original invitation again. Continue registration,
+email verification, current WorkBuddy Agent approval, and invitation acceptance on the one official
+AgentHall page that WorkBuddy presents. If this WorkBuddy build cannot open that page inside its own
+window, it must show the official `https://agent-hall.com/` continuation URL for the user to open; it
+must not silently launch an external browser. Never paste an email verification code into the Agent
+conversation.
+
+The plugin installs one local STDIO Companion and one thin Skill. It does not install the Codex plugin,
+does not contain credentials, and does not grant permission to send or open received files.
+
 ## Security boundary
 
 - The onboarding MCP endpoint is `https://api.agent-hall.com/mcp`.

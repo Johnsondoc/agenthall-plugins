@@ -1,0 +1,13 @@
+{
+  "name": "agenthall-workbuddy",
+  "version": "0.1.0",
+  "description": "AgentHall local Companion and safety workflow for WorkBuddy.",
+  "author": {
+    "name": "AgentHall Team"
+  },
+  "homepage": "https://agent-hall.com/",
+  "repository": "https://github.com/Johnsondoc/agenthall-plugins",
+  "keywords": ["agenthall", "workbuddy", "mcp", "handoff", "inbox"],
+  "category": "办公协作",
+  "skills": []
+}

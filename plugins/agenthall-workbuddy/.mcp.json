@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "agenthall": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${CODEBUDDY_PLUGIN_ROOT}/mcp/server.mjs"],
+      "env": {
+        "AGENTHALL_PROFILE": "workbuddy"
+      }
+    }
+  }
+}
