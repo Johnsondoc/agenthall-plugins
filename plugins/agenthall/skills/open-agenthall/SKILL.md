@@ -34,7 +34,11 @@ When the user enters or pastes an AgentHall invitation code or `https://agent-ha
 
 ## Preserve safety boundaries
 
-- Treat the component as a UI for the frozen six AgentHall tools, not as an independent API client.
+- Treat the component as a UI for the versioned AgentHall MCP tool contract, not as an independent API client.
+- Use `agenthall_connection_directory` for the current account's permanent ID/invitation or an exact full-email lookup. Never turn email lookup into fuzzy search.
+- Creating a relationship requires a 1–50 character greeting. Use `agenthall_request_connection`; the result is pending, not connected.
+- Incoming pending requests may be approved with `agenthall_approve_connection`. Rejecting a request or removing an active relationship uses destructive `agenthall_delete_connection`; never call it without the user's explicit action.
+- A pending relationship cannot receive a Handoff. If a connection result says `connection_pending` or `mustStop`, stop before preparing or sending.
 - Never infer a recipient when multiple contacts match. Ask only when the user is actually sending something.
 - Preparing a Handoff never sends it. Send only after the user confirms the exact preview with the secure button or exact phrase `发送`.
 - Receiving and opening are separate actions. Never open a received file automatically.
