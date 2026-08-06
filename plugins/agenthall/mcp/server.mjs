@@ -38268,7 +38268,7 @@ function prepareConfirmableAttachmentDraft(input) {
   });
 }
 function normalizeKeySet(input) {
-  if (!Array.isArray(input) || input.length === 0 || input.length > 20) {
+  if (!Array.isArray(input) || input.length > 20) {
     throw new TypeError("recipient key set is invalid");
   }
   const seenConnectors = /* @__PURE__ */ new Set();
@@ -38758,7 +38758,7 @@ function validateUnsigned(input) {
   assertId4(input.senderConnectorId, "conn_");
   assertConnectorKeyId3(input.senderSigningKeyId);
   assertId4(input.recipientAccountId, "acct_");
-  if (typeof input.displayName !== "string" || input.displayName.length === 0 || typeof input.mediaType !== "string" || input.mediaType.length === 0 || !Number.isSafeInteger(input.originalBytes) || input.originalBytes < 0 || input.originalBytes > 5 * 1024 * 1024 || !Number.isSafeInteger(input.encryptedBytes) || input.encryptedBytes <= 0 || input.encryptedBytes > 5 * 1024 * 1024 + 16 * 1024 || !SHA256_BASE64URL.test(input.originalSha256) || !SHA256_BASE64URL.test(input.encryptedSha256) || !SHA256_BASE64URL.test(input.confirmationDigest) || !SHA256_BASE64URL.test(input.idempotencyRequestDigest) || !Array.isArray(input.recipientKeyWraps) || input.recipientKeyWraps.length === 0 || !isIsoDate(input.createdAt) || !isIsoDate(input.expiresAt) || !isIsoDate(input.confirmedAt) || !isConfirmationSource(input.confirmationSource) || !ALLOWED_MEDIA_TYPES.has(input.mediaType)) {
+  if (typeof input.displayName !== "string" || input.displayName.length === 0 || typeof input.mediaType !== "string" || input.mediaType.length === 0 || !Number.isSafeInteger(input.originalBytes) || input.originalBytes < 0 || input.originalBytes > 5 * 1024 * 1024 || !Number.isSafeInteger(input.encryptedBytes) || input.encryptedBytes <= 0 || input.encryptedBytes > 5 * 1024 * 1024 + 16 * 1024 || !SHA256_BASE64URL.test(input.originalSha256) || !SHA256_BASE64URL.test(input.encryptedSha256) || !SHA256_BASE64URL.test(input.confirmationDigest) || !SHA256_BASE64URL.test(input.idempotencyRequestDigest) || !Array.isArray(input.recipientKeyWraps) || input.recipientKeyWraps.length > 50 || !isIsoDate(input.createdAt) || !isIsoDate(input.expiresAt) || !isIsoDate(input.confirmedAt) || !isConfirmationSource(input.confirmationSource) || !ALLOWED_MEDIA_TYPES.has(input.mediaType)) {
     throw new TypeError("Handoff Envelope is invalid");
   }
   assertBase64UrlBytes(input.originalSha256, 32);
@@ -39233,16 +39233,13 @@ var OutgoingHandoffCoordinator = class {
     try {
       contentKey = this.draft.openContentKey(this.localStorageMasterKey);
       const context = this.draft.artifactContext();
-      const recipientKeyWraps = wrapContentKeyForRecipients(
-        contentKey,
-        this.draft.recipientReceivingKeys(),
-        {
-          protocolVersion: "agenthall.v0.1",
-          handoffId: context.handoffId,
-          senderConnectorId: context.senderConnectorId,
-          recipientAccountId: context.recipientAccountId
-        }
-      );
+      const recipientKeys = this.draft.recipientReceivingKeys();
+      const recipientKeyWraps = recipientKeys.length === 0 ? [] : wrapContentKeyForRecipients(contentKey, recipientKeys, {
+        protocolVersion: "agenthall.v0.1",
+        handoffId: context.handoffId,
+        senderConnectorId: context.senderConnectorId,
+        recipientAccountId: context.recipientAccountId
+      });
       const envelope = signHandoffEnvelope(
         {
           protocolVersion: "agenthall.v0.1",
@@ -39272,6 +39269,7 @@ var OutgoingHandoffCoordinator = class {
       );
       const created = await this.gateway.create({
         envelope,
+        managedContentKey: contentKey,
         idempotencyKey: confirmed.idempotencyKey,
         now: input.now
       });
@@ -39353,6 +39351,9 @@ function mapRemoteError(code) {
   }
   if (code === "RECIPIENT_NOT_READY") {
     return new ConnectorSdkError("RECIPIENT_NOT_READY", false, "none", code);
+  }
+  if (code === "USER_NOT_FOUND" || code === "CONNECTION_EXISTS" || code === "CONNECTION_APPROVAL_NOT_ALLOWED") {
+    return new ConnectorSdkError(code, false, "none", code);
   }
   return new ConnectorSdkError(
     "REMOTE_ERROR",
@@ -39545,19 +39546,60 @@ var ConnectorApiClient = class {
       const item = asObject(value);
       const peer = readObject(item, "peer");
       const statusValue = readString2(item, "status");
-      const status = statusValue === "active" ? "active" : statusValue === "closed" ? "closed" : responseInvalid();
+      const status = statusValue === "pending" ? "pending" : statusValue === "active" ? "active" : statusValue === "closed" ? "closed" : responseInvalid();
       return {
         connectionId: readString2(item, "connection_id"),
         status,
         peerAccountId: readString2(peer, "account_id"),
         peerNickname: readString2(peer, "nickname"),
-        privateNote: readNullableString(item, "private_note")
+        privateNote: readNullableString(item, "private_note"),
+        greeting: readNullableString(item, "greeting"),
+        initiatedByPeer: readBoolean(item, "initiated_by_peer"),
+        peerAgentConnected: readBoolean(item, "peer_agent_connected")
       };
     });
     return {
       connections: items,
       totalMatches: readNumber(body, "total_matches")
     };
+  }
+  async accountProfile() {
+    const body = await this.authorizedJson("/v1/profile");
+    return {
+      publicId: readString2(body, "public_id"),
+      inviteUrl: readString2(body, "invite_url")
+    };
+  }
+  async findUserByExactEmail(email3) {
+    const body = await this.authorizedJson("/v1/directory/search", {
+      method: "POST",
+      body: JSON.stringify({ email: email3 })
+    });
+    const user = readObject(body, "user");
+    return { nickname: readString2(user, "nickname") };
+  }
+  async requestConnection(input) {
+    const body = await this.authorizedJson("/v1/connection-requests", {
+      method: "POST",
+      body: JSON.stringify(input)
+    });
+    if (readString2(body, "status") !== "pending") responseInvalid();
+    return {
+      status: "pending",
+      connectionId: readString2(body, "connection_id")
+    };
+  }
+  async approveConnection(connectionId) {
+    await this.authorizedJson(
+      `/v1/connections/${encodeURIComponent(connectionId)}/approve`,
+      { method: "POST", body: JSON.stringify({}) }
+    );
+  }
+  async deleteConnection(connectionId) {
+    await this.authorizedJson(
+      `/v1/connections/${encodeURIComponent(connectionId)}`,
+      { method: "DELETE" }
+    );
   }
   async handoffContext(connectionId) {
     const body = await this.authorizedJson(
@@ -39587,7 +39629,12 @@ var ConnectorApiClient = class {
     const body = await this.authorizedJson("/v1/handoffs", {
       method: "POST",
       headers: { "idempotency-key": input.idempotencyKey },
-      body: JSON.stringify(wireEnvelope(input.envelope))
+      body: JSON.stringify({
+        ...wireEnvelope(input.envelope),
+        managed_content_key: Buffer.from(input.managedContentKey).toString(
+          "base64url"
+        )
+      })
     });
     const upload = readObject(body, "upload");
     if (readString2(upload, "method") !== "PUT") responseInvalid();
@@ -39882,6 +39929,11 @@ function readNumber(body, key) {
   if (typeof value !== "number" || !Number.isFinite(value)) responseInvalid();
   return value;
 }
+function readBoolean(body, key) {
+  const value = body[key];
+  if (typeof value !== "boolean") responseInvalid();
+  return value;
+}
 function readStringRecord(body, key) {
   const value = readObject(body, key);
   if (Object.values(value).some((item) => typeof item !== "string")) {
@@ -40059,6 +40111,8 @@ var AgentHallMcpRuntime = class {
   #hostDisplayName;
   #pairings = /* @__PURE__ */ new Map();
   #drafts = /* @__PURE__ */ new Map();
+  #connectionActionTokens = /* @__PURE__ */ new Map();
+  #connectionTokensById = /* @__PURE__ */ new Map();
   #localArtifacts = new LocalArtifactRegistry();
   constructor(options = {}) {
     this.#baseUrl = options.baseUrl ?? "https://agent-hall.com";
@@ -40167,19 +40221,78 @@ var AgentHallMcpRuntime = class {
               totalMatches: semanticMatches.length
             },
             "contacts",
-            input.query
+            input.query,
+            (connectionId) => this.#connectionActionToken(connectionId)
           );
         }
-        return presentConnectionList(all, "contacts");
+        return presentConnectionList(
+          all,
+          "contacts",
+          void 0,
+          (id) => this.#connectionActionToken(id)
+        );
       }
-      return presentConnectionList(result2, input.detail, input.query);
+      return presentConnectionList(
+        result2,
+        input.detail,
+        input.query,
+        (connectionId) => this.#connectionActionToken(connectionId)
+      );
+    });
+  }
+  async connectionDirectory(input) {
+    return this.#protect(async () => {
+      const client = await this.#client();
+      if (input.action === "profile") {
+        const profile = await client.accountProfile();
+        return { kind: "profile", ...profile };
+      }
+      if (input.email === void 0 || input.email.trim() === "") {
+        throw new ConnectorSdkError("USER_NOT_FOUND", false, "none");
+      }
+      const user = await client.findUserByExactEmail(input.email.trim());
+      return { kind: "user", nickname: user.nickname };
+    });
+  }
+  async manageConnection(input) {
+    return this.#protect(async () => {
+      const client = await this.#client();
+      if (input.action === "request") {
+        if (input.email === void 0 || input.greeting === void 0 || input.greeting.trim() === "") {
+          throw new ConnectorSdkError("USER_NOT_FOUND", false, "none");
+        }
+        await client.requestConnection({
+          email: input.email.trim(),
+          greeting: input.greeting.trim()
+        });
+        return { status: "pending" };
+      }
+      const connectionId = input.actionToken === void 0 ? void 0 : this.#connectionActionTokens.get(input.actionToken);
+      if (connectionId === void 0) {
+        throw new ConnectorSdkError("CONTACT_NOT_FOUND", false, "none");
+      }
+      if (input.action === "approve") {
+        await client.approveConnection(connectionId);
+        return { status: "active" };
+      }
+      await client.deleteConnection(connectionId);
+      this.#forgetConnectionActionToken(connectionId);
+      return { status: "deleted" };
     });
   }
   async prepareHandoff(input) {
     return this.#protect(async () => {
       const client = await this.#client();
       const exact = await client.listConnections(input.recipient);
-      const connection = exact.totalMatches > 0 ? requireUniqueConnection(exact) : requireUniqueConnection(
+      const activeExact = {
+        connections: exact.connections.filter(
+          (connection2) => connection2.status === "active"
+        ),
+        totalMatches: exact.connections.filter(
+          (connection2) => connection2.status === "active"
+        ).length
+      };
+      const connection = activeExact.totalMatches > 0 ? requireUniqueConnection(activeExact) : requireUniqueConnection(
         await semanticRecipientResult(client, input.recipient)
       );
       const context = await client.handoffContext(connection.connectionId);
@@ -40239,8 +40352,12 @@ var AgentHallMcpRuntime = class {
       );
       try {
         const gateway = {
-          create: async ({ envelope, idempotencyKey }) => ({
-            grant: await client.createHandoff({ envelope, idempotencyKey })
+          create: async ({ envelope, managedContentKey, idempotencyKey }) => ({
+            grant: await client.createHandoff({
+              envelope,
+              managedContentKey,
+              idempotencyKey
+            })
           }),
           upload: async ({ grant, encryptedArtifact }) => client.upload(grant.url, grant.requiredHeaders, encryptedArtifact),
           finalize: async ({ handoffId: id, idempotencyKey }) => client.finalizeHandoff(id, idempotencyKey)
@@ -40413,10 +40530,26 @@ var AgentHallMcpRuntime = class {
       });
     }
   }
+  #connectionActionToken(connectionId) {
+    const existing = this.#connectionTokensById.get(connectionId);
+    if (existing !== void 0) return existing;
+    const token = `connection_action_${randomUUID().replaceAll("-", "")}`;
+    this.#connectionTokensById.set(connectionId, token);
+    this.#connectionActionTokens.set(token, connectionId);
+    return token;
+  }
+  #forgetConnectionActionToken(connectionId) {
+    const token = this.#connectionTokensById.get(connectionId);
+    if (token !== void 0) this.#connectionActionTokens.delete(token);
+    this.#connectionTokensById.delete(connectionId);
+  }
 };
 async function semanticRecipientResult(client, expression) {
   const all = await client.listConnections();
-  const connections = matchRecipientSemantics(expression, all.connections);
+  const connections = matchRecipientSemantics(
+    expression,
+    all.connections.filter((connection) => connection.status === "active")
+  );
   return { connections, totalMatches: connections.length };
 }
 function mapExpectedLocalError(error51) {
@@ -40450,20 +40583,25 @@ function presentHandoffConfirmation(preview, filePath, recipient, handoffId) {
     nextAction: "Render exactly two table rows: \u6536\u4EF6\u4EBA and \u6587\u4EF6\u540D. Render \u6587\u4EF6\u540D as a clickable local-file link or file chip that only opens the source read-only. Do not show size, media type, hashes, Handoff ID, status, or deadline in the table. State \u5C1A\u672A\u53D1\u9001 outside the table. Prefer a secure '\u53D1\u9001\u6587\u4EF6' button. If the host cannot render that button, clearly instruct the user to type the exact phrase '\u53D1\u9001'. Do not accept vague confirmation wording. After confirm, return one short sentence and no table."
   };
 }
-function presentConnectionList(result2, detail = "summary", query) {
+function presentConnectionList(result2, detail = "summary", query, actionTokenFor) {
   if (detail === "summary") {
     return { totalMatches: result2.totalMatches };
   }
+  const pendingExact = query !== void 0 && query.trim() !== "" && result2.totalMatches === 1 && result2.connections[0]?.status !== "active";
   const semanticResolution = (query === void 0 || query.trim() === "") && result2.totalMatches > 1;
-  const requiresChoice = result2.totalMatches !== 1 && !semanticResolution;
+  const requiresChoice = !pendingExact && result2.totalMatches !== 1 && !semanticResolution;
   return {
     totalMatches: result2.totalMatches,
-    action: semanticResolution ? "resolve_semantically" : requiresChoice ? "choose_contact" : "use_exact_nickname",
-    mustStop: requiresChoice,
-    nextAction: semanticResolution ? "Compare the user's recipient expression semantically with each returned nickname and privateNote. Relationship terms, aliases, abbreviations, and natural-language equivalents may match even when their text differs. If exactly one candidate is clearly equivalent, use that candidate's exact nickname for prepare_handoff. If none or more than one are plausible, show only the plausible candidates and ask the user to choose. Never use files, project history, logs, APIs, Inbox, or the web to infer a recipient." : requiresChoice ? "Show only these candidates and ask the user to choose. Do not search local files, project history, logs, APIs, Inbox, or the web to infer a recipient. Do not call prepare_handoff." : "Use the returned exact nickname only if it matches the user's explicit choice.",
+    action: pendingExact ? "connection_pending" : semanticResolution ? "resolve_semantically" : requiresChoice ? "choose_contact" : "use_exact_nickname",
+    mustStop: pendingExact || requiresChoice,
+    nextAction: pendingExact ? "This relationship is still waiting for approval and cannot receive a Handoff. Do not call prepare_handoff." : semanticResolution ? "Compare the user's recipient expression semantically with each returned nickname and privateNote. Relationship terms, aliases, abbreviations, and natural-language equivalents may match even when their text differs. If exactly one candidate is clearly equivalent, use that candidate's exact nickname for prepare_handoff. If none or more than one are plausible, show only the plausible candidates and ask the user to choose. Never use files, project history, logs, APIs, Inbox, or the web to infer a recipient." : requiresChoice ? "Show only these candidates and ask the user to choose. Do not search local files, project history, logs, APIs, Inbox, or the web to infer a recipient. Do not call prepare_handoff." : "Use the returned exact nickname only if it matches the user's explicit choice.",
     connections: result2.connections.map((connection) => ({
       nickname: connection.peerNickname,
       status: connection.status,
+      initiatedByPeer: connection.initiatedByPeer ?? false,
+      greeting: connection.greeting ?? null,
+      peerAgentConnected: connection.peerAgentConnected ?? false,
+      ...actionTokenFor === void 0 ? {} : { actionToken: actionTokenFor(connection.connectionId) },
       ...connection.privateNote === void 0 || connection.privateNote === null ? {} : { privateNote: connection.privateNote }
     }))
   };
@@ -40500,8 +40638,8 @@ function safeNumber(value) {
 }
 
 // connectors/agenthall-codex-mcp/src/server.ts
-var VERSION = "0.1.2";
-var SIDEBAR_TEMPLATE_URI = "ui://agenthall/sidebar-v3.html";
+var VERSION = "0.1.3";
+var SIDEBAR_TEMPLATE_URI = "ui://agenthall/sidebar-v4.html";
 var HANDOFF_CONFIRMATION_TEMPLATE_URI = "ui://agenthall/handoff-confirmation-v3.html";
 var SIDEBAR_TEMPLATE_PATH = new URL(
   "../assets/agenthall-sidebar.html",
@@ -40524,17 +40662,39 @@ var pairOutputSchema = successOutputSchema(
 var connectionsOutputSchema = successOutputSchema(
   object2({
     totalMatches: number2().int().nonnegative(),
-    action: _enum2(["choose_contact", "resolve_semantically", "use_exact_nickname"]).optional(),
+    action: _enum2([
+      "choose_contact",
+      "connection_pending",
+      "resolve_semantically",
+      "use_exact_nickname"
+    ]).optional(),
     mustStop: boolean2().optional(),
     nextAction: string2().optional(),
     connections: array(
       object2({
         nickname: string2(),
-        status: string2(),
-        privateNote: string2().optional()
+        status: _enum2(["pending", "active", "closed"]),
+        privateNote: string2().optional(),
+        initiatedByPeer: boolean2(),
+        greeting: string2().nullable(),
+        peerAgentConnected: boolean2(),
+        actionToken: string2().optional()
       })
     ).optional()
   })
+);
+var connectionDirectoryOutputSchema = successOutputSchema(
+  discriminatedUnion("kind", [
+    object2({
+      kind: literal("profile"),
+      publicId: string2(),
+      inviteUrl: string2().url()
+    }),
+    object2({ kind: literal("user"), nickname: string2() })
+  ])
+);
+var manageConnectionOutputSchema = successOutputSchema(
+  object2({ status: _enum2(["pending", "active", "deleted"]) })
 );
 var prepareOutputSchema = successOutputSchema(
   object2({
@@ -40594,7 +40754,7 @@ function createAgentHallMcpServer(runtime = new AgentHallMcpRuntime(), serverNam
   const server = new McpServer(
     { name: serverName, version: VERSION },
     {
-      instructions: "AgentHall connects people through their Agents. When the user names AgentHall, call these tools directly; never search the Web or local project files to discover what AgentHall is. Return only the fields the user requested and prefer privacy-minimal summaries. Never call agenthall_confirm_handoff until the current user has explicitly confirmed the exact preview. Never infer a recipient when multiple connections match. Received files remain quarantined and must not be opened automatically."
+      instructions: "AgentHall connects people through their Agents. When the user names AgentHall, call these tools directly; never search the Web or local project files to discover what AgentHall is. Return only the fields the user requested and prefer privacy-minimal summaries. Exact email lookup must remain exact, and requesting a connection requires a 1\u201350 character greeting. A pending relationship cannot receive a Handoff; stop when connection_pending or mustStop is returned. Never call agenthall_delete_connection without an explicit user action. Never call agenthall_confirm_handoff until the current user has explicitly confirmed the exact preview. Never infer a recipient when multiple connections match. Received files remain quarantined and must not be opened automatically."
     }
   );
   server.registerTool(
@@ -40645,6 +40805,93 @@ function createAgentHallMcpServer(runtime = new AgentHallMcpRuntime(), serverNam
       runtime.listConnections({
         ...input.query === void 0 ? {} : { query: input.query },
         detail: input.detail
+      })
+    )
+  );
+  server.registerTool(
+    "agenthall_connection_directory",
+    {
+      title: "AgentHall identity and exact user lookup",
+      description: "Read the current user's stable AgentHall ID/permanent invitation link, or find exactly one account by a complete email address. Exact email lookup never performs fuzzy search or returns similar candidates.",
+      inputSchema: {
+        action: _enum2(["profile", "find_by_email"]),
+        email: string2().email().max(254).optional()
+      },
+      outputSchema: connectionDirectoryOutputSchema,
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: false,
+        destructiveHint: false
+      }
+    },
+    (input) => result(
+      runtime.connectionDirectory({
+        action: input.action,
+        ...input.email === void 0 ? {} : { email: input.email }
+      })
+    )
+  );
+  server.registerTool(
+    "agenthall_request_connection",
+    {
+      title: "Request an AgentHall connection",
+      description: "Create a pending connection request after the user supplies an exact email and a 1\u201350 character greeting. This contacts another user but does not establish an active connection until they approve it.",
+      inputSchema: {
+        email: string2().email().max(254),
+        greeting: string2().min(1).max(50)
+      },
+      outputSchema: manageConnectionOutputSchema,
+      annotations: {
+        readOnlyHint: false,
+        openWorldHint: true,
+        destructiveHint: false
+      }
+    },
+    (input) => result(
+      runtime.manageConnection({
+        action: "request",
+        email: input.email,
+        greeting: input.greeting
+      })
+    )
+  );
+  server.registerTool(
+    "agenthall_approve_connection",
+    {
+      title: "Approve an AgentHall connection",
+      description: "Approve one incoming pending connection request selected by its opaque action token. The action token must come from the latest agenthall_list_connections result.",
+      inputSchema: { action_token: string2().min(1) },
+      outputSchema: manageConnectionOutputSchema,
+      annotations: {
+        readOnlyHint: false,
+        openWorldHint: true,
+        destructiveHint: false
+      }
+    },
+    (input) => result(
+      runtime.manageConnection({
+        action: "approve",
+        actionToken: input.action_token
+      })
+    )
+  );
+  server.registerTool(
+    "agenthall_delete_connection",
+    {
+      title: "Delete an AgentHall connection request or relationship",
+      description: "Delete or reject the selected pending request, or remove an active relationship. This is destructive and uses an opaque action token from the latest agenthall_list_connections result.",
+      inputSchema: { action_token: string2().min(1) },
+      outputSchema: manageConnectionOutputSchema,
+      annotations: {
+        readOnlyHint: false,
+        openWorldHint: true,
+        destructiveHint: true
+      }
+    },
+    (input) => result(
+      runtime.manageConnection({
+        action: "delete",
+        actionToken: input.action_token
       })
     )
   );
@@ -40712,7 +40959,7 @@ function createAgentHallMcpServer(runtime = new AgentHallMcpRuntime(), serverNam
     server,
     "agenthall_prepare_handoff",
     {
-      description: "Prepare exactly one supported local file up to 5 MiB for an existing AgentHall connection. This reads and encrypts locally and never sends. The user-facing confirmation table must contain exactly two rows: \u6536\u4EF6\u4EBA and \u6587\u4EF6\u540D. Render sourceFile as a clickable local-file link or file chip whose click only opens the source read-only. Never show size, media type, hashes, Handoff ID, status, or deadline in that table. Show the returned confirmationPrompt outside the table. Mention a secure send button only when the host actually renders one; otherwise tell the user only to reply with the exact phrase \u53D1\u9001. If the result error code is RECIPIENT_NOT_READY, say that the named recipient has not connected an Agent that can receive files, ask them to complete the AgentHall connection before retrying, and clearly state that the file was not sent. Do not describe this state as a server error or recommend an immediate retry.",
+      description: "Prepare exactly one supported local file up to 5 MiB for an existing active AgentHall connection. This creates an immutable local snapshot and never sends. The recipient does not need an installed or online AgentHall plugin. The user-facing confirmation table must contain exactly two rows: \u6536\u4EF6\u4EBA and \u6587\u4EF6\u540D. Render sourceFile as a clickable local-file link or file chip whose click only opens the source read-only. Never show size, media type, hashes, Handoff ID, status, or deadline in that table. Show the returned confirmationPrompt outside the table. Mention a secure send button only when the host actually renders one; otherwise tell the user only to reply with the exact phrase \u53D1\u9001.",
       inputSchema: {
         recipient: string2().min(1).max(100),
         file_path: string2().min(1)

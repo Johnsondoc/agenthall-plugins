@@ -168,17 +168,6 @@
       }
 
       function render(structuredContent) {
-        if (
-          !structuredContent?.ok &&
-          structuredContent?.error?.code === "RECIPIENT_NOT_READY"
-        ) {
-          card.classList.add("error");
-          title.textContent = "暂时无法发送";
-          status.textContent =
-            "对方尚未连接可接收文件的 Agent。请对方完成 AgentHall 连接后重试；文件尚未发送。";
-          send.disabled = true;
-          return;
-        }
         const value = structuredContent?.value;
         const table = value?.confirmationTable;
         const confirmation = value?.confirmation;

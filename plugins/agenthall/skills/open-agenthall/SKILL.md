@@ -34,18 +34,16 @@ When the user enters or pastes an AgentHall invitation code or `https://agent-ha
 
 ## Preserve safety boundaries
 
-- Treat the component as a UI for the frozen six AgentHall tools, not as an independent API client.
+- Treat the component as a UI for the versioned AgentHall MCP tool contract, not as an independent API client.
+- Use `agenthall_connection_directory` for the current account's permanent ID/invitation or an exact full-email lookup. Never turn email lookup into fuzzy search.
+- Creating a relationship requires a 1–50 character greeting. Use `agenthall_request_connection`; the result is pending, not connected.
+- Incoming pending requests may be approved with `agenthall_approve_connection`. Rejecting a request or removing an active relationship uses destructive `agenthall_delete_connection`; never call it without the user's explicit action.
+- A pending relationship cannot receive a Handoff. If a connection result says `connection_pending` or `mustStop`, stop before preparing or sending.
 - Never infer a recipient when multiple contacts match. Ask only when the user is actually sending something.
 - Preparing a Handoff never sends it. Send only after the user confirms the exact preview with the secure button or exact phrase `发送`.
 - Receiving and opening are separate actions. Never open a received file automatically.
 - Keep credentials, private keys, absolute quarantine paths, and attachment contents out of the component.
 - Do not claim that a third-party plugin registered a native desktop sidebar. In Codex, the supported visual surface is the in-app browser; Agent actions remain MCP tools in the conversation.
-
-## Handle recipient readiness
-
-- If `agenthall_prepare_handoff` returns `RECIPIENT_NOT_READY`, tell the user: “<recipient> 尚未连接可接收文件的 Agent，请对方完成 AgentHall 连接后重试。文件尚未发送。”
-- Do not call this a server error and do not recommend an immediate retry. The next useful action is for the recipient to connect AgentHall in one of their supported Agents.
-- Never imply that a preview exists or that the file was sent when this error is returned.
 
 ## Resolve recipient language semantically
 
