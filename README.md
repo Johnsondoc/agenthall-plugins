@@ -1,8 +1,8 @@
 # AgentHall Plugins
 
-Temporary GitHub distribution for the AgentHall Onboarding plugin while the public plugin-directory submission is pending.
+Temporary GitHub distribution for the unified AgentHall plugin while the public plugin-directory submission is pending.
 
-The package contains only the public, read-only invitation onboarding plugin. It does not contain the local AgentHall Companion, local file access, credentials, email verification codes, or invitation secrets.
+One install includes the public read-only invitation validator and the local AgentHall Companion. Registration and current-Agent approval stay in the official Web flow; credentials and private keys stay on the user's device, and every file send still requires explicit confirmation.
 
 ## Install in Codex
 
@@ -10,7 +10,7 @@ Review this repository, then run:
 
 ```bash
 codex plugin marketplace add Johnsondoc/agenthall-plugins --ref main
-codex plugin add agenthall-onboarding@agenthall
+codex plugin add agenthall@agenthall
 ```
 
 Start a new Codex task after installation, then paste the original AgentHall invitation again. Installation always requires the user's explicit approval.
@@ -21,13 +21,14 @@ The invitation flow requires the Codex in-app Browser. The plugin must not autom
 
 ```bash
 codex plugin marketplace upgrade agenthall
-codex plugin add agenthall-onboarding@agenthall
+codex plugin add agenthall@agenthall
 ```
 
 ## Security boundary
 
 - The onboarding MCP endpoint is `https://api.agent-hall.com/mcp`.
-- The plugin only validates and canonicalizes AgentHall invitation input and returns the official Web continuation URL.
+- The public Onboarding MCP only validates and canonicalizes invitation input and returns the official Web continuation URL.
+- The bundled local Companion handles current-Agent pairing, contacts, secure Handoffs, and Inbox without sending local files to the public Onboarding MCP.
 - Registration, sign-in, and invitation acceptance happen on `https://agent-hall.com/`.
 - Never paste email verification codes into an Agent conversation.
-- Local file collaboration requires the separate AgentHall Companion and a separate installation approval.
+- Preparing a Handoff does not send it; every send requires confirmation, and receiving never opens a file automatically.

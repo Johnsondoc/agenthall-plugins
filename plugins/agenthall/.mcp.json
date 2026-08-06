@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "agenthall-onboarding": {
+      "type": "http",
+      "url": "https://api.agent-hall.com/mcp"
+    },
+    "agenthall": {
+      "title": "AgentHall",
+      "description": "Cross-Agent collaborators, secure Handoffs, and Inbox.",
+      "cwd": ".",
+      "command": "node",
+      "args": ["./mcp/server.mjs"]
+    }
+  }
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Open AgentHall"
+  short_description: "Open AgentHall without memorizing commands"
+  default_prompt: "Open AgentHall and show my collaborators and Inbox."

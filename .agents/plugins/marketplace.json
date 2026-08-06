@@ -5,10 +5,10 @@
   },
   "plugins": [
     {
-      "name": "agenthall-onboarding",
+      "name": "agenthall",
       "source": {
         "source": "local",
-        "path": "./plugins/agenthall-onboarding"
+        "path": "./plugins/agenthall"
       },
       "policy": {
         "installation": "AVAILABLE",

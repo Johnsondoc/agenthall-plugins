@@ -1,4 +1,0 @@
-interface:
-  display_name: "Accept AgentHall invitation"
-  short_description: "Continue registration and invitation acceptance safely"
-  default_prompt: "Accept this AgentHall invitation and continue in the official browser flow."

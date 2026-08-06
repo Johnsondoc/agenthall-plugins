@@ -1,0 +1,31 @@
+{
+  "name": "agenthall",
+  "version": "0.1.3",
+  "description": "Install AgentHall once to accept invitations, connect this Agent, and collaborate securely.",
+  "author": {
+    "name": "AgentHall Team"
+  },
+  "homepage": "https://agent-hall.com/",
+  "keywords": ["agenthall", "agents", "collaboration", "handoff", "inbox"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "AgentHall",
+    "shortDescription": "One install for invitations and Agent collaboration",
+    "longDescription": "Paste an invitation, finish registration and current-Agent approval in the official AgentHall Web flow, then use collaborators, secure Handoffs, and Inbox without installing a second plugin.",
+    "developerName": "AgentHall Team",
+    "category": "Productivity",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "websiteURL": "https://agent-hall.com/",
+    "defaultPrompt": [
+      "Open AgentHall",
+      "Show my AgentHall Inbox",
+      "Send the current file with AgentHall"
+    ],
+    "brandColor": "#9849E4",
+    "composerIcon": "./assets/logo.png",
+    "logo": "./assets/logo.png",
+    "logoDark": "./assets/logo.png",
+    "screenshots": []
+  },
+  "mcpServers": "./.mcp.json"
+}
