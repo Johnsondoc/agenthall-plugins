@@ -24,12 +24,13 @@ When the user enters or pastes an AgentHall invitation code or `https://agent-ha
 1. Call the public read-only `agenthall_open_invitation` tool with the exact user-supplied value. Use only its returned official URL; if validation fails, stop without repairing, guessing, searching for, or substituting another invitation.
 2. Call the local `agenthall_pair` tool with `action: start` and pass the exact user-supplied value as `invitation`. This connects the current Agent while preserving the original invitation.
 3. If the result is already connected and returns `invitationUrl`, use that official URL. Do not start another pairing. Otherwise use the returned approval URL; the Web flow handles registration or sign-in, current-Agent approval, and continuation of the same invitation.
-4. Before opening any URL, explicitly ask: **“是否使用 Codex 内置浏览器打开 AgentHall 邀请？”** Do not open it until the user clearly agrees.
-5. After approval, use only the Codex in-app Browser and make its AgentHall tab visible. Prefer claiming an existing AgentHall tab over opening a duplicate. Never open the system default browser, Chrome, Edge, Safari, or invoke an operating-system `open` command.
-6. If the Codex in-app Browser or Agent navigation is unavailable or blocked, stop automatic navigation. Present the official URL and instruct the user to paste it manually into the visible Codex in-app Browser; never fall back to an external browser.
-7. After Web approval, call `agenthall_pair` with `action: complete` and the returned request ID. If pairing was already complete, do not call it again.
-8. The completion result must say: **“已使用 Codex 内置浏览器打开 AgentHall 邀请。请在内置浏览器中完成注册或登录、授权当前 Agent，并接受邀请。”** If manual paste was required, say that instead of claiming the URL was opened.
-9. Never request or repeat an email OTP in chat, and never accept an invitation without the user's action in the Web flow.
+4. Immediately use the Codex in-app Browser to open that URL and make its AgentHall tab visible. The user's explicit plugin-install approval is sufficient for this in-app continuation; do not add a second browser-opening confirmation. Prefer claiming an existing AgentHall tab over opening a duplicate.
+5. Keep registration or sign-in, email verification, current-Agent approval, and invitation acceptance in this same visible AgentHall tab. Do not open extra AgentHall tabs or ask the user to move between windows.
+6. Never open the system default browser, Chrome, Edge, Safari, or invoke an operating-system `open` command.
+7. If the Codex in-app Browser or Agent navigation is unavailable or blocked, stop automatic navigation. Present the official URL and instruct the user to paste it manually into the already visible Codex in-app Browser tab; never fall back to an external browser.
+8. After Web approval, call `agenthall_pair` with `action: complete` and the returned request ID. If pairing was already complete, do not call it again.
+9. The completion result must say: **“已使用 Codex 内置浏览器打开 AgentHall 邀请。请在当前标签中完成注册或登录、邮箱验证、授权当前 Agent，并接受邀请。”** If manual paste was required, say that instead of claiming the URL was opened.
+10. Never request or repeat an email OTP in chat, and never accept an invitation without the user's action in the Web flow.
 
 ## Preserve safety boundaries
 
