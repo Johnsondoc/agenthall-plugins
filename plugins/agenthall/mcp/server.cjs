@@ -67731,9 +67731,9 @@ function safeIsoDateTime(value) {
 
 // connectors/agenthall-codex-mcp/src/server.ts
 var import_meta = {};
-var VERSION = "0.1.9";
+var VERSION = "0.1.10";
 var MODULE_URL = import_meta.url || (0, import_node_url.pathToFileURL)((0, import_node_path6.resolve)(process.argv[1] ?? ".")).href;
-var SIDEBAR_TEMPLATE_URI = "ui://agenthall/sidebar-v5.html";
+var SIDEBAR_TEMPLATE_URI = "ui://agenthall/sidebar-v6.html";
 var HANDOFF_CONFIRMATION_TEMPLATE_URI = "ui://agenthall/handoff-confirmation-v4.html";
 var SIDEBAR_TEMPLATE_PATH = new URL(
   "../assets/agenthall-sidebar.html",
@@ -67880,7 +67880,8 @@ function createAgentHallMcpServer(runtime = new AgentHallMcpRuntime(), serverNam
       })
     )
   );
-  server.registerTool(
+  K3(
+    server,
     "agenthall_list_connections",
     {
       title: "Open AgentHall",
@@ -67894,7 +67895,8 @@ function createAgentHallMcpServer(runtime = new AgentHallMcpRuntime(), serverNam
         readOnlyHint: true,
         openWorldHint: false,
         destructiveHint: false
-      }
+      },
+      _meta: sidebarToolMeta("\u6B63\u5728\u6253\u5F00 AgentHall\u2026", "AgentHall \u5DF2\u6253\u5F00")
     },
     (input) => result(
       runtime.listConnections({
@@ -68104,7 +68106,8 @@ function createAgentHallMcpServer(runtime = new AgentHallMcpRuntime(), serverNam
     },
     (input) => result(runtime.confirmHandoff(input.handoff_id))
   );
-  server.registerTool(
+  K3(
+    server,
     "agenthall_list_inbox",
     {
       description: "List pending AgentHall items using minimal metadata. This does not download or reveal file contents.",
@@ -68114,7 +68117,8 @@ function createAgentHallMcpServer(runtime = new AgentHallMcpRuntime(), serverNam
         readOnlyHint: true,
         openWorldHint: false,
         destructiveHint: false
-      }
+      },
+      _meta: sidebarToolMeta("\u6B63\u5728\u6253\u5F00\u6536\u4EF6\u7BB1\u2026", "\u6536\u4EF6\u7BB1\u5DF2\u6253\u5F00")
     },
     () => result(runtime.listInbox())
   );
@@ -68168,6 +68172,18 @@ function createAgentHallMcpServer(runtime = new AgentHallMcpRuntime(), serverNam
     }
   );
   return server;
+}
+function sidebarToolMeta(invoking, invoked) {
+  return {
+    ui: {
+      resourceUri: SIDEBAR_TEMPLATE_URI,
+      visibility: ["model", "app"]
+    },
+    "openai/outputTemplate": SIDEBAR_TEMPLATE_URI,
+    "openai/widgetAccessible": true,
+    "openai/toolInvocation/invoking": invoking,
+    "openai/toolInvocation/invoked": invoked
+  };
 }
 function successOutputSchema(value) {
   return object2({ ok: literal(true), value });

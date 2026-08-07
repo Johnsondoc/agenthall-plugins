@@ -11,10 +11,10 @@ Use the AgentHall MCP tools directly. Do not search the web, repository, logs, o
 
 When the user selects AgentHall or asks to open it:
 
-1. Open `https://agent-hall.com/app` in the Codex in-app browser and make the page visible. Prefer claiming an existing AgentHall tab over opening a duplicate.
-2. Do not ask the user to type an activation phrase and do not call `agenthall_list_connections` merely to launch UI. Codex can call MCP tools but does not reliably render a local MCP Apps component.
-3. If the in-app browser is unavailable, return one clickable link labeled **打开 AgentHall** pointing to `https://agent-hall.com/app`.
-4. Call `agenthall_list_connections` only when the user asks to view, count, search, or choose collaborators.
+1. For collaborators, Inbox, Outbox, send, and receive tasks, call the matching AgentHall MCP tool so Codex renders the interactive Sidebar Widget in the current task. Use `agenthall_list_connections` to open the default AgentHall surface and `agenthall_list_inbox` when the user asks for Inbox or a pending file.
+2. Do not ask the user to type an activation phrase. The Sidebar Widget is the primary installed-plugin surface because it can call the local Connector and return a verified attachment to the current Agent task.
+3. Use `https://agent-hall.com/app` in the Codex in-app browser only for registration, sign-in, account management, invitations, or cross-device status viewing. Prefer claiming an existing AgentHall tab over opening a duplicate.
+4. Web Inbox cannot access a local Connector or current Agent conversation. Never imply that its status rows can load a file locally; open the plugin Inbox instead.
 5. If authentication is required for an Agent operation, use `agenthall_pair`; never request an email OTP in chat.
 6. A retryable `NETWORK_UNAVAILABLE` is not evidence that authorization was lost. The Companion already checks environment/system proxy, system CA, timeout and safe retries. Do not tell the user to configure VPN, DNS, proxy, CA, Node flags, environment variables, or run terminal diagnostics. Do not start repeated pairings. Return one short action: **“AgentHall 暂时未连接，请点击或回复‘重试连接’。”** Preserve the current task and retry the original operation once when the user asks.
 7. Only `AUTH_REQUIRED` or `CONNECTOR_REVOKED` may lead to pairing. Plugin upgrade or host restart must not by itself trigger a new pairing; first retry the original AgentHall operation so persisted authorization can be reused.
@@ -43,9 +43,9 @@ When the user enters or pastes an AgentHall invitation code or `https://agent-ha
 - A pending relationship cannot receive a Handoff. If a connection result says `connection_pending` or `mustStop`, stop before preparing or sending.
 - Never infer a recipient when multiple contacts match. Ask only when the user is actually sending something.
 - Preparing a Handoff never sends it. Send only after the user confirms the exact preview with the secure button or exact phrase `发送`.
-- Receiving and opening are separate actions. Never open a received file automatically.
+- In the Sidebar Inbox, one explicit **加载到 Agent** click authorizes verified download and read-only loading into the current task. Do not ask for a second confirmation and never load without that click.
 - Keep credentials, private keys, absolute quarantine paths, and attachment contents out of the component.
-- Do not claim that a third-party plugin registered a native desktop sidebar. In Codex, the supported visual surface is the in-app browser; Agent actions remain MCP tools in the conversation.
+- Call the surface an AgentHall Sidebar Widget rendered by the plugin in the current Codex task; do not claim it is a native desktop sidebar. Registration and account management remain in the Codex in-app browser.
 
 ## Resolve recipient language semantically
 
