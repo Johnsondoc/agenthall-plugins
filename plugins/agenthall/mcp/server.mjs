@@ -40412,7 +40412,8 @@ var AgentHallMcpRuntime = class {
           senderNickname: safeText(peer.nickname),
           displayName: safeText(content.display_name),
           mediaType: safeText(content.media_type),
-          originalBytes: safeNumber(content.original_bytes)
+          originalBytes: safeNumber(content.original_bytes),
+          receivedAt: safeIsoDateTime(item.received_at)
         };
       });
       return { count: items.length, items };
@@ -40636,6 +40637,16 @@ function safeText(value) {
 function safeNumber(value) {
   return typeof value === "number" && Number.isSafeInteger(value) ? value : null;
 }
+function safeIsoDateTime(value) {
+  if (typeof value !== "string") {
+    throw new ConnectorSdkError("RESPONSE_INVALID", false, "none");
+  }
+  const parsed = new Date(value);
+  if (!Number.isFinite(parsed.getTime()) || parsed.toISOString() !== value) {
+    throw new ConnectorSdkError("RESPONSE_INVALID", false, "none");
+  }
+  return value;
+}
 
 // connectors/agenthall-codex-mcp/src/server.ts
 var VERSION = "0.1.3";
@@ -40737,7 +40748,8 @@ var inboxOutputSchema = successOutputSchema(
         senderNickname: string2(),
         displayName: string2(),
         mediaType: string2(),
-        originalBytes: number2().int().nonnegative().nullable()
+        originalBytes: number2().int().nonnegative().nullable(),
+        receivedAt: string2().datetime({ offset: true })
       })
     )
   })
