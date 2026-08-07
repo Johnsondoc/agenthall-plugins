@@ -44,6 +44,7 @@ When the user enters or pastes an AgentHall invitation code or `https://agent-ha
 - Never infer a recipient when multiple contacts match. Ask only when the user is actually sending something.
 - Preparing a Handoff never sends it. Send only after the user confirms the exact preview with the secure button or exact phrase `发送`.
 - In the Sidebar Inbox, one explicit **加载到 Agent** click authorizes verified download and read-only loading into the current task. Do not ask for a second confirmation and never load without that click.
+- When `agenthall_list_inbox` opens its Widget, the Inbox list is the first actionable screen. Do not ask the user to click a second launcher or open another surface before choosing **加载到 Agent**.
 - Keep credentials, private keys, absolute quarantine paths, and attachment contents out of the component.
 - Call the surface an AgentHall Sidebar Widget rendered by the plugin in the current Codex task; do not claim it is a native desktop sidebar. Registration and account management remain in the Codex in-app browser.
 
