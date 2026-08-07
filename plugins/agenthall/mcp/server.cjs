@@ -66504,7 +66504,9 @@ var ConnectorApiClient = class {
     const body = await this.authorizedJson("/v1/profile");
     return {
       publicId: readString2(body, "public_id"),
-      inviteUrl: readString2(body, "invite_url")
+      inviteUrl: readString2(body, "invite_url"),
+      nickname: readString2(body, "nickname"),
+      email: readString2(body, "email")
     };
   }
   async findUserByExactEmail(email3) {
@@ -67731,9 +67733,9 @@ function safeIsoDateTime(value) {
 
 // connectors/agenthall-codex-mcp/src/server.ts
 var import_meta = {};
-var VERSION = "0.1.11";
+var VERSION = "0.1.21";
 var MODULE_URL = import_meta.url || (0, import_node_url.pathToFileURL)((0, import_node_path6.resolve)(process.argv[1] ?? ".")).href;
-var SIDEBAR_TEMPLATE_URI = "ui://agenthall/sidebar-v7.html";
+var SIDEBAR_TEMPLATE_URI = `ui://agenthall/sidebar-v${VERSION}.html`;
 var HANDOFF_CONFIRMATION_TEMPLATE_URI = "ui://agenthall/handoff-confirmation-v4.html";
 var SIDEBAR_TEMPLATE_PATH = new URL(
   "../assets/agenthall-sidebar.html",
@@ -67782,7 +67784,9 @@ var connectionDirectoryOutputSchema = successOutputSchema(
     object2({
       kind: literal("profile"),
       publicId: string2(),
-      inviteUrl: string2().url()
+      inviteUrl: string2().url(),
+      nickname: string2().optional(),
+      email: string2().email().optional()
     }),
     object2({ kind: literal("user"), nickname: string2() })
   ])
