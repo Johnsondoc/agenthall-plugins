@@ -16,6 +16,8 @@ When the user selects AgentHall or asks to open it:
 3. If the in-app browser is unavailable, return one clickable link labeled **打开 AgentHall** pointing to `https://agent-hall.com/app`.
 4. Call `agenthall_list_connections` only when the user asks to view, count, search, or choose collaborators.
 5. If authentication is required for an Agent operation, use `agenthall_pair`; never request an email OTP in chat.
+6. A retryable `NETWORK_UNAVAILABLE` is not evidence that authorization was lost. The Companion already checks environment/system proxy, system CA, timeout and safe retries. Do not tell the user to configure VPN, DNS, proxy, CA, Node flags, environment variables, or run terminal diagnostics. Do not start repeated pairings. Return one short action: **“AgentHall 暂时未连接，请点击或回复‘重试连接’。”** Preserve the current task and retry the original operation once when the user asks.
+7. Only `AUTH_REQUIRED` or `CONNECTOR_REVOKED` may lead to pairing. Plugin upgrade or host restart must not by itself trigger a new pairing; first retry the original AgentHall operation so persisted authorization can be reused.
 
 ## Continue an invitation
 
