@@ -224,7 +224,8 @@
           });
           if (response?.isError) throw new Error("send_failed");
           card.classList.add("sent");
-          status.textContent = "已发送";
+          title.textContent = "发送成功";
+          status.textContent = "已进入投递队列";
         } catch {
           send.disabled = false;
           status.textContent = "发送失败，请重试";

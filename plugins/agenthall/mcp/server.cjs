@@ -67731,10 +67731,10 @@ function safeIsoDateTime(value) {
 
 // connectors/agenthall-codex-mcp/src/server.ts
 var import_meta = {};
-var VERSION = "0.1.3";
+var VERSION = "0.1.9";
 var MODULE_URL = import_meta.url || (0, import_node_url.pathToFileURL)((0, import_node_path6.resolve)(process.argv[1] ?? ".")).href;
-var SIDEBAR_TEMPLATE_URI = "ui://agenthall/sidebar-v4.html";
-var HANDOFF_CONFIRMATION_TEMPLATE_URI = "ui://agenthall/handoff-confirmation-v3.html";
+var SIDEBAR_TEMPLATE_URI = "ui://agenthall/sidebar-v5.html";
+var HANDOFF_CONFIRMATION_TEMPLATE_URI = "ui://agenthall/handoff-confirmation-v4.html";
 var SIDEBAR_TEMPLATE_PATH = new URL(
   "../assets/agenthall-sidebar.html",
   MODULE_URL
@@ -67849,7 +67849,7 @@ function createAgentHallMcpServer(runtime = new AgentHallMcpRuntime(), serverNam
   const server = new McpServer(
     { name: serverName, version: VERSION },
     {
-      instructions: "AgentHall connects people through their Agents. When the user names AgentHall, call these tools directly; never search the Web or local project files to discover what AgentHall is. Return only the fields the user requested and prefer privacy-minimal summaries. Exact email lookup must remain exact, and requesting a connection requires a 1\u201350 character greeting. A pending relationship cannot receive a Handoff; stop when connection_pending or mustStop is returned. Never call agenthall_delete_connection without an explicit user action. Never call agenthall_confirm_handoff until the current user has explicitly confirmed the exact preview. Never infer a recipient when multiple connections match. Received files remain quarantined and must not be opened automatically. NETWORK_UNAVAILABLE is not lost authorization: never ask the user to diagnose VPN, DNS, proxy, CA, Node flags, or environment variables, and never loop pairing. Preserve credentials and offer only one retry_connection action. Pair only for AUTH_REQUIRED or CONNECTOR_REVOKED."
+      instructions: "AgentHall connects people through their Agents. When the user names AgentHall, call these tools directly; never search the Web or local project files to discover what AgentHall is. Do not narrate Tool calls, contact lookup, authorization checks, uploads, downloads, or other internal steps. Return only the requested confirmation widget or final result. Exact email lookup must remain exact, and requesting a connection requires a 1\u201350 character greeting. A pending relationship cannot receive a Handoff; stop when connection_pending or mustStop is returned. Never call agenthall_delete_connection without an explicit user action. Never call agenthall_confirm_handoff until the current user has explicitly confirmed the exact preview; clicking the rendered send button is complete confirmation and must never be followed by a request to type \u53D1\u9001. Never infer a recipient when multiple connections match. Received files remain quarantined until the user clicks \u52A0\u8F7D\u5230 Agent; that single click authorizes both verified download and loading into the current task. NETWORK_UNAVAILABLE is not lost authorization: never ask the user to diagnose VPN, DNS, proxy, CA, Node flags, or environment variables, and never loop pairing. Preserve credentials and offer only one retry_connection action. Pair only for AUTH_REQUIRED or CONNECTOR_REVOKED."
     }
   );
   server.registerTool(
@@ -68054,7 +68054,7 @@ function createAgentHallMcpServer(runtime = new AgentHallMcpRuntime(), serverNam
     server,
     "agenthall_prepare_handoff",
     {
-      description: "Prepare exactly one supported local file up to 5 MiB for an existing active AgentHall connection. This creates an immutable local snapshot and never sends. The recipient does not need an installed or online AgentHall plugin. The user-facing confirmation table must contain exactly two rows: \u6536\u4EF6\u4EBA and \u6587\u4EF6\u540D. Render sourceFile as a clickable local-file link or file chip whose click only opens the source read-only. Never show size, media type, hashes, Handoff ID, status, or deadline in that table. Show the returned confirmationPrompt outside the table. Mention a secure send button only when the host actually renders one; otherwise tell the user only to reply with the exact phrase \u53D1\u9001.",
+      description: "Prepare exactly one supported local file up to 5 MiB for an existing active AgentHall connection. This creates an immutable local snapshot and never sends. Do not narrate contact lookup, authorization, upload, Tool calls, or any other internal step. The recipient does not need an installed or online AgentHall plugin. The user-facing confirmation table must contain exactly two rows: \u6536\u4EF6\u4EBA and \u6587\u4EF6\u540D. Render sourceFile as a clickable local-file link or file chip whose click only opens the source read-only. Never show size, media type, hashes, Handoff ID, status, or deadline in that table. When the confirmation widget renders, show only the widget and do not ask for a typed reply. Only when no button can render, show the returned fallback phrase once.",
       inputSchema: {
         recipient: string2().min(1).max(100),
         file_path: string2().min(1)
@@ -68086,7 +68086,7 @@ function createAgentHallMcpServer(runtime = new AgentHallMcpRuntime(), serverNam
   server.registerTool(
     "agenthall_confirm_handoff",
     {
-      description: "Send one prepared Handoff. Call only after the current user clicks the secure \u53D1\u9001\u6587\u4EF6 button or types the exact phrase \u53D1\u9001 in a new reply after seeing the exact preview. Vague wording such as \u786E\u8BA4, \u7EE7\u7EED, \u597D, or \u53EF\u4EE5 is not enough. Input cannot replace the file or recipient. On success, return one short status sentence and do not render another table.",
+      description: "Send one prepared Handoff. A click on the rendered \u53D1\u9001\u6587\u4EF6 button is the complete final confirmation: never ask the user to type \u53D1\u9001 afterward. The typed exact phrase \u53D1\u9001 is only a fallback when the host cannot render the button. Vague wording such as \u786E\u8BA4, \u7EE7\u7EED, \u597D, or \u53EF\u4EE5 is not enough. Input cannot replace the file or recipient. Do not narrate internal steps. On success, return only one short status sentence and do not render another table.",
       inputSchema: {
         handoff_id: string2().regex(/^handoff_[A-Za-z0-9_-]+$/u),
         confirmation_phrase: literal("\u53D1\u9001")
@@ -68096,6 +68096,10 @@ function createAgentHallMcpServer(runtime = new AgentHallMcpRuntime(), serverNam
         readOnlyHint: false,
         openWorldHint: true,
         destructiveHint: true
+      },
+      _meta: {
+        "openai/toolInvocation/invoking": "\u6B63\u5728\u53D1\u9001\u2026",
+        "openai/toolInvocation/invoked": "\u53D1\u9001\u6210\u529F"
       }
     },
     (input) => result(runtime.confirmHandoff(input.handoff_id))
@@ -68117,7 +68121,7 @@ function createAgentHallMcpServer(runtime = new AgentHallMcpRuntime(), serverNam
   server.registerTool(
     "agenthall_receive_handoff",
     {
-      description: "Download one pending Handoff, verify it, save it to the fixed local quarantine, and submit a signed receipt. Never open the received file automatically.",
+      description: "After the user clicks \u52A0\u8F7D\u5230 Agent, download one pending Handoff, verify it, save it to the fixed local quarantine, submit a signed receipt, and make its verified local resource available to the current Agent task. Do not require a second click.",
       inputSchema: {
         handoff_id: string2().regex(/^handoff_[A-Za-z0-9_-]+$/u)
       },
