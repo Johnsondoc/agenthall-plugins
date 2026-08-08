@@ -66267,6 +66267,9 @@ var ConnectorSdkError = class extends Error {
   }
 };
 function mapRemoteError(code) {
+  if (code === "OTP_INVALID_OR_EXPIRED") {
+    return new ConnectorSdkError("AUTH_CODE_INVALID", true, "retry", code);
+  }
   if (code === "AUTH_REQUIRED" || code === "AUTH_INVALID") {
     return new ConnectorSdkError("AUTH_REQUIRED", false, "sign_in", code);
   }
@@ -66373,6 +66376,46 @@ var ConnectorPairingClient = class {
     );
     return readString(body, "status");
   }
+  async requestEmailChallenge(pairing, input) {
+    const body = await this.pairingJson(pairing, "email/challenges", {
+      method: "POST",
+      body: JSON.stringify({ email: input.email, locale: input.locale })
+    });
+    return readString(body, "challenge_id");
+  }
+  async verifyEmailChallenge(pairing, input) {
+    const body = await this.pairingJson(pairing, "email/verifications", {
+      method: "POST",
+      body: JSON.stringify({
+        challenge_id: input.challengeId,
+        email: input.email,
+        otp: input.otp
+      })
+    });
+    const status = readString(body, "status");
+    if (status === "approved") return { status };
+    if (status === "registration_required") {
+      return {
+        status,
+        registrationToken: readString(body, "registration_token")
+      };
+    }
+    throw new ConnectorSdkError("RESPONSE_INVALID", false, "none");
+  }
+  async registerEmailPairing(pairing, input) {
+    const body = await this.pairingJson(pairing, "email/registrations", {
+      method: "POST",
+      body: JSON.stringify({
+        registration_token: input.registrationToken,
+        email: input.email,
+        nickname: input.nickname,
+        locale: input.locale
+      })
+    });
+    if (readString(body, "status") !== "approved") {
+      throw new ConnectorSdkError("RESPONSE_INVALID", false, "none");
+    }
+  }
   async exchange(pairing, input) {
     const body = await this.json(
       `/v1/connector-pairings/${encodeURIComponent(pairing.pairingId)}/tokens`,
@@ -66398,6 +66441,18 @@ var ConnectorPairingClient = class {
   }
   approvalUrl(pairingId) {
     return `${this.baseUrl}/pair/${encodeURIComponent(pairingId)}`;
+  }
+  pairingJson(pairing, suffix, init) {
+    return this.json(
+      `/v1/connector-pairings/${encodeURIComponent(pairing.pairingId)}/${suffix}`,
+      {
+        ...init,
+        headers: {
+          authorization: `Bearer ${pairing.pairingVerifier}`,
+          ...init.headers
+        }
+      }
+    );
   }
   async json(path, init) {
     let response;
@@ -66508,6 +66563,9 @@ var ConnectorApiClient = class {
       nickname: readString2(body, "nickname"),
       email: readString2(body, "email")
     };
+  }
+  async disconnectSelf() {
+    await this.authorizedJson("/v1/connectors/self", { method: "DELETE" });
   }
   async findUserByExactEmail(email3) {
     const body = await this.authorizedJson("/v1/directory/search", {
@@ -66991,6 +67049,13 @@ async function replaceConnectorCredentials(path, credentials) {
   }
   await atomicWrite(path, credentials, ".credentials");
 }
+async function removeConnectorCredentials(path) {
+  const metadata = await (0, import_promises4.lstat)(path);
+  if (!metadata.isFile() || metadata.isSymbolicLink()) {
+    throw new Error("connector_profile_unsafe");
+  }
+  await (0, import_promises4.unlink)(path);
+}
 async function connectorProfileExists(directory, profile) {
   return pathExists(connectorProfilePath(directory, profile));
 }
@@ -67285,6 +67350,112 @@ var AgentHallMcpRuntime = class {
       });
       this.#pairings.delete(pending.pairing.pairingId);
       return { status: "connected", nextAction: "list_connections" };
+    });
+  }
+  async widgetAuth(input) {
+    return this.#protect(async () => {
+      if (await connectorProfileExists(this.#credentialDirectory, this.#profile)) {
+        return { status: "connected", nextAction: "refresh_sidebar" };
+      }
+      const client = new ConnectorPairingClient(
+        this.#baseUrl,
+        this.#connectorType,
+        this.#request
+      );
+      if (input.action === "request_code") {
+        const email3 = input.email?.trim();
+        if (!email3) {
+          throw new ConnectorSdkError("AUTH_REQUIRED", false, "sign_in");
+        }
+        await requireAgentHallNetwork(this.#request, this.#baseUrl);
+        let pending2 = input.requestId === void 0 ? void 0 : this.#pairings.get(input.requestId);
+        if (pending2 === void 0) {
+          const keys = generateLocalConnectorKeys();
+          const displayName = `${this.#hostDisplayName} on ${(0, import_node_os2.hostname)()}`;
+          const pairing = await client.requestPairing({
+            displayName,
+            locale: input.locale ?? locale(),
+            keys
+          });
+          pending2 = { pairing, keys, displayName };
+        }
+        const challengeId = await client.requestEmailChallenge(
+          pending2.pairing,
+          {
+            email: email3,
+            locale: input.locale ?? pending2.locale ?? locale()
+          }
+        );
+        const nextPending = {
+          pairing: pending2.pairing,
+          keys: pending2.keys,
+          displayName: pending2.displayName,
+          email: email3,
+          locale: input.locale ?? pending2.locale ?? locale(),
+          challengeId
+        };
+        this.#pairings.set(pending2.pairing.pairingId, nextPending);
+        return {
+          status: "awaiting_code",
+          requestId: pending2.pairing.pairingId,
+          expiresAt: pending2.pairing.expiresAt,
+          nextAction: "enter_six_digit_code"
+        };
+      }
+      const pending = input.requestId === void 0 ? void 0 : this.#pairings.get(input.requestId);
+      if (pending === void 0 || pending.email === void 0) {
+        throw new ConnectorSdkError("AUTH_REQUIRED", false, "sign_in");
+      }
+      if (input.action === "verify_code") {
+        if (pending.challengeId === void 0 || input.otp === void 0) {
+          throw new ConnectorSdkError("AUTH_REQUIRED", false, "sign_in");
+        }
+        const verified = await client.verifyEmailChallenge(pending.pairing, {
+          challengeId: pending.challengeId,
+          email: pending.email,
+          otp: input.otp
+        });
+        if (verified.status === "registration_required") {
+          this.#pairings.set(pending.pairing.pairingId, {
+            ...pending,
+            registrationToken: verified.registrationToken
+          });
+          return {
+            status: "registration_required",
+            requestId: pending.pairing.pairingId,
+            nextAction: "enter_nickname"
+          };
+        }
+        await this.#finishWidgetPairing(client, pending);
+        return { status: "connected", nextAction: "refresh_sidebar" };
+      }
+      if (pending.registrationToken === void 0 || !input.nickname?.trim()) {
+        throw new ConnectorSdkError("AUTH_REQUIRED", false, "sign_in");
+      }
+      await client.registerEmailPairing(pending.pairing, {
+        registrationToken: pending.registrationToken,
+        email: pending.email,
+        nickname: input.nickname.trim(),
+        locale: input.locale ?? pending.locale ?? locale()
+      });
+      await this.#finishWidgetPairing(client, pending);
+      return { status: "connected", nextAction: "refresh_sidebar" };
+    });
+  }
+  async disconnect() {
+    return this.#protect(async () => {
+      const path = connectorProfilePath(
+        this.#credentialDirectory,
+        this.#profile
+      );
+      const client = await this.#client();
+      await client.disconnectSelf();
+      await removeConnectorCredentials(path);
+      this.#pairings.clear();
+      this.#drafts.clear();
+      this.#connectionActionTokens.clear();
+      this.#connectionTokensById.clear();
+      return { status: "disconnected", nextAction: "show_login" };
     });
   }
   async listConnections(input = {}) {
@@ -67592,6 +67763,14 @@ var AgentHallMcpRuntime = class {
       this.#request
     );
   }
+  async #finishWidgetPairing(client, pending) {
+    const credentials = await client.exchange(pending.pairing, pending);
+    await saveConnectorCredentials(credentials, {
+      directory: this.#credentialDirectory,
+      profile: this.#profile
+    });
+    this.#pairings.delete(pending.pairing.pairingId);
+  }
   async #protect(operation) {
     try {
       return toolSuccess(await operation());
@@ -67733,7 +67912,7 @@ function safeIsoDateTime(value) {
 
 // connectors/agenthall-codex-mcp/src/server.ts
 var import_meta = {};
-var VERSION = "0.1.21";
+var VERSION = "0.1.24";
 var MODULE_URL = import_meta.url || (0, import_node_url.pathToFileURL)((0, import_node_path6.resolve)(process.argv[1] ?? ".")).href;
 var SIDEBAR_TEMPLATE_URI = `ui://agenthall/sidebar-v${VERSION}.html`;
 var HANDOFF_CONFIRMATION_TEMPLATE_URI = "ui://agenthall/handoff-confirmation-v4.html";
@@ -67751,6 +67930,14 @@ var pairOutputSchema = successOutputSchema(
     requestId: string2().optional(),
     approvalUrl: string2().url().optional(),
     invitationUrl: string2().url().optional(),
+    expiresAt: string2().optional(),
+    nextAction: string2()
+  })
+);
+var widgetAuthOutputSchema = successOutputSchema(
+  object2({
+    status: _enum2(["awaiting_code", "registration_required", "connected"]),
+    requestId: string2().optional(),
     expiresAt: string2().optional(),
     nextAction: string2()
   })
@@ -67793,6 +67980,12 @@ var connectionDirectoryOutputSchema = successOutputSchema(
 );
 var manageConnectionOutputSchema = successOutputSchema(
   object2({ status: _enum2(["pending", "active", "deleted"]) })
+);
+var disconnectOutputSchema = successOutputSchema(
+  object2({
+    status: literal("disconnected"),
+    nextAction: literal("show_login")
+  })
 );
 var prepareOutputSchema = successOutputSchema(
   object2({
@@ -67883,6 +68076,62 @@ function createAgentHallMcpServer(runtime = new AgentHallMcpRuntime(), serverNam
         ...input.invitation === void 0 ? {} : { invitation: input.invitation }
       })
     )
+  );
+  K3(
+    server,
+    "agenthall_widget_auth",
+    {
+      title: "AgentHall Sidebar authentication",
+      description: "Private App-only authentication for the AgentHall Sidebar. This tool is never available to the model and never returns OTPs, pairing verifiers, registration tokens, or Connector credentials.",
+      inputSchema: {
+        action: _enum2(["request_code", "verify_code", "register"]),
+        request_id: string2().min(1).optional(),
+        email: string2().email().max(320).optional(),
+        otp: string2().regex(/^\d{6}$/u).optional(),
+        nickname: string2().min(1).max(80).optional(),
+        locale: _enum2(["zh-CN", "en"]).optional()
+      },
+      outputSchema: widgetAuthOutputSchema,
+      annotations: {
+        readOnlyHint: false,
+        openWorldHint: true,
+        destructiveHint: false
+      },
+      _meta: {
+        ui: {
+          resourceUri: SIDEBAR_TEMPLATE_URI,
+          visibility: ["app"]
+        },
+        "openai/outputTemplate": SIDEBAR_TEMPLATE_URI,
+        "openai/widgetAccessible": true,
+        "openai/visibility": "private"
+      }
+    },
+    (input) => result(
+      runtime.widgetAuth({
+        action: input.action,
+        ...input.request_id === void 0 ? {} : { requestId: input.request_id },
+        ...input.email === void 0 ? {} : { email: input.email },
+        ...input.otp === void 0 ? {} : { otp: input.otp },
+        ...input.nickname === void 0 ? {} : { nickname: input.nickname },
+        ...input.locale === void 0 ? {} : { locale: input.locale }
+      })
+    )
+  );
+  server.registerTool(
+    "agenthall_disconnect",
+    {
+      title: "Disconnect this AgentHall Agent",
+      description: "Disconnect only the current Agent after the user explicitly confirms logout. This revokes the current Connector and removes its local credentials without deleting the AgentHall account, collaborators, Inbox, Outbox, or Handoff history.",
+      inputSchema: {},
+      outputSchema: disconnectOutputSchema,
+      annotations: {
+        readOnlyHint: false,
+        openWorldHint: true,
+        destructiveHint: true
+      }
+    },
+    () => result(runtime.disconnect())
   );
   K3(
     server,

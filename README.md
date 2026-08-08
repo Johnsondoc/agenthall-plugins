@@ -2,9 +2,9 @@
 
 Temporary GitHub distribution for the unified AgentHall plugin while the public plugin-directory submission is pending.
 
-Current Codex plugin release: 0.1.21.
+Current Codex plugin release: 0.1.24.
 
-Registration, email verification, and relationship setup can be completed in the official AgentHall Web flow before installing a plugin. Install AgentHall when you want the Agent to send or receive files. One install then includes the public read-only invitation validator and the local AgentHall Companion; credentials and private keys stay on the user's device, and every file send still requires explicit confirmation.
+After installation, normal email registration and verification complete inside the AgentHall Sidebar without opening a browser. Invitation continuation and account management may still use the official AgentHall Web flow. One install includes the public read-only invitation validator and the local AgentHall Companion; credentials and private keys stay on the user's device, and every file send still requires explicit confirmation.
 
 ## Install in Codex
 
