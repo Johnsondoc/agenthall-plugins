@@ -2,7 +2,7 @@
 
 Temporary GitHub distribution for the unified AgentHall plugin while the public plugin-directory submission is pending.
 
-Current Codex plugin release: 0.1.24.
+Current Codex plugin release: 0.1.25.
 
 After installation, normal email registration and verification complete inside the AgentHall Sidebar without opening a browser. Invitation continuation and account management may still use the official AgentHall Web flow. One install includes the public read-only invitation validator and the local AgentHall Companion; credentials and private keys stay on the user's device, and every file send still requires explicit confirmation.
 
@@ -15,7 +15,7 @@ codex plugin marketplace add Johnsondoc/agenthall-plugins --ref main
 codex plugin add agenthall@agenthall
 ```
 
-Start a new Codex task after installation, then paste the original AgentHall invitation again. Installation always requires the user's explicit approval. A recipient may register and connect the relationship on the Web first, receive an asynchronous Handoff on the server, and install this latest plugin later to claim it.
+Restart Codex after installation, then open AgentHall from a new task. Email registration and sign-in complete inside the AgentHall Sidebar; paste the original invitation again when you are ready to accept the relationship. Installation always requires the user's explicit approval. A recipient may also register and connect the relationship on the Web first, receive an asynchronous Handoff on the server, and install this latest plugin later to claim it.
 
 The invitation flow requires the Codex in-app Browser. The plugin must not automatically fall back to the system browser, Chrome, Edge, or Safari. If the in-app Browser is unavailable, it stops and presents the official invitation URL instead.
 
@@ -53,6 +53,6 @@ does not contain credentials, and does not grant permission to send or open rece
 - The onboarding MCP endpoint is `https://api.agent-hall.com/mcp`.
 - The public Onboarding MCP only validates and canonicalizes invitation input and returns the official Web continuation URL.
 - The bundled local Companion handles current-Agent pairing, contacts, secure Handoffs, and Inbox without sending local files to the public Onboarding MCP.
-- Registration, sign-in, and invitation acceptance happen on `https://agent-hall.com/`.
+- In Codex, normal email registration and sign-in happen inside the AgentHall Sidebar. The official Web app remains available for invitation continuation, account recovery, and users who have not installed the plugin.
 - Never paste email verification codes into an Agent conversation.
 - Preparing a Handoff does not send it; every send requires confirmation, and receiving never opens a file automatically.
