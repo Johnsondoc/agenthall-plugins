@@ -2,7 +2,7 @@
 
 Temporary GitHub distribution for the unified AgentHall plugin while the public plugin-directory submission is pending.
 
-Current Codex plugin release: 0.3.1-alpha.77.
+Current Codex plugin release: 0.3.1-alpha.78.
 
 After installation, normal email registration and verification complete inside the AgentHall Sidebar without opening a browser. Invitation continuation and account management may still use the official AgentHall Web flow. One install includes the public read-only invitation validator and the local AgentHall Companion; credentials and private keys stay on the user's device, and every file send still requires explicit confirmation.
 
@@ -11,10 +11,10 @@ After installation, normal email registration and verification complete inside t
 Review the version-pinned installer, then run this one command in Terminal:
 
 ```bash
-i=/tmp/ah77.sh; curl -fsSL https://raw.githubusercontent.com/Johnsondoc/agenthall-plugins/agenthall-v0.3.1-alpha.77/install-agenthall-macos.sh -o "$i" && echo "2c616453c48445af3e8834e25c1af6513fdaf352a6aa989caf23b327a024a3dc  $i" | shasum -a 256 -c - && /bin/bash "$i"
+i=/tmp/ah78.sh; curl -fsSL https://raw.githubusercontent.com/Johnsondoc/agenthall-plugins/agenthall-v0.3.1-alpha.78/install-agenthall-macos.sh -o "$i" && echo "e9a0dcfacb7e3739c2c23cbd540ff14567b9292ba9c220dec6488c9e740f0654  $i" | shasum -a 256 -c - && /bin/bash "$i"
 ```
 
-The installer uses the immutable `agenthall-v0.3.1-alpha.77` tag for clean installs and upgrades. It automatically finds Codex either in `PATH` or inside the installed ChatGPT/Codex app, then verifies the downloaded installer and every Plugin, MCP, Skill, Sidebar, and logo artifact; requests Codex to quit normally before replacing any plugin files; preserves a recoverable copy of the previous installation; and reopens Codex automatically. It does not delete AgentHall accounts, authorization, endpoints, bindings, checkpoints, projects, tasks, history, or project files. If any gate fails, it restores the previous installation and reopens Codex instead of reporting success.
+The installer uses the immutable `agenthall-v0.3.1-alpha.78` tag for clean installs and upgrades. It starts one self-contained background worker without leaving a persistent launchd job, automatically finds Codex either in `PATH` or inside the installed ChatGPT/Codex app, then verifies the downloaded installer and every Plugin, MCP, Skill, Sidebar, and logo artifact; requests Codex to quit normally before replacing any plugin files; preserves a recoverable copy of the previous installation; and reopens Codex automatically. It does not delete AgentHall accounts, authorization, endpoints, bindings, checkpoints, projects, tasks, history, or project files. If any gate fails, it restores the previous installation and reopens Codex instead of reporting success.
 
 After Codex reopens, start a new task and open AgentHall. Plugin capabilities are loaded into new tasks after installation. Email registration and sign-in complete inside the AgentHall Sidebar; paste the original invitation again when you are ready to accept the relationship. Installation always requires the user's explicit approval. A recipient may also register and connect the relationship on the Web first, receive an asynchronous Handoff on the server, and install this latest plugin later to claim it.
 
