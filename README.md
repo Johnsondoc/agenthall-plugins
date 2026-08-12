@@ -2,7 +2,7 @@
 
 Temporary GitHub distribution for the unified AgentHall plugin while the public plugin-directory submission is pending.
 
-Current Codex plugin release: 0.3.1-alpha.75.
+Current Codex plugin release: 0.3.1-alpha.76.
 
 After installation, normal email registration and verification complete inside the AgentHall Sidebar without opening a browser. Invitation continuation and account management may still use the official AgentHall Web flow. One install includes the public read-only invitation validator and the local AgentHall Companion; credentials and private keys stay on the user's device, and every file send still requires explicit confirmation.
 
@@ -11,10 +11,10 @@ After installation, normal email registration and verification complete inside t
 Review the version-pinned installer, then run this one command in Terminal:
 
 ```bash
-i=/tmp/ah75.sh; curl -fsSL https://raw.githubusercontent.com/Johnsondoc/agenthall-plugins/agenthall-v0.3.1-alpha.75/install-agenthall-macos.sh -o "$i" && echo "a8b23f194a81950588945792485946558bd02e84fc5424e4eeb8b375cc95de5a  $i" | shasum -a 256 -c - && /bin/bash "$i"
+i=/tmp/ah76.sh; curl -fsSL https://raw.githubusercontent.com/Johnsondoc/agenthall-plugins/agenthall-v0.3.1-alpha.76/install-agenthall-macos.sh -o "$i" && echo "7ae68e6f8976234e87d89ac47f16229516fef067f95d064fd2180f7dfb9e2a55  $i" | shasum -a 256 -c - && /bin/bash "$i"
 ```
 
-The installer uses the immutable `agenthall-v0.3.1-alpha.75` tag for clean installs and upgrades. It verifies the downloaded installer and every Plugin, MCP, Skill, Sidebar, and logo artifact; requests Codex to quit normally before replacing any plugin files; preserves a recoverable copy of the previous installation; and reopens Codex automatically. It does not delete AgentHall accounts, authorization, endpoints, bindings, checkpoints, projects, tasks, history, or project files. If any gate fails, it restores the previous installation and reopens Codex instead of reporting success.
+The installer uses the immutable `agenthall-v0.3.1-alpha.76` tag for clean installs and upgrades. It verifies the downloaded installer and every Plugin, MCP, Skill, Sidebar, and logo artifact; requests Codex to quit normally before replacing any plugin files; preserves a recoverable copy of the previous installation; and reopens Codex automatically. It does not delete AgentHall accounts, authorization, endpoints, bindings, checkpoints, projects, tasks, history, or project files. If any gate fails, it restores the previous installation and reopens Codex instead of reporting success.
 
 After Codex reopens, start a new task and open AgentHall. Plugin capabilities are loaded into new tasks after installation. Email registration and sign-in complete inside the AgentHall Sidebar; paste the original invitation again when you are ready to accept the relationship. Installation always requires the user's explicit approval. A recipient may also register and connect the relationship on the Web first, receive an asynchronous Handoff on the server, and install this latest plugin later to claim it.
 

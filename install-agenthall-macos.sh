@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-release_version="0.3.1-alpha.75"
+release_version="0.3.1-alpha.76"
 release_tag="agenthall-v${release_version}"
 marketplace_source="Johnsondoc/agenthall-plugins"
 marketplace_name="agenthall"
 plugin_id="agenthall@agenthall"
-expected_plugin_manifest_sha="a69f96a0185023dc0af791fd276ff53a7465cdd98057af5b322d1ec6dbc397bb"
+expected_plugin_manifest_sha="d7102b23482eb5e8dbd68d2deeb5297ead86fce8da0ba72f88792de10509748f"
 expected_mcp_config_sha="45581d920318e53b101ec07617a954d04e1b6f8eb9672d9a1320eaccea898ffc"
-expected_mcp_server_sha="1026613baddd88e1503581a7cc562c3f865569b06b180c04e377da3f10d2081a"
+expected_mcp_server_sha="7c6e1293f1954c90d5d8f16fb7700558f62a5096b0b804a864732a4bd0a35573"
 expected_skill_sha="224dcd5dc6ed0033a22a04d78fee6e1399d7301b301d33e8b300339d6facae06"
-expected_sidebar_sha="024b8dc82d8b3213cf243d650d3ad5989a0a360b81e8d20766113a4b8c4b0722"
+expected_sidebar_sha="0d9db5c286d51369c4f06065ecf87aea5c9e4ca27a814fca586832688b2d1bb6"
 expected_logo_sha="e6366bec291df5c514a8da289ee7798f3cfc4a23aed21f91f59eb0a8849bc8a6"
 
 fail() {
@@ -155,7 +155,7 @@ process.stdin.on("data", (chunk) => (body += chunk));
 process.stdin.on("end", () => {
   const parsed = JSON.parse(body);
   const matches = (parsed.installed ?? []).filter((item) => item.name === "agenthall");
-  const valid = matches.length === 1 && matches[0].pluginId === "agenthall@agenthall" && matches[0].version === "0.3.1-alpha.75" && matches[0].enabled === true;
+  const valid = matches.length === 1 && matches[0].pluginId === "agenthall@agenthall" && matches[0].version === "0.3.1-alpha.76" && matches[0].enabled === true;
   process.exit(valid ? 0 : 1);
 });'
 }
