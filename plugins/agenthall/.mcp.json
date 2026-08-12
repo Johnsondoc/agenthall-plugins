@@ -9,7 +9,12 @@
       "description": "Cross-Agent collaborators, secure Handoffs, and Inbox.",
       "cwd": ".",
       "command": "node",
-      "args": ["./mcp/server.cjs"]
+      "args": [
+        "./mcp/server.cjs"
+      ],
+      "env": {
+        "AGENTHALL_BASE_URL": "https://api.agent-hall.com"
+      }
     }
   }
 }

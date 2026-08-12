@@ -2,9 +2,9 @@
 
 Temporary GitHub distribution for the unified AgentHall plugin while the public plugin-directory submission is pending.
 
-Current Codex plugin release: 0.1.25.
+Current Codex plugin prerelease: 0.3.1-alpha.73.
 
-After installation, normal email registration and verification complete inside the AgentHall Sidebar without opening a browser. Invitation continuation and account management may still use the official AgentHall Web flow. One install includes the public read-only invitation validator and the local AgentHall Companion; credentials and private keys stay on the user's device, and every file send still requires explicit confirmation.
+This alpha opens same-account Codex task-progress continuity across two computers. AgentHall stores task context, checkpoints, and references needed to continue work; it does not mirror or replace project files. Normal email registration and verification complete inside the AgentHall Sidebar. Invitation continuation and account management may still use the official AgentHall Web flow. Credentials and private keys stay on the user's device, and every file send still requires explicit confirmation.
 
 ## Install in Codex
 
@@ -15,7 +15,9 @@ codex plugin marketplace add Johnsondoc/agenthall-plugins --ref main
 codex plugin add agenthall@agenthall
 ```
 
-Restart Codex after installation, then open AgentHall from a new task. Email registration and sign-in complete inside the AgentHall Sidebar; paste the original invitation again when you are ready to accept the relationship. Installation always requires the user's explicit approval. A recipient may also register and connect the relationship on the Web first, receive an asynchronous Handoff on the server, and install this latest plugin later to claim it.
+Restart Codex after installation, then open AgentHall from a new task. Sign in to the same AgentHall account on both computers. A successful save must show a real AgentHall success receipt before the second computer continues the task; the UI must not report a static success state. Installation always requires the user's explicit approval.
+
+This is an alpha release for controlled two-computer acceptance testing, not a stable public release. Do not use it as the only copy of important work.
 
 The invitation flow requires the Codex in-app Browser. The plugin must not automatically fall back to the system browser, Chrome, Edge, or Safari. If the in-app Browser is unavailable, it stops and presents the official invitation URL instead.
 
@@ -54,5 +56,7 @@ does not contain credentials, and does not grant permission to send or open rece
 - The public Onboarding MCP only validates and canonicalizes invitation input and returns the official Web continuation URL.
 - The bundled local Companion handles current-Agent pairing, contacts, secure Handoffs, and Inbox without sending local files to the public Onboarding MCP.
 - In Codex, normal email registration and sign-in happen inside the AgentHall Sidebar. The official Web app remains available for invitation continuation, account recovery, and users who have not installed the plugin.
+- Task-progress save and continue operations are driven by real Connector/API receipts. A failed or missing receipt must never be rendered as a successful save or download.
+- Loading progress on another computer creates or resumes local task context without deleting existing local projects, tasks, history, or files.
 - Never paste email verification codes into an Agent conversation.
 - Preparing a Handoff does not send it; every send requires confirmation, and receiving never opens a file automatically.

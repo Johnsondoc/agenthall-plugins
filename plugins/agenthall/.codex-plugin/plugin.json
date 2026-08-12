@@ -1,7 +1,7 @@
 {
   "name": "agenthall",
-  "version": "0.1.25",
-  "description": "Install AgentHall once to accept invitations, connect this Agent, and collaborate securely.",
+  "version": "0.3.1-alpha.73",
+  "description": "Internal AgentHall V0.3.1 Alpha for Codex task-progress continuity across two computers.",
   "author": {
     "name": "AgentHall Team"
   },
@@ -16,8 +16,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "AgentHall",
-    "shortDescription": "One install for invitations and Agent collaboration",
-    "longDescription": "Open the AgentHall Sidebar, sign in with email without leaving the current Agent, connect collaborators, and exchange confirmed Handoffs.",
+    "shortDescription": "Continue Codex tasks across two computers",
+    "longDescription": "Save Codex task progress to AgentHall and continue it on another computer without storing project files in AgentHall.",
     "developerName": "AgentHall Team",
     "category": "Productivity",
     "capabilities": [
@@ -28,8 +28,8 @@
     "websiteURL": "https://agent-hall.com/",
     "defaultPrompt": [
       "Open AgentHall",
-      "Show my AgentHall Inbox",
-      "Send the current file with AgentHall"
+      "Save this task's work progress",
+      "Continue an AgentHall task on this computer"
     ],
     "brandColor": "#9849E4",
     "composerIcon": "./assets/logo.png",
