@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-release_version="0.3.1-alpha.79"
+release_version="0.3.1-alpha.80"
 release_tag="agenthall-v${release_version}"
 marketplace_source="Johnsondoc/agenthall-plugins"
 marketplace_name="agenthall"
 plugin_id="agenthall@agenthall"
-expected_plugin_manifest_sha="dfbddb0dfd1c195373d2ca2109b597afffb1a07da53524f28d3e27c96d74462f"
+expected_plugin_manifest_sha="a6d7e0f40d662ee52a83f4acfce00b77e2f2f005703f1924ff650076e4f09424"
 expected_mcp_config_sha="45581d920318e53b101ec07617a954d04e1b6f8eb9672d9a1320eaccea898ffc"
-expected_mcp_server_sha="cb3036b22b7b31620d3cf1f078720e88a765d911fcdeda60d8dca5d8cbf03231"
+expected_mcp_server_sha="874fe0fc57a4769264534aec74eece842b495f644010b9a7c42ac676c41e9d49"
 expected_skill_sha="224dcd5dc6ed0033a22a04d78fee6e1399d7301b301d33e8b300339d6facae06"
-expected_sidebar_sha="4d4fbd5a996dee4314babbbf87e8533e0b9c97fa579dda6a662e62e4678a6a0e"
+expected_sidebar_sha="3fbcfcac5c14312fbd9b9a903275fff67be8dd7f8acad49cbdd16a089fdb19e7"
 expected_logo_sha="e6366bec291df5c514a8da289ee7798f3cfc4a23aed21f91f59eb0a8849bc8a6"
 
 fail() {
@@ -134,6 +134,12 @@ launch_host() {
   record_test_event "host_launch_requested"
   if [[ "$test_mode" == "1" ]]; then
     : >"$codex_root/test-host.running"
+    if [[ "${AGENTHALL_TEST_BACKUP_RUNTIME_ALWAYS:-0}" == "1" || ("${AGENTHALL_TEST_BACKUP_RUNTIME_ON_FIRST_LAUNCH:-0}" == "1" && ! -f "$codex_root/test-host-launched-once") ]]; then
+      : >"$codex_root/test-host-launched-once"
+      : >"$codex_root/test-backup-runtime.running"
+    else
+      rm -f "$codex_root/test-backup-runtime.running"
+    fi
   else
     "$codex_bin" app "$workspace" >/dev/null 2>&1
   fi
@@ -153,6 +159,69 @@ wait_for_host_state() {
     attempts=$((attempts + 1))
   done
   return 1
+}
+
+agenthall_runtime_state() {
+  if [[ "$test_mode" == "1" ]]; then
+    if [[ -f "$codex_root/test-backup-runtime.running" ]]; then
+      printf 'backup\n'
+    elif host_is_running; then
+      printf 'current\n'
+    else
+      printf 'absent\n'
+    fi
+    return 0
+  fi
+
+  local current_found=0
+  local pid=""
+  local cwd=""
+  while IFS= read -r pid; do
+    [[ -n "$pid" ]] || continue
+    cwd="$(/usr/sbin/lsof -a -p "$pid" -d cwd -Fn 2>/dev/null | /usr/bin/awk '/^n/{sub(/^n/,""); print; exit}')"
+    case "$cwd" in
+      "$codex_root"/plugins/cache/agenthall/plugin-backup-*/agenthall/"$release_version")
+        printf 'backup\n'
+        return 0
+        ;;
+      "$codex_root"/plugins/cache/agenthall/agenthall/"$release_version")
+        current_found=1
+        ;;
+    esac
+  done < <(/usr/bin/pgrep -f 'node ./mcp/server.cjs' 2>/dev/null || true)
+
+  if [[ "$current_found" == "1" ]]; then
+    printf 'current\n'
+  else
+    printf 'absent\n'
+  fi
+}
+
+wait_for_agenthall_runtime() {
+  local attempts=0
+  local current_streak=0
+  local state="absent"
+  local limit=30
+  [[ "$test_mode" != "1" ]] || limit=1
+  while ((attempts < limit)); do
+    state="$(agenthall_runtime_state)"
+    if [[ "$state" == "backup" ]]; then
+      printf 'backup\n'
+      return 0
+    fi
+    if [[ "$state" == "current" ]]; then
+      current_streak=$((current_streak + 1))
+      if [[ "$test_mode" == "1" || "$current_streak" -ge 3 ]]; then
+        printf 'current\n'
+        return 0
+      fi
+    else
+      current_streak=0
+    fi
+    /bin/sleep 1
+    attempts=$((attempts + 1))
+  done
+  printf 'absent\n'
 }
 
 installed_agenthall_ids() {
@@ -187,7 +256,7 @@ process.stdin.on("data", (chunk) => (body += chunk));
 process.stdin.on("end", () => {
   const parsed = JSON.parse(body);
   const matches = (parsed.installed ?? []).filter((item) => item.name === "agenthall");
-  const valid = matches.length === 1 && matches[0].pluginId === "agenthall@agenthall" && matches[0].version === "0.3.1-alpha.79" && matches[0].enabled === true;
+  const valid = matches.length === 1 && matches[0].pluginId === "agenthall@agenthall" && matches[0].version === "0.3.1-alpha.80" && matches[0].enabled === true;
   process.exit(valid ? 0 : 1);
 });'
 }
@@ -253,6 +322,10 @@ run_worker() {
     trap - EXIT
     if [[ "$install_succeeded" != "1" ]]; then
       if [[ "$mutation_started" == "1" ]]; then
+        if host_is_running; then
+          request_host_quit || true
+          wait_for_host_state stopped || true
+        fi
         restore_previous_install
       fi
       if ! host_is_running; then
@@ -309,6 +382,19 @@ run_worker() {
   launch_host "$workspace"
   wait_for_host_state running || fail "Codex could not be restarted after installation"
   record_test_event "host_running"
+
+  runtime_state="$(wait_for_agenthall_runtime)"
+  if [[ "$runtime_state" == "backup" ]]; then
+    record_test_event "backup_runtime_detected"
+    request_host_quit
+    wait_for_host_state stopped || fail "Codex did not exit while refreshing the AgentHall runtime"
+    launch_host "$workspace"
+    wait_for_host_state running || fail "Codex could not complete the AgentHall runtime refresh"
+    record_test_event "host_running_after_runtime_refresh"
+    runtime_state="$(wait_for_agenthall_runtime)"
+  fi
+  [[ "$runtime_state" == "current" ]] || fail "Codex did not load the current ${release_version} AgentHall runtime"
+  record_test_event "current_runtime_verified"
 
   mkdir -p "$state_root"
   printf '{"release_version":"%s","status":"installed_and_restarted","sidebar_resource":"ui://agenthall/sidebar-v%s.html"}\n' \
