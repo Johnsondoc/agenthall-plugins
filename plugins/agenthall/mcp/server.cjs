@@ -70687,7 +70687,7 @@ function safeIsoDateTime(value) {
 
 // connectors/agenthall-codex-mcp/src/server.ts
 var import_meta = {};
-var VERSION = "0.3.1-alpha.73";
+var VERSION = "0.3.1-alpha.74";
 var MODULE_URL = import_meta.url || (0, import_node_url.pathToFileURL)((0, import_node_path11.resolve)(process.argv[1] ?? ".")).href;
 var SIDEBAR_TEMPLATE_URI = `ui://agenthall/sidebar-v${VERSION}.html`;
 var HANDOFF_CONFIRMATION_TEMPLATE_URI = "ui://agenthall/handoff-confirmation-v4.html";
