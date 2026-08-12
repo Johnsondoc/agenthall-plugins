@@ -1,0 +1,30 @@
+{
+  "release_version": "0.3.1-alpha.75",
+  "status": "partial",
+  "channel": "public-prerelease",
+  "source_commit": "46f9e6742d3c21a49c9590c2dc084638af7d2ea6",
+  "protocol_version": "agenthall.v0.1",
+  "context_protocol_version": "agenthall.context.v0.3.1",
+  "migration_max": 19,
+  "codex_plugin_version": "0.3.1-alpha.75",
+  "marketplace_commit": "3a2823e33313af8a66863f28375c1e4b7a3d7c2e",
+  "marketplace_version": "0.3.1-alpha.75",
+  "artifact_sha256": {
+    "codex_plugin_manifest": "a69f96a0185023dc0af791fd276ff53a7465cdd98057af5b322d1ec6dbc397bb",
+    "codex_mcp_config": "45581d920318e53b101ec07617a954d04e1b6f8eb9672d9a1320eaccea898ffc",
+    "codex_mcp_server": "1026613baddd88e1503581a7cc562c3f865569b06b180c04e377da3f10d2081a",
+    "codex_skill": "224dcd5dc6ed0033a22a04d78fee6e1399d7301b301d33e8b300339d6facae06",
+    "sidebar_widget": "024b8dc82d8b3213cf243d650d3ad5989a0a360b81e8d20766113a4b8c4b0722",
+    "macos_installer": "a8b23f194a81950588945792485946558bd02e84fc5424e4eeb8b375cc95de5a"
+  },
+  "git_tag": "agenthall-v0.3.1-alpha.75",
+  "github_release": null,
+  "rollback_target": "0.3.1-alpha.74",
+  "complete": false,
+  "incomplete_reasons": [
+    "The production Web installation copy has not yet been switched to the alpha.75 release",
+    "Computer-B one-pass Marketplace installation and host restart are not yet verified",
+    "Real email delivery and Google browser authorization are not yet verified from an installed alpha.75 Sidebar",
+    "The real A to B to A continuation flow is not yet complete"
+  ]
+}
