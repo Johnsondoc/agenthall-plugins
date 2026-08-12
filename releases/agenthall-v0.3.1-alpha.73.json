@@ -1,0 +1,27 @@
+{
+  "release_version": "0.3.1-alpha.73",
+  "status": "partial",
+  "channel": "internal-alpha",
+  "source_commit": "8ece46f7293b26c78df93688589ebcc3e4915931",
+  "protocol_version": "agenthall.v0.1",
+  "context_protocol_version": "agenthall.context.v0.3.1",
+  "migration_max": 19,
+  "codex_plugin_version": "0.3.1-alpha.73",
+  "marketplace_commit": "5892c1e6dab61a8708f46c6e57d1339218d64613",
+  "marketplace_version": "0.3.1-alpha.73",
+  "artifact_sha256": {
+    "codex_plugin_manifest": "4c9b42fcf080ad37e4bce2c5ba32aeb1f21c9065acf189a7217c7528ff8bf0a9",
+    "codex_mcp_config": "a3f01280f193bc685e47f351fe4d140c538b3192d3a2fc80b8b875a5d5336c11",
+    "codex_mcp_server": "58e625a7fcd38b71b11f50934bf48887408168c86c5b1f580a027672adb443d3",
+    "codex_skill": "224dcd5dc6ed0033a22a04d78fee6e1399d7301b301d33e8b300339d6facae06",
+    "sidebar_widget": "6ef137a43c736143db847e6e1aefad6c7350e5d4f554e755db9cbdf35198b203"
+  },
+  "git_tag": "agenthall-v0.3.1-alpha.73",
+  "github_release": "https://github.com/Johnsondoc/agenthall-plugins/releases/tag/agenthall-v0.3.1-alpha.73",
+  "rollback_target": "0.3.1-alpha.72",
+  "complete": false,
+  "incomplete_reasons": [
+    "Computer-B clean Marketplace installation and host restart are not yet verified",
+    "The real A to B to A continuation flow is not yet complete"
+  ]
+}
