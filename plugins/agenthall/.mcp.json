@@ -11,10 +11,7 @@
       "command": "node",
       "args": [
         "./mcp/server.cjs"
-      ],
-      "env": {
-        "AGENTHALL_BASE_URL": "https://api.agent-hall.com"
-      }
+      ]
     }
   }
 }
