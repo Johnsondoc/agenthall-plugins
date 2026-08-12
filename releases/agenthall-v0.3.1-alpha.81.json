@@ -1,0 +1,33 @@
+{
+  "release_version": "0.3.1-alpha.81",
+  "status": "partial",
+  "channel": "public-prerelease",
+  "source_commit": "eae4819784700d3fea567e7df6c6c62ac21ff227",
+  "protocol_version": "agenthall.v0.1",
+  "context_protocol_version": "agenthall.context.v0.3.1",
+  "migration_max": 19,
+  "codex_plugin_version": "0.3.1-alpha.81",
+  "marketplace_commit": "53c5f999c1309c62541d9624ca6c7c8900e40bf2",
+  "marketplace_version": "0.3.1-alpha.81",
+  "api_release": "internal-alpha:20260812T160314Z",
+  "artifact_sha256": {
+    "codex_plugin_manifest": "b867d0bab716059286f574986e508336d5cf0513cbf27e2b2c32d73fedd90e2e",
+    "codex_mcp_config": "45581d920318e53b101ec07617a954d04e1b6f8eb9672d9a1320eaccea898ffc",
+    "codex_mcp_server": "efbab8d074d0ee1029493c509beb1a31785e6916e45c676bf7c7c6ed39be2a1c",
+    "codex_skill": "224dcd5dc6ed0033a22a04d78fee6e1399d7301b301d33e8b300339d6facae06",
+    "sidebar_widget": "127cff51ea3171eac0966675eeba8ad14c5e7a2f0a5dfbd2c637718aed4a5c36",
+    "logo": "e6366bec291df5c514a8da289ee7798f3cfc4a23aed21f91f59eb0a8849bc8a6",
+    "macos_installer": "eeb81b1d2e0d7e0cbfd6b12193f8d1cde47075fe6a29307ce386cabc341123c6"
+  },
+  "git_tag": "agenthall-v0.3.1-alpha.81",
+  "github_release": null,
+  "rollback_target": "0.3.1-alpha.80",
+  "api_rollback_target": "0.3.1-alpha.62",
+  "complete": false,
+  "incomplete_reasons": [
+    "The production Web installation copy has not yet been switched to the alpha.81 release",
+    "Computer-B one-pass alpha.80 to alpha.81 upgrade and current-runtime verification are not yet complete",
+    "The connected Sidebar must verify one visible Endpoint no longer consumes two quota slots and local project import succeeds",
+    "The real A to B to A continuation flow is not yet complete"
+  ]
+}
