@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-release_version="0.3.1-alpha.76"
+release_version="0.3.1-alpha.77"
 release_tag="agenthall-v${release_version}"
 marketplace_source="Johnsondoc/agenthall-plugins"
 marketplace_name="agenthall"
 plugin_id="agenthall@agenthall"
-expected_plugin_manifest_sha="d7102b23482eb5e8dbd68d2deeb5297ead86fce8da0ba72f88792de10509748f"
+expected_plugin_manifest_sha="707abc346b56fa092ecea6317974484dc9c12dd3127f6036ed4b5ffd6c5530c0"
 expected_mcp_config_sha="45581d920318e53b101ec07617a954d04e1b6f8eb9672d9a1320eaccea898ffc"
-expected_mcp_server_sha="7c6e1293f1954c90d5d8f16fb7700558f62a5096b0b804a864732a4bd0a35573"
+expected_mcp_server_sha="780cbbf34b2e3a699b5d18d155b0a4fb43704593946e951cd58ed1f42b70aa35"
 expected_skill_sha="224dcd5dc6ed0033a22a04d78fee6e1399d7301b301d33e8b300339d6facae06"
-expected_sidebar_sha="0d9db5c286d51369c4f06065ecf87aea5c9e4ca27a814fca586832688b2d1bb6"
+expected_sidebar_sha="b99a82525735cfcbf078070d45cb1f6871de796f63c765a6af71f81dbe977201"
 expected_logo_sha="e6366bec291df5c514a8da289ee7798f3cfc4a23aed21f91f59eb0a8849bc8a6"
 
 fail() {
@@ -18,9 +18,43 @@ fail() {
   exit 1
 }
 
+test_mode="${AGENTHALL_INSTALLER_TEST_MODE:-0}"
+
 require_command() {
   command -v "$1" >/dev/null 2>&1 || fail "required command is unavailable: $1"
 }
+
+resolve_codex_bin() {
+  local candidate=""
+  if candidate="$(command -v codex 2>/dev/null)" && [[ -x "$candidate" ]]; then
+    printf '%s\n' "$candidate"
+    return 0
+  fi
+
+  local candidates=()
+  if [[ "$test_mode" == "1" && -n "${AGENTHALL_TEST_CODEX_APP_BIN:-}" ]]; then
+    candidates=("$AGENTHALL_TEST_CODEX_APP_BIN")
+  else
+    candidates=(
+      "/Applications/ChatGPT.app/Contents/Resources/codex"
+      "$HOME/Applications/ChatGPT.app/Contents/Resources/codex"
+      "/Applications/Codex.app/Contents/Resources/codex"
+      "$HOME/Applications/Codex.app/Contents/Resources/codex"
+    )
+  fi
+  for candidate in "${candidates[@]}"; do
+    if [[ -x "$candidate" ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  fail "Codex CLI was not found in PATH or the installed ChatGPT/Codex app"
+}
+
+if [[ "${AGENTHALL_INSTALLER_TEST_RESOLVE_CODEX_ONLY:-0}" == "1" ]]; then
+  resolve_codex_bin
+  exit 0
+fi
 
 sha256_file() {
   /usr/bin/shasum -a 256 "$1" | /usr/bin/awk '{print $1}'
@@ -46,19 +80,17 @@ verify_plugin_tree() {
   verify_file "$root" "assets/logo.png" "$expected_logo_sha"
 }
 
-test_mode="${AGENTHALL_INSTALLER_TEST_MODE:-0}"
 if [[ "$test_mode" == "1" ]]; then
   codex_root="${AGENTHALL_TEST_CODEX_ROOT:?AGENTHALL_TEST_CODEX_ROOT is required}"
   codex_bin="${AGENTHALL_TEST_CODEX_BIN:?AGENTHALL_TEST_CODEX_BIN is required}"
   json_node="${AGENTHALL_TEST_NODE_BIN:-$(command -v node)}"
 else
   [[ "$(uname -s)" == "Darwin" ]] || fail "this installer supports macOS only"
-  require_command codex
   require_command git
   require_command osascript
   require_command launchctl
   codex_root="${CODEX_HOME:-$HOME/.codex}"
-  codex_bin="$(command -v codex)"
+  codex_bin="$(resolve_codex_bin)"
   if command -v node >/dev/null 2>&1; then
     json_node="$(command -v node)"
   elif [[ -x "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node" ]]; then
@@ -155,7 +187,7 @@ process.stdin.on("data", (chunk) => (body += chunk));
 process.stdin.on("end", () => {
   const parsed = JSON.parse(body);
   const matches = (parsed.installed ?? []).filter((item) => item.name === "agenthall");
-  const valid = matches.length === 1 && matches[0].pluginId === "agenthall@agenthall" && matches[0].version === "0.3.1-alpha.76" && matches[0].enabled === true;
+  const valid = matches.length === 1 && matches[0].pluginId === "agenthall@agenthall" && matches[0].version === "0.3.1-alpha.77" && matches[0].enabled === true;
   process.exit(valid ? 0 : 1);
 });'
 }
