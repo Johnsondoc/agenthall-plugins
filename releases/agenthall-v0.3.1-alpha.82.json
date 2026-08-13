@@ -11,7 +11,7 @@
   "marketplace_version": "0.3.1-alpha.82",
   "api_release": null,
   "api_artifact_reused_from": "0.3.1-alpha.81",
-  "web_release": null,
+  "web_release": "internal-alpha:20260813T042450Z",
   "artifact_sha256": {
     "codex_plugin_manifest": "47652c11454180899102e8488faea93c7cdc36b20ac9047e2f43502193f0ff38",
     "codex_mcp_config": "45581d920318e53b101ec07617a954d04e1b6f8eb9672d9a1320eaccea898ffc",
@@ -22,12 +22,11 @@
     "macos_installer": "71ea8127531468fc4e39845c159a86c549b2dc109b4c456821972674aa581f40"
   },
   "git_tag": "agenthall-v0.3.1-alpha.82",
-  "github_release": null,
+  "github_release": "https://github.com/Johnsondoc/agenthall-plugins/releases/tag/agenthall-v0.3.1-alpha.82",
   "rollback_target": "0.3.1-alpha.81",
   "api_rollback_target": "0.3.1-alpha.81",
   "complete": false,
   "incomplete_reasons": [
-    "The production Web installation copy has not yet been switched to the alpha.82 release",
     "Computer-B one-pass alpha.81 to alpha.82 upgrade and current-runtime verification are not yet complete",
     "The visible Codex task created from the first continuation must be verified on computer B",
     "The real A to B to A continuation flow is not yet complete"
