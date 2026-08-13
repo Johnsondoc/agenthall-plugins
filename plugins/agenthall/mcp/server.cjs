@@ -67725,6 +67725,8 @@ async function resolveCodexCommand(options = {}) {
 var CodexStdioAppServerClient = class _CodexStdioAppServerClient {
   #child;
   #pending = /* @__PURE__ */ new Map();
+  #notifications = [];
+  #notificationWaiters = /* @__PURE__ */ new Set();
   #nextId = 1;
   #closed = false;
   constructor(child) {
@@ -67781,12 +67783,40 @@ var CodexStdioAppServerClient = class _CodexStdioAppServerClient {
       this.#write({ id, method, params: wireParams });
     });
   }
+  waitForNotification(input) {
+    if (this.#closed) return Promise.reject(new Error("app_server_closed"));
+    const bufferedIndex = this.#notifications.findIndex(
+      (entry) => entry.method === input.method && input.matches(entry.params)
+    );
+    if (bufferedIndex >= 0) {
+      const [entry] = this.#notifications.splice(bufferedIndex, 1);
+      return Promise.resolve(entry.params);
+    }
+    return new Promise((resolve2, reject) => {
+      const timeout = setTimeout(
+        () => {
+          this.#notificationWaiters.delete(waiter);
+          reject(new Error("app_server_notification_timeout"));
+        },
+        Math.min(Math.max(input.timeoutMs, 100), 12e4)
+      );
+      const waiter = {
+        method: input.method,
+        matches: (params) => input.matches(params),
+        resolve: (params) => resolve2(params),
+        reject,
+        timeout
+      };
+      this.#notificationWaiters.add(waiter);
+    });
+  }
   close() {
     if (this.#closed) return;
     this.#closed = true;
     this.#child.stdin.end();
     this.#child.kill("SIGTERM");
     this.#rejectAll("app_server_closed");
+    this.#rejectNotificationWaiters("app_server_closed");
   }
   #notify(method, params) {
     this.#write({ method, params });
@@ -67802,7 +67832,12 @@ var CodexStdioAppServerClient = class _CodexStdioAppServerClient {
     } catch {
       return;
     }
-    if (typeof message.id !== "number") return;
+    if (typeof message.id !== "number") {
+      if (typeof message.method === "string") {
+        this.#handleNotification(message.method, message.params);
+      }
+      return;
+    }
     const pending = this.#pending.get(message.id);
     if (pending === void 0) return;
     this.#pending.delete(message.id);
@@ -67813,6 +67848,24 @@ var CodexStdioAppServerClient = class _CodexStdioAppServerClient {
       pending.resolve(message.result);
     }
   }
+  #handleNotification(method, params) {
+    for (const waiter of this.#notificationWaiters) {
+      if (waiter.method !== method) continue;
+      let matches = false;
+      try {
+        matches = waiter.matches(params);
+      } catch {
+        matches = false;
+      }
+      if (!matches) continue;
+      this.#notificationWaiters.delete(waiter);
+      clearTimeout(waiter.timeout);
+      waiter.resolve(params);
+      return;
+    }
+    this.#notifications.push({ method, params });
+    if (this.#notifications.length > 100) this.#notifications.shift();
+  }
   #rejectAll(category) {
     for (const pending of this.#pending.values()) {
       clearTimeout(pending.timeout);
@@ -67820,10 +67873,18 @@ var CodexStdioAppServerClient = class _CodexStdioAppServerClient {
     }
     this.#pending.clear();
   }
+  #rejectNotificationWaiters(category) {
+    for (const waiter of this.#notificationWaiters) {
+      clearTimeout(waiter.timeout);
+      waiter.reject(new Error(category));
+    }
+    this.#notificationWaiters.clear();
+  }
   #fail(category) {
     if (this.#closed) return;
     this.#closed = true;
     this.#rejectAll(category);
+    this.#rejectNotificationWaiters(category);
   }
 };
 
@@ -68034,13 +68095,40 @@ var CodexAdapter = class _CodexAdapter {
     }
     return Object.freeze([...response.data].reverse());
   }
-  async resumeNative(binding) {
+  async resumeNative(binding, options) {
     if (!this.#isLocalBinding(binding))
       return { status: "unavailable" };
     try {
       const response = await this.#client.request("thread/resume", { threadId: binding.nativeThreadId });
       const id = projectThread(response.thread ?? {}, false).id;
-      return { status: "resumed", nativeThreadId: id };
+      const taskName = safeThreadName(options.taskName);
+      const loadedBeforeName = await this.#client.request("thread/read", { threadId: id, includeTurns: true });
+      const projectionBeforeName = projectThread(
+        loadedBeforeName.thread ?? {},
+        true
+      );
+      const lastTurn = record2(projectionBeforeName.turns.at(-1));
+      if (lastTurn.status !== void 0 && lastTurn.status !== "completed") {
+        return { status: "unavailable" };
+      }
+      await this.#client.request("thread/name/set", {
+        threadId: id,
+        name: taskName
+      });
+      const loaded = await this.#client.request("thread/read", { threadId: id, includeTurns: true });
+      const projection = projectThread(loaded.thread ?? {}, true);
+      if (projection.name !== taskName) {
+        return { status: "unavailable" };
+      }
+      const visible = (await this.#listThreads()).some(
+        (thread) => projectThread(thread, false).id === id
+      );
+      if (!visible) return { status: "unavailable" };
+      return {
+        status: "resumed",
+        nativeThreadId: id,
+        threadUrl: `codex://threads/${id}`
+      };
     } catch {
       return { status: "failed", errorCategory: "host" };
     }
@@ -68053,10 +68141,15 @@ var CodexAdapter = class _CodexAdapter {
     });
     return projectThread(response.thread ?? {}, false).cwd ?? void 0;
   }
-  async startFromPortableContext(contextInput) {
+  async startFromPortableContext(contextInput, options) {
     const context = PORTABLE_TASK_CONTEXT_SCHEMA.parse(contextInput);
     const started = await this.#client.request("thread/start", {});
     const threadId = projectThread(started.thread ?? {}, false).id;
+    const taskName = safeThreadName(options.taskName);
+    await this.#client.request("thread/name/set", {
+      threadId,
+      name: taskName
+    });
     let goalRestored = false;
     if (context.goalState?.source === "codex_goal") {
       try {
@@ -68070,12 +68163,32 @@ var CodexAdapter = class _CodexAdapter {
         goalRestored = false;
       }
     }
-    await this.#client.request("turn/start", {
+    const startedTurn = await this.#client.request("turn/start", {
       threadId,
       input: [{ type: "text", text: handoffPrompt(context) }]
     });
-    const loaded = await this.#client.request("thread/read", { threadId, includeTurns: false });
-    const projection = projectThread(loaded.thread ?? {}, false);
+    const turnId = record2(startedTurn.turn).id;
+    if (typeof turnId !== "string" || turnId.length < 1) {
+      throw new Error("app_server_turn_start_invalid");
+    }
+    const completed = await this.#client.waitForNotification({
+      method: "turn/completed",
+      timeoutMs: 12e4,
+      matches: (params) => params.threadId === threadId && record2(params.turn).id === turnId
+    });
+    const turn = record2(completed.turn);
+    if (turn.status !== "completed") {
+      throw new Error("app_server_turn_incomplete");
+    }
+    const loaded = await this.#client.request("thread/read", { threadId, includeTurns: true });
+    const projection = projectThread(loaded.thread ?? {}, true);
+    if (projection.name !== taskName) {
+      throw new Error("app_server_thread_name_unconfirmed");
+    }
+    const visible = (await this.#listThreads()).some(
+      (thread) => projectThread(thread, false).id === threadId
+    );
+    if (!visible) throw new Error("app_server_thread_not_visible");
     const cwd = projection.cwd ?? "codex:unknown";
     const resolvedProject = await this.#resolvedProject({
       nativeThreadId: threadId,
@@ -68098,6 +68211,7 @@ var CodexAdapter = class _CodexAdapter {
       nativeContentRevision,
       nativeProjectName: resolvedProject?.projectName ?? safeProjectName(projection.cwd),
       nativeTaskName: projection.name ?? (projection.preview || "\u672A\u547D\u540D Codex \u4EFB\u52A1"),
+      threadUrl: `codex://threads/${threadId}`,
       goalRestored
     };
   }
@@ -68220,6 +68334,10 @@ function safeProjectName(cwd) {
   if (cwd === null) return "Codex";
   const name = (0, import_node_path6.basename)(cwd).trim();
   return name || "Codex";
+}
+function safeThreadName(value) {
+  const name = safeText(value, 120);
+  return name || "AgentHall \u63A5\u529B\u4EFB\u52A1";
 }
 function localWorkspaceKey(cwd) {
   return `workspace_${digest(cwd).slice(0, 24)}`;
@@ -68842,11 +68960,9 @@ var ContextSyncCoordinator = class {
     ]);
     const task = cloudTasks.find((entry) => entry.taskId === input.taskId);
     if (task === void 0) throw new Error("context_cloud_task_unavailable");
-    if (localTasks.some(
+    const alreadyLoaded = localTasks.some(
       (local) => local.taskId === input.taskId && local.loadedCheckpointId === input.checkpointId
-    )) {
-      throw new Error("context_checkpoint_already_on_current_endpoint");
-    }
+    );
     const checkpoint = await this.#api.getContextCheckpoint(input.checkpointId);
     if (checkpoint.context.agentHallTaskId !== task.taskId) {
       throw new Error("context_checkpoint_task_mismatch");
@@ -68860,7 +68976,7 @@ var ContextSyncCoordinator = class {
     );
     if (nativeBinding !== void 0) {
       const resumed = await this.#withAdapter(
-        (adapter) => adapter.resumeNative(nativeBinding)
+        (adapter) => adapter.resumeNative(nativeBinding, { taskName: task.taskDisplayName })
       );
       if (resumed.status === "resumed") {
         if (importBatchId !== void 0) {
@@ -68875,12 +68991,18 @@ var ContextSyncCoordinator = class {
           status: "continued",
           mode: "native_resume",
           taskId: task.taskId,
+          threadUrl: resumed.threadUrl,
           ...materialContinueResult(materials)
         };
       }
     }
+    if (alreadyLoaded) {
+      throw new Error("context_checkpoint_already_on_current_endpoint");
+    }
     const started = await this.#withAdapter(
-      (adapter) => adapter.startFromPortableContext(checkpoint.context)
+      (adapter) => adapter.startFromPortableContext(checkpoint.context, {
+        taskName: task.taskDisplayName
+      })
     );
     const binding = Object.freeze({
       ...started.binding,
@@ -68899,7 +69021,7 @@ var ContextSyncCoordinator = class {
       nativeUpdatedAtAtCheckpoint: started.nativeUpdatedAt,
       nativeContentRevisionAtCheckpoint: started.nativeContentRevision
     });
-    await this.#upsertBinding(binding);
+    await this.#replaceContinuationBinding(binding);
     if (importBatchId !== void 0) {
       await this.#recordImportBatch({
         importBatchId,
@@ -68912,6 +69034,7 @@ var ContextSyncCoordinator = class {
       status: "continued",
       mode: "portable_new_task",
       taskId: task.taskId,
+      threadUrl: started.threadUrl,
       ...materialContinueResult(materials)
     };
   }
@@ -69013,6 +69136,15 @@ var ContextSyncCoordinator = class {
     await this.#bindingStore.save([
       ...stored.filter(
         (entry) => entry.nativeThreadId !== binding.nativeThreadId
+      ),
+      binding
+    ]);
+  }
+  async #replaceContinuationBinding(binding) {
+    const stored = await this.#bindingStore.load();
+    await this.#bindingStore.save([
+      ...stored.filter(
+        (entry) => entry.nativeThreadId !== binding.nativeThreadId && !(entry.agentHallTaskId === binding.agentHallTaskId && entry.checkpointId === binding.checkpointId && entry.endpointId === binding.endpointId)
       ),
       binding
     ]);
@@ -70687,7 +70819,7 @@ function safeIsoDateTime(value) {
 
 // connectors/agenthall-codex-mcp/src/server.ts
 var import_meta = {};
-var VERSION = "0.3.1-alpha.81";
+var VERSION = "0.3.1-alpha.82";
 var MODULE_URL = import_meta.url || (0, import_node_url.pathToFileURL)((0, import_node_path11.resolve)(process.argv[1] ?? ".")).href;
 var SIDEBAR_TEMPLATE_URI = `ui://agenthall/sidebar-v${VERSION}.html`;
 var HANDOFF_CONFIRMATION_TEMPLATE_URI = "ui://agenthall/handoff-confirmation-v4.html";
@@ -70933,6 +71065,7 @@ var continueContextOutputSchema = successOutputSchema(
     status: literal("continued"),
     mode: _enum2(["native_resume", "portable_new_task"]),
     taskId: string2(),
+    threadUrl: string2().regex(/^codex:\/\/threads\/[A-Za-z0-9_-]+$/u),
     materials: array(MATERIAL_REFERENCE_SCHEMA),
     nextAction: object2({
       kind: _enum2(["retry_failed", "reauthorize"]),
@@ -70961,6 +71094,7 @@ var confirmRestoreOutputSchema = successOutputSchema(
     status: literal("continued"),
     mode: _enum2(["native_resume", "portable_new_task"]),
     taskId: string2(),
+    threadUrl: string2().regex(/^codex:\/\/threads\/[A-Za-z0-9_-]+$/u),
     materials: array(MATERIAL_REFERENCE_SCHEMA),
     nextAction: object2({
       kind: _enum2(["retry_failed", "reauthorize"]),
