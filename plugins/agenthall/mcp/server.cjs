@@ -27881,9 +27881,9 @@ var require_timers = __commonJS({
        * before the specified function or code is executed.
        * @param {*} arg
        */
-      constructor(callback, delay2, arg) {
+      constructor(callback, delay3, arg) {
         this._onTimeout = callback;
-        this._idleTimeout = delay2;
+        this._idleTimeout = delay3;
         this._timerArg = arg;
         this.refresh();
       }
@@ -27928,8 +27928,8 @@ var require_timers = __commonJS({
        * when the timer expires.
        * @returns {NodeJS.Timeout|FastTimer}
        */
-      setTimeout(callback, delay2, arg) {
-        return delay2 <= RESOLUTION_MS ? setTimeout(callback, delay2, arg) : new FastTimer(callback, delay2, arg);
+      setTimeout(callback, delay3, arg) {
+        return delay3 <= RESOLUTION_MS ? setTimeout(callback, delay3, arg) : new FastTimer(callback, delay3, arg);
       },
       /**
        * The clearTimeout method cancels an instantiated Timer previously created
@@ -27955,8 +27955,8 @@ var require_timers = __commonJS({
        * when the timer expires.
        * @returns {FastTimer}
        */
-      setFastTimeout(callback, delay2, arg) {
-        return new FastTimer(callback, delay2, arg);
+      setFastTimeout(callback, delay3, arg) {
+        return new FastTimer(callback, delay3, arg);
       },
       /**
        * The clearTimeout method cancels an instantiated FastTimer previously
@@ -27982,8 +27982,8 @@ var require_timers = __commonJS({
        * @deprecated
        * @param {number} [delay=0] The delay in milliseconds to add to the now value.
        */
-      tick(delay2 = 0) {
-        fastNow += delay2 - RESOLUTION_MS + 1;
+      tick(delay3 = 0) {
+        fastNow += delay3 - RESOLUTION_MS + 1;
         onTick();
         onTick();
       },
@@ -34395,21 +34395,21 @@ var require_client_h1 = __commonJS({
         this.connectionKeepAlive = false;
         this.maxResponseSize = client[kMaxResponseSize];
       }
-      setTimeout(delay2, type) {
-        if (delay2 !== this.timeoutValue || type & USE_FAST_TIMER ^ this.timeoutType & USE_FAST_TIMER) {
+      setTimeout(delay3, type) {
+        if (delay3 !== this.timeoutValue || type & USE_FAST_TIMER ^ this.timeoutType & USE_FAST_TIMER) {
           if (this.timeout) {
             timers.clearTimeout(this.timeout);
             this.timeout = null;
           }
-          if (delay2) {
+          if (delay3) {
             if (type & USE_FAST_TIMER) {
-              this.timeout = timers.setFastTimeout(onParserTimeout, delay2, this.timeoutWeakRef);
+              this.timeout = timers.setFastTimeout(onParserTimeout, delay3, this.timeoutWeakRef);
             } else {
-              this.timeout = setTimeout(onParserTimeout, delay2, this.timeoutWeakRef);
+              this.timeout = setTimeout(onParserTimeout, delay3, this.timeoutWeakRef);
               this.timeout?.unref();
             }
           }
-          this.timeoutValue = delay2;
+          this.timeoutValue = delay3;
         } else if (this.timeout) {
           if (this.timeout.refresh) {
             this.timeout.refresh();
@@ -41417,7 +41417,7 @@ var require_mock_utils = __commonJS({
       return dispatchMockReply(mockDispatches, mockDispatch2, key, opts, handler);
     }
     function dispatchMockReply(mockDispatches, mockDispatch2, key, opts, handler) {
-      const { data: response, delay: delay2 } = mockDispatch2;
+      const { data: response, delay: delay3 } = mockDispatch2;
       if (response.error !== null) {
         deleteMockDispatch(mockDispatches, key);
         handler.onResponseError(null, response.error);
@@ -41507,11 +41507,11 @@ var require_mock_utils = __commonJS({
           handleReply(dispatches, mockDispatch2.data);
           return;
         }
-        if (typeof delay2 === "number" && delay2 > 0) {
+        if (typeof delay3 === "number" && delay3 > 0) {
           timer = setTimeout(() => {
             timer = null;
             handleReply(dispatches);
-          }, delay2);
+          }, delay3);
         } else {
           handleReply(dispatches);
         }
@@ -42509,8 +42509,8 @@ var require_snapshot_utils = __commonJS({
 var require_snapshot_recorder = __commonJS({
   "node_modules/undici/lib/mock/snapshot-recorder.js"(exports2, module2) {
     "use strict";
-    var { writeFile: writeFile4, readFile: readFile7, mkdir: mkdir5 } = require("node:fs/promises");
-    var { dirname: dirname4, resolve: resolve2 } = require("node:path");
+    var { writeFile: writeFile5, readFile: readFile9, mkdir: mkdir6 } = require("node:fs/promises");
+    var { dirname: dirname5, resolve: resolve2 } = require("node:path");
     var { setTimeout: setTimeout2, clearTimeout: clearTimeout2 } = require("node:timers");
     var { InvalidArgumentError, UndiciError } = require_errors3();
     var { hashId, isUrlExcludedFactory, normalizeHeaders, createHeaderFilters } = require_snapshot_utils();
@@ -42726,7 +42726,7 @@ var require_snapshot_recorder = __commonJS({
           throw new InvalidArgumentError("Snapshot path is required");
         }
         try {
-          const data = await readFile7(resolve2(path), "utf8");
+          const data = await readFile9(resolve2(path), "utf8");
           const parsed = JSON.parse(data);
           if (Array.isArray(parsed)) {
             this.#snapshots.clear();
@@ -42756,12 +42756,12 @@ var require_snapshot_recorder = __commonJS({
           throw new InvalidArgumentError("Snapshot path is required");
         }
         const resolvedPath = resolve2(path);
-        await mkdir5(dirname4(resolvedPath), { recursive: true });
+        await mkdir6(dirname5(resolvedPath), { recursive: true });
         const data = Array.from(this.#snapshots.entries()).map(([hash2, snapshot]) => ({
           hash: hash2,
           snapshot
         }));
-        await writeFile4(resolvedPath, JSON.stringify(data, null, 2), { flush: true });
+        await writeFile5(resolvedPath, JSON.stringify(data, null, 2), { flush: true });
       }
       /**
        * Clears all recorded snapshots
@@ -54663,8 +54663,8 @@ __export(server_exports, {
   main: () => main
 });
 module.exports = __toCommonJS(server_exports);
-var import_promises10 = require("node:fs/promises");
-var import_node_path11 = require("node:path");
+var import_promises13 = require("node:fs/promises");
+var import_node_path12 = require("node:path");
 var import_node_url = require("node:url");
 
 // node_modules/zod/v3/helpers/util.js
@@ -64650,35 +64650,35 @@ async function readValidatedAttachmentBytes(input) {
     throw error51;
   }
   try {
-    const stat = await handle.stat();
-    if (!stat.isFile()) {
+    const stat2 = await handle.stat();
+    if (!stat2.isFile()) {
       throw invalid("The attachment must be a regular file");
     }
-    if (stat.size > MAX_ATTACHMENT_BYTES) {
+    if (stat2.size > MAX_ATTACHMENT_BYTES) {
       throw new AttachmentValidationError(
         "PAYLOAD_TOO_LARGE",
         `The attachment exceeds ${MAX_ATTACHMENT_BYTES} bytes`
       );
     }
-    const bytes = Buffer.alloc(stat.size);
-    if (stat.size > 0) {
-      const { bytesRead } = await handle.read(bytes, 0, stat.size, 0);
-      if (bytesRead !== stat.size) {
+    const bytes = Buffer.alloc(stat2.size);
+    if (stat2.size > 0) {
+      const { bytesRead } = await handle.read(bytes, 0, stat2.size, 0);
+      if (bytesRead !== stat2.size) {
         throw invalid("The attachment changed while it was being inspected");
       }
     }
     validateContent(classified.extension, bytes);
     const afterRead = await handle.stat();
-    if (afterRead.size !== stat.size || afterRead.ino !== stat.ino || afterRead.dev !== stat.dev || afterRead.mtimeMs !== stat.mtimeMs) {
+    if (afterRead.size !== stat2.size || afterRead.ino !== stat2.ino || afterRead.dev !== stat2.dev || afterRead.mtimeMs !== stat2.mtimeMs) {
       throw invalid("The attachment changed while it was being inspected");
     }
     return {
       descriptor: {
         ...classified,
-        originalBytes: stat.size,
-        device: stat.dev,
-        inode: stat.ino,
-        modifiedAtMs: stat.mtimeMs
+        originalBytes: stat2.size,
+        device: stat2.dev,
+        inode: stat2.ino,
+        modifiedAtMs: stat2.mtimeMs
       },
       bytes
     };
@@ -65921,8 +65921,8 @@ var QuarantineWriteError = class extends Error {
 };
 var QuarantineReceiver = class {
   #randomUUID;
-  constructor(randomUUID3 = import_node_crypto6.randomUUID) {
-    this.#randomUUID = randomUUID3;
+  constructor(randomUUID5 = import_node_crypto6.randomUUID) {
+    this.#randomUUID = randomUUID5;
   }
   async receive(input) {
     let encrypted;
@@ -66113,9 +66113,9 @@ function assertLease(expiresAt, now) {
 // packages/agenthall-connector/src/receipt-submit.ts
 var import_node_crypto7 = require("node:crypto");
 var ReceiptCoordinator = class {
-  constructor(submitter, randomUUID3 = import_node_crypto7.randomUUID) {
+  constructor(submitter, randomUUID5 = import_node_crypto7.randomUUID) {
     this.submitter = submitter;
-    this.#randomUUID = randomUUID3;
+    this.#randomUUID = randomUUID5;
   }
   #randomUUID;
   async submit(input) {
@@ -67352,8 +67352,8 @@ var import_node_path3 = require("node:path");
 var LocalArtifactRegistry = class {
   #entries = /* @__PURE__ */ new Map();
   #randomUUID;
-  constructor(randomUUID3 = import_node_crypto11.randomUUID) {
-    this.#randomUUID = randomUUID3;
+  constructor(randomUUID5 = import_node_crypto11.randomUUID) {
+    this.#randomUUID = randomUUID5;
   }
   register(input) {
     assertReference(input);
@@ -67365,8 +67365,8 @@ var LocalArtifactRegistry = class {
     const reference = this.#entries.get(localHandle);
     if (reference === void 0) throw unavailable();
     try {
-      const stat = await (0, import_promises3.lstat)(reference.filePath);
-      if (!stat.isFile() || stat.isSymbolicLink() || stat.size !== reference.originalBytes) {
+      const stat2 = await (0, import_promises3.lstat)(reference.filePath);
+      if (!stat2.isFile() || stat2.isSymbolicLink() || stat2.size !== reference.originalBytes) {
         throw new Error("local_artifact_changed");
       }
       const bytes = await (0, import_promises3.readFile)(reference.filePath);
@@ -67489,8 +67489,8 @@ async function atomicWrite(target, credentials, prefix) {
 }
 async function ensurePrivateDirectory(directory) {
   await (0, import_promises4.mkdir)(directory, { recursive: true, mode: 448 });
-  const stat = await (0, import_promises4.lstat)(directory);
-  if (!stat.isDirectory() || stat.isSymbolicLink()) {
+  const stat2 = await (0, import_promises4.lstat)(directory);
+  if (!stat2.isDirectory() || stat2.isSymbolicLink()) {
     throw new Error("connector_directory_unsafe");
   }
 }
@@ -67680,9 +67680,9 @@ function first(...values) {
 }
 
 // connectors/agenthall-codex-mcp/src/runtime.ts
-var import_node_crypto17 = require("node:crypto");
+var import_node_crypto19 = require("node:crypto");
 var import_node_os4 = require("node:os");
-var import_node_path10 = require("node:path");
+var import_node_path11 = require("node:path");
 
 // packages/agenthall-codex-adapter/src/index.ts
 var import_node_crypto12 = require("node:crypto");
@@ -68142,15 +68142,34 @@ var CodexAdapter = class _CodexAdapter {
     return projectThread(response.thread ?? {}, false).cwd ?? void 0;
   }
   async startFromPortableContext(contextInput, options) {
+    return this.startOrResumeFromPortableContext(contextInput, options);
+  }
+  async startOrResumeFromPortableContext(contextInput, options) {
     const context = PORTABLE_TASK_CONTEXT_SCHEMA.parse(contextInput);
-    const started = await this.#client.request("thread/start", {});
-    const threadId = projectThread(started.thread ?? {}, false).id;
+    const checkpoint = options.checkpoint ?? (async () => void 0);
+    let threadId = safeOptionalId(options.state?.nativeThreadId);
+    if (threadId === void 0) {
+      const started = await this.#client.request("thread/start", {});
+      threadId = projectThread(started.thread ?? {}, false).id;
+      await checkpoint("thread_created_or_reused", 28, {
+        nativeThreadId: threadId
+      });
+    } else {
+      await this.#client.request("thread/read", {
+        threadId,
+        includeTurns: false
+      });
+      await checkpoint("thread_created_or_reused", 28, {
+        nativeThreadId: threadId
+      });
+    }
     const taskName = safeThreadName(options.taskName);
     await this.#client.request("thread/name/set", {
       threadId,
       name: taskName
     });
-    let goalRestored = false;
+    await checkpoint("thread_named", 42, { nativeThreadId: threadId });
+    let goalRestored = options.state?.goalRestored === true;
     if (context.goalState?.source === "codex_goal") {
       try {
         await this.#client.request("thread/goal/set", {
@@ -68163,32 +68182,49 @@ var CodexAdapter = class _CodexAdapter {
         goalRestored = false;
       }
     }
-    const startedTurn = await this.#client.request("turn/start", {
-      threadId,
-      input: [{ type: "text", text: handoffPrompt(context) }]
-    });
-    const turnId = record2(startedTurn.turn).id;
-    if (typeof turnId !== "string" || turnId.length < 1) {
-      throw new Error("app_server_turn_start_invalid");
+    let turnId = safeOptionalId(options.state?.turnId);
+    if (turnId === void 0) {
+      const startedTurn = await this.#client.request("turn/start", {
+        threadId,
+        input: [{ type: "text", text: handoffPrompt(context) }]
+      });
+      turnId = safeOptionalId(record2(startedTurn.turn).id);
+      if (turnId === void 0) {
+        throw new Error("app_server_turn_start_invalid");
+      }
+      await checkpoint("first_turn_started", 58, {
+        nativeThreadId: threadId,
+        turnId,
+        goalRestored
+      });
     }
-    const completed = await this.#client.waitForNotification({
-      method: "turn/completed",
-      timeoutMs: 12e4,
-      matches: (params) => params.threadId === threadId && record2(params.turn).id === turnId
+    const loaded = await this.#waitForCompletedFinalTurn(threadId, turnId);
+    await checkpoint("first_turn_completed", 78, {
+      nativeThreadId: threadId,
+      turnId,
+      goalRestored
     });
-    const turn = record2(completed.turn);
-    if (turn.status !== "completed") {
-      throw new Error("app_server_turn_incomplete");
-    }
-    const loaded = await this.#client.request("thread/read", { threadId, includeTurns: true });
     const projection = projectThread(loaded.thread ?? {}, true);
     if (projection.name !== taskName) {
       throw new Error("app_server_thread_name_unconfirmed");
     }
+    if (!hasCompletedFinalTurn(projection.turns, turnId)) {
+      throw new Error("app_server_turn_final_unconfirmed");
+    }
+    await checkpoint("thread_read_verified", 88, {
+      nativeThreadId: threadId,
+      turnId,
+      goalRestored
+    });
     const visible = (await this.#listThreads()).some(
       (thread) => projectThread(thread, false).id === threadId
     );
     if (!visible) throw new Error("app_server_thread_not_visible");
+    await checkpoint("thread_list_verified", 94, {
+      nativeThreadId: threadId,
+      turnId,
+      goalRestored
+    });
     const cwd = projection.cwd ?? "codex:unknown";
     const resolvedProject = await this.#resolvedProject({
       nativeThreadId: threadId,
@@ -68203,6 +68239,11 @@ var CodexAdapter = class _CodexAdapter {
       localWorkspaceKey: localWorkspaceKey2
     };
     const nativeContentRevision = await this.readSubstantiveRevision(binding);
+    await checkpoint("ready_to_open", 98, {
+      nativeThreadId: threadId,
+      turnId,
+      goalRestored
+    });
     return {
       status: "started",
       binding,
@@ -68214,6 +68255,33 @@ var CodexAdapter = class _CodexAdapter {
       threadUrl: `codex://threads/${threadId}`,
       goalRestored
     };
+  }
+  async #waitForCompletedFinalTurn(threadId, turnId) {
+    const initial = await this.#client.request("thread/read", { threadId, includeTurns: true });
+    if (hasCompletedFinalTurn(
+      projectThread(initial.thread ?? {}, true).turns,
+      turnId
+    )) {
+      return initial;
+    }
+    const completed = await this.#client.waitForNotification({
+      method: "turn/completed",
+      timeoutMs: 12e4,
+      matches: (params) => params.threadId === threadId && record2(params.turn).id === turnId
+    });
+    if (record2(completed.turn).status !== "completed") {
+      throw new Error("app_server_turn_incomplete");
+    }
+    const deadline = Date.now() + 3e4;
+    while (true) {
+      const loaded = await this.#client.request("thread/read", { threadId, includeTurns: true });
+      const projection = projectThread(loaded.thread ?? {}, true);
+      if (hasCompletedFinalTurn(projection.turns, turnId)) return loaded;
+      if (Date.now() >= deadline) {
+        throw new Error("app_server_turn_final_unconfirmed");
+      }
+      await new Promise((resolve2) => setTimeout(resolve2, 500));
+    }
   }
   async forkNative(binding) {
     if (!this.#isLocalBinding(binding))
@@ -68339,6 +68407,20 @@ function safeThreadName(value) {
   const name = safeText(value, 120);
   return name || "AgentHall \u63A5\u529B\u4EFB\u52A1";
 }
+function safeOptionalId(value) {
+  return typeof value === "string" && value.length > 0 ? value : void 0;
+}
+function hasCompletedFinalTurn(turns, turnId) {
+  const turn = turns.find((candidate) => record2(candidate).id === turnId);
+  const projected = record2(turn);
+  if (projected.status !== "completed" || !Array.isArray(projected.items)) {
+    return false;
+  }
+  return projected.items.some((candidate) => {
+    const item = record2(candidate);
+    return item.type === "agentMessage" && item.phase === "final_answer" && typeof item.text === "string" && item.text.trim().length > 0;
+  });
+}
 function localWorkspaceKey(cwd) {
   return `workspace_${digest(cwd).slice(0, 24)}`;
 }
@@ -68420,7 +68502,6 @@ var ContextSyncCoordinator = class {
   #pendingSaves;
   #resolveWorkspaceKey;
   #resolveProject;
-  #restoreDrafts = /* @__PURE__ */ new Map();
   #taskTokens = /* @__PURE__ */ new Map();
   #saveSettlements = /* @__PURE__ */ new Map();
   constructor(input) {
@@ -68889,12 +68970,8 @@ var ContextSyncCoordinator = class {
       else summary2.added += 1;
     }
     const previewToken = `restore_${digest2(
-      `${input.taskId}:${input.checkpointId}:${this.#id()}`
+      `${input.taskId}:${input.checkpointId}:${this.#endpointId}`
     ).slice(0, 32)}`;
-    this.#restoreDrafts.set(previewToken, {
-      ...input,
-      needsChoice: summary2.needsChoice
-    });
     return {
       status: "preview_required",
       previewToken,
@@ -68903,17 +68980,25 @@ var ContextSyncCoordinator = class {
     };
   }
   async confirmFirstRestore(input) {
-    const draft = this.#restoreDrafts.get(input.previewToken);
-    if (draft === void 0) throw new Error("context_restore_preview_expired");
-    if (draft.needsChoice > 0 && input.keepSeparate !== true) {
+    const expectedToken = `restore_${digest2(
+      `${input.taskId}:${input.checkpointId}:${this.#endpointId}`
+    ).slice(0, 32)}`;
+    if (input.previewToken !== expectedToken) {
+      throw new Error("context_restore_preview_expired");
+    }
+    const preview = await this.prepareFirstRestore({
+      taskId: input.taskId,
+      checkpointId: input.checkpointId
+    });
+    if (preview.status === "preview_required" && preview.summary.needsChoice > 0 && input.keepSeparate !== true) {
       throw new Error("context_restore_choice_required");
     }
     const importBatchId = `local_import_${digest2(input.previewToken).slice(0, 32)}`;
     const result2 = await this.continueFromCloud(
-      { taskId: draft.taskId, checkpointId: draft.checkpointId },
-      importBatchId
+      { taskId: input.taskId, checkpointId: input.checkpointId },
+      importBatchId,
+      input.operation
     );
-    this.#restoreDrafts.delete(input.previewToken);
     return { ...result2, importBatchId };
   }
   async listLocalImportBatches() {
@@ -68952,7 +69037,7 @@ var ContextSyncCoordinator = class {
       localFilesDeleted: 0
     };
   }
-  async continueFromCloud(input, importBatchId) {
+  async continueFromCloud(input, importBatchId, operation) {
     await this.#ensureEndpoint();
     const [localTasks, cloudTasks] = await Promise.all([
       this.listLocalTasks(),
@@ -69000,8 +69085,9 @@ var ContextSyncCoordinator = class {
       throw new Error("context_checkpoint_already_on_current_endpoint");
     }
     const started = await this.#withAdapter(
-      (adapter) => adapter.startFromPortableContext(checkpoint.context, {
-        taskName: task.taskDisplayName
+      (adapter) => adapter.startOrResumeFromPortableContext(checkpoint.context, {
+        taskName: task.taskDisplayName,
+        ...operation === void 0 ? {} : { state: operation.state, checkpoint: operation.checkpoint }
       })
     );
     const binding = Object.freeze({
@@ -69906,6 +69992,763 @@ function digest4(value) {
   return (0, import_node_crypto16.createHash)("sha256").update(value).digest("hex");
 }
 
+// connectors/agenthall-codex-mcp/src/local-operations.ts
+var import_node_crypto18 = require("node:crypto");
+var import_promises11 = require("node:fs/promises");
+
+// connectors/agenthall-codex-mcp/src/private-json-journal.ts
+var import_node_crypto17 = require("node:crypto");
+var import_promises10 = require("node:fs/promises");
+var import_node_path10 = require("node:path");
+async function withPrivateJsonLock(path, action, options) {
+  await (0, import_promises10.mkdir)((0, import_node_path10.dirname)(path), { recursive: true, mode: 448 });
+  const lockPath = `${path}.lock`;
+  const release = await acquirePrivateJsonLock(lockPath, options);
+  try {
+    return await action();
+  } finally {
+    await release();
+  }
+}
+async function atomicWritePrivateJson(path, value) {
+  const temporary = `${path}.${process.pid}.${(0, import_node_crypto17.randomUUID)()}.tmp`;
+  const data = `${JSON.stringify(value, null, 2)}
+`;
+  const handle = await (0, import_promises10.open)(temporary, "wx", 384);
+  try {
+    await handle.writeFile(data, "utf8");
+    await handle.sync();
+  } finally {
+    await handle.close();
+  }
+  try {
+    await (0, import_promises10.rename)(temporary, path);
+    await (0, import_promises10.chmod)(path, 384);
+    const directory = await (0, import_promises10.open)((0, import_node_path10.dirname)(path), "r");
+    try {
+      await directory.sync();
+    } finally {
+      await directory.close();
+    }
+  } catch (error51) {
+    await (0, import_promises10.unlink)(temporary).catch(() => void 0);
+    throw error51;
+  }
+}
+async function acquirePrivateJsonLock(lockPath, options) {
+  const startedAt = Date.now();
+  const lockWaitMs = options.lockWaitMs ?? 5e3;
+  const staleLockMs = options.staleLockMs ?? 1e4;
+  while (true) {
+    try {
+      await (0, import_promises10.mkdir)(lockPath, { mode: 448 });
+      await (0, import_promises10.writeFile)(
+        `${lockPath}/owner.json`,
+        `${JSON.stringify({ pid: process.pid, acquiredAt: (/* @__PURE__ */ new Date()).toISOString() })}
+`,
+        { mode: 384, flag: "wx" }
+      );
+      return async () => {
+        await (0, import_promises10.rm)(`${lockPath}/owner.json`, { force: true });
+        await (0, import_promises10.rmdir)(lockPath).catch((error51) => {
+          if (!isMissing3(error51)) throw error51;
+        });
+      };
+    } catch (error51) {
+      if (!isAlreadyExists2(error51)) throw error51;
+      const lockStat = await (0, import_promises10.stat)(lockPath).catch((statError) => {
+        if (isMissing3(statError)) return void 0;
+        throw statError;
+      });
+      if (lockStat !== void 0 && Date.now() - lockStat.mtimeMs > staleLockMs) {
+        const stalePath = `${lockPath}.stale.${(0, import_node_crypto17.randomUUID)()}`;
+        try {
+          await (0, import_promises10.rename)(lockPath, stalePath);
+          await (0, import_promises10.rm)(stalePath, { recursive: true, force: true });
+        } catch (renameError) {
+          if (!isMissing3(renameError)) throw renameError;
+        }
+        continue;
+      }
+      if (Date.now() - startedAt >= lockWaitMs) {
+        throw new Error(options.timeoutCode);
+      }
+      await delay2(10);
+    }
+  }
+}
+function isMissing3(error51) {
+  return isRecord2(error51) && error51.code === "ENOENT";
+}
+function isAlreadyExists2(error51) {
+  return isRecord2(error51) && error51.code === "EEXIST";
+}
+function isRecord2(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+function delay2(milliseconds) {
+  return new Promise((resolve2) => setTimeout(resolve2, milliseconds));
+}
+
+// connectors/agenthall-codex-mcp/src/local-operations.ts
+var LOCAL_OPERATION_CONTRACT_VERSION = 1;
+var DEFAULT_LEASE_MS = 15e3;
+var DEFAULT_HEARTBEAT_MS = 4e3;
+var STORE_VERSION = 1;
+var LocalOperationLeaseLostError = class extends Error {
+  constructor() {
+    super("local_operation_lease_lost");
+  }
+};
+var LocalOperationCoordinator = class {
+  #store;
+  #ownerId;
+  #now;
+  #leaseMs;
+  #heartbeatMs;
+  #mapError;
+  #handlers = /* @__PURE__ */ new Map();
+  #active = /* @__PURE__ */ new Map();
+  constructor(options) {
+    this.#store = options.store;
+    this.#ownerId = options.ownerId ?? `owner_${(0, import_node_crypto18.randomUUID)().replaceAll("-", "")}`;
+    this.#now = options.now ?? (() => /* @__PURE__ */ new Date());
+    this.#leaseMs = options.leaseMs ?? DEFAULT_LEASE_MS;
+    this.#heartbeatMs = options.heartbeatMs ?? DEFAULT_HEARTBEAT_MS;
+    this.#mapError = options.mapError ?? defaultOperationError;
+    if (!Number.isSafeInteger(this.#leaseMs) || this.#leaseMs < 100) {
+      throw new Error("local_operation_lease_invalid");
+    }
+    if (!Number.isSafeInteger(this.#heartbeatMs) || this.#heartbeatMs < 0 || this.#heartbeatMs >= this.#leaseMs) {
+      throw new Error("local_operation_heartbeat_invalid");
+    }
+  }
+  register(kind, handler) {
+    if (this.#handlers.has(kind)) {
+      throw new Error(`local_operation_handler_duplicate:${kind}`);
+    }
+    this.#handlers.set(kind, handler);
+  }
+  async start(input) {
+    assertOperationKey(input.operationKey);
+    const claimed = await this.#store.transaction(
+      (current) => {
+        const now = this.#now();
+        const operationId = operationIdFromKey(input.operationKey);
+        const existing = current.find(
+          (entry) => entry.operationId === operationId
+        );
+        if (existing !== void 0) {
+          if (existing.operationKey !== input.operationKey || existing.kind !== input.kind || stableJson(existing.input) !== stableJson(input.input)) {
+            throw new Error("local_operation_identity_collision");
+          }
+          const next2 = this.#claimIfAvailable(existing, now, true);
+          return {
+            operations: replaceOperation(current, next2.record),
+            value: next2
+          };
+        }
+        const timestamp2 = now.toISOString();
+        const created = {
+          version: LOCAL_OPERATION_CONTRACT_VERSION,
+          operationId,
+          operationKey: input.operationKey,
+          kind: input.kind,
+          input: structuredClone(input.input),
+          status: "accepted",
+          phase: "accepted",
+          progress: 0,
+          attempt: 0,
+          owner: null,
+          createdAt: timestamp2,
+          updatedAt: timestamp2
+        };
+        const next = this.#claimIfAvailable(created, now);
+        return {
+          operations: pruneOperations([...current, next.record], now),
+          value: next
+        };
+      }
+    );
+    if (claimed.claimed) this.#schedule(claimed.record);
+    return operationSnapshot(claimed.record);
+  }
+  async status(operationId) {
+    assertOperationId(operationId);
+    const claimed = await this.#store.transaction(
+      (current) => {
+        const existing = current.find(
+          (entry) => entry.operationId === operationId
+        );
+        if (existing === void 0) {
+          throw new Error("local_operation_not_found");
+        }
+        const next = this.#claimIfAvailable(existing, this.#now());
+        return {
+          operations: replaceOperation(current, next.record),
+          value: next
+        };
+      }
+    );
+    if (claimed.claimed) this.#schedule(claimed.record);
+    return operationSnapshot(claimed.record);
+  }
+  async bootstrap() {
+    const operations = await this.#store.load();
+    return [...operations].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt)).map(operationSnapshot);
+  }
+  async acknowledge(operationId) {
+    assertOperationId(operationId);
+    return this.#store.transaction((current) => {
+      const existing = current.find(
+        (entry) => entry.operationId === operationId
+      );
+      if (existing === void 0) {
+        throw new Error("local_operation_not_found");
+      }
+      if (existing.status === "succeeded") {
+        return { operations: current, value: operationSnapshot(existing) };
+      }
+      if (existing.status !== "awaiting_ack") {
+        throw new Error("local_operation_not_ready_for_ack");
+      }
+      const succeeded = {
+        ...existing,
+        status: "succeeded",
+        phase: "succeeded",
+        progress: 100,
+        updatedAt: this.#now().toISOString()
+      };
+      return {
+        operations: replaceOperation(current, succeeded),
+        value: operationSnapshot(succeeded)
+      };
+    });
+  }
+  async drain() {
+    while (this.#active.size > 0) {
+      await Promise.all([...this.#active.values()]);
+    }
+  }
+  #claimIfAvailable(operation, now, allowRetry = false) {
+    if (operation.status === "awaiting_ack" || operation.status === "succeeded" || operation.status === "failed" && (!allowRetry || operation.error?.retryable !== true)) {
+      return { record: operation, claimed: false };
+    }
+    const alreadyActive = this.#active.has(operation.operationId);
+    if (operation.owner?.ownerId === this.#ownerId && alreadyActive) {
+      return { record: operation, claimed: false };
+    }
+    const leaseExpired = operation.owner === null || Date.parse(operation.owner.leaseExpiresAt) <= now.getTime();
+    if (!leaseExpired && operation.owner?.ownerId !== this.#ownerId) {
+      return { record: operation, claimed: false };
+    }
+    const generation = (operation.owner?.generation ?? 0) + 1;
+    const retryableOperation = withoutOperationError(operation);
+    const claimed = {
+      ...retryableOperation,
+      status: "running",
+      attempt: operation.attempt + 1,
+      owner: {
+        ownerId: this.#ownerId,
+        generation,
+        leaseExpiresAt: new Date(now.getTime() + this.#leaseMs).toISOString()
+      },
+      updatedAt: now.toISOString()
+    };
+    return { record: claimed, claimed: true };
+  }
+  #schedule(operation) {
+    if (this.#active.has(operation.operationId)) return;
+    const running = this.#execute(operation).finally(() => {
+      this.#active.delete(operation.operationId);
+    });
+    this.#active.set(operation.operationId, running);
+  }
+  async #execute(operation) {
+    const handler = this.#handlers.get(operation.kind);
+    if (handler === void 0) {
+      await this.#fail(operation, {
+        code: "LOCAL_OPERATION_HANDLER_UNAVAILABLE",
+        retryable: false,
+        action: "none"
+      });
+      return;
+    }
+    let heartbeatTail = Promise.resolve();
+    const timer = this.#heartbeatMs === 0 ? void 0 : setInterval(() => {
+      heartbeatTail = heartbeatTail.then(() => this.#renew(operation)).catch(() => void 0);
+    }, this.#heartbeatMs);
+    timer?.unref?.();
+    try {
+      const outcome = await handler({
+        operation,
+        checkpoint: (phase, progress, partialResult) => this.#checkpoint(operation, phase, progress, partialResult)
+      });
+      await heartbeatTail;
+      if (isAwaitingAcknowledgement(outcome)) {
+        await this.#awaitAcknowledgement(operation, outcome);
+      } else {
+        await this.#succeed(operation, outcome);
+      }
+    } catch (error51) {
+      await heartbeatTail;
+      if (error51 instanceof LocalOperationLeaseLostError) return;
+      await this.#fail(operation, this.#mapError(error51));
+    } finally {
+      if (timer !== void 0) clearInterval(timer);
+    }
+  }
+  async #renew(operation) {
+    await this.#store.transaction((current) => {
+      const existing = ownedOperation(current, operation);
+      const now = this.#now();
+      const renewed = {
+        ...existing,
+        owner: {
+          ...existing.owner,
+          leaseExpiresAt: new Date(now.getTime() + this.#leaseMs).toISOString()
+        },
+        updatedAt: now.toISOString()
+      };
+      return {
+        operations: replaceOperation(current, renewed),
+        value: void 0
+      };
+    });
+  }
+  async #checkpoint(operation, phase, progress, partialResult) {
+    assertPhase(phase);
+    assertProgress(progress, false);
+    return this.#store.transaction((current) => {
+      const existing = ownedOperation(current, operation);
+      const now = this.#now();
+      const checkpoint = {
+        ...existing,
+        phase,
+        progress,
+        ...partialResult === void 0 ? {} : {
+          result: {
+            ...existing.result ?? {},
+            ...structuredClone(partialResult)
+          }
+        },
+        owner: {
+          ...existing.owner,
+          leaseExpiresAt: new Date(now.getTime() + this.#leaseMs).toISOString()
+        },
+        updatedAt: now.toISOString()
+      };
+      return {
+        operations: replaceOperation(current, checkpoint),
+        value: checkpoint
+      };
+    });
+  }
+  async #succeed(operation, result2) {
+    await this.#store.transaction((current) => {
+      const existing = ownedOperation(current, operation);
+      const withoutError = withoutOperationError(existing);
+      const succeeded = {
+        ...withoutError,
+        status: "succeeded",
+        phase: "succeeded",
+        progress: 100,
+        owner: null,
+        result: structuredClone(result2),
+        updatedAt: this.#now().toISOString()
+      };
+      return {
+        operations: replaceOperation(current, succeeded),
+        value: void 0
+      };
+    });
+  }
+  async #awaitAcknowledgement(operation, outcome) {
+    assertPhase(outcome.phase);
+    assertProgress(outcome.progress, false);
+    if (outcome.progress >= 100) {
+      throw new Error("local_operation_ack_progress_invalid");
+    }
+    await this.#store.transaction((current) => {
+      const existing = ownedOperation(current, operation);
+      const waiting = {
+        ...existing,
+        status: "awaiting_ack",
+        phase: outcome.phase,
+        progress: outcome.progress,
+        owner: null,
+        result: {
+          ...existing.result ?? {},
+          ...structuredClone(outcome.result)
+        },
+        updatedAt: this.#now().toISOString()
+      };
+      return {
+        operations: replaceOperation(current, waiting),
+        value: void 0
+      };
+    });
+  }
+  async #fail(operation, error51) {
+    try {
+      await this.#store.transaction((current) => {
+        const existing = ownedOperation(current, operation);
+        const failed = {
+          ...existing,
+          status: "failed",
+          phase: "failed",
+          owner: null,
+          error: normalizeOperationError(error51),
+          updatedAt: this.#now().toISOString()
+        };
+        return {
+          operations: replaceOperation(current, failed),
+          value: void 0
+        };
+      });
+    } catch (leaseError) {
+      if (!(leaseError instanceof LocalOperationLeaseLostError)) {
+        throw leaseError;
+      }
+    }
+  }
+};
+var JsonLocalOperationStore = class {
+  constructor(path, options = {}) {
+    this.path = path;
+    this.#lockWaitMs = options.lockWaitMs ?? 5e3;
+    this.#staleLockMs = options.staleLockMs ?? 1e4;
+  }
+  #lockWaitMs;
+  #staleLockMs;
+  async load() {
+    try {
+      const value = JSON.parse(await (0, import_promises11.readFile)(this.path, "utf8"));
+      return parseStore(value);
+    } catch (error51) {
+      if (isMissing4(error51)) return [];
+      throw error51;
+    }
+  }
+  async transaction(update) {
+    return withPrivateJsonLock(
+      this.path,
+      async () => {
+        const current = await this.load();
+        const next = await update(structuredClone(current));
+        const operations = next.operations.map(parseOperation);
+        await atomicWritePrivateJson(this.path, {
+          version: STORE_VERSION,
+          operations
+        });
+        return next.value;
+      },
+      {
+        lockWaitMs: this.#lockWaitMs,
+        staleLockMs: this.#staleLockMs,
+        timeoutCode: "local_operation_store_lock_timeout"
+      }
+    );
+  }
+};
+function localOperationKey(input) {
+  const digest5 = (0, import_node_crypto18.createHash)("sha256").update(
+    stableJson({
+      accountScope: input.accountScope,
+      endpointId: input.endpointId,
+      kind: input.kind,
+      subjectId: input.subjectId,
+      checkpointId: input.checkpointId ?? null,
+      hostKind: input.hostKind,
+      contractVersion: input.contractVersion ?? LOCAL_OPERATION_CONTRACT_VERSION
+    })
+  ).digest("hex");
+  return `opkey_${digest5}`;
+}
+function operationIdFromKey(operationKey) {
+  return `localop_${(0, import_node_crypto18.createHash)("sha256").update(operationKey).digest("hex").slice(0, 24)}`;
+}
+function operationSnapshot(operation) {
+  const subject = operationSubject(operation);
+  return {
+    operationId: operation.operationId,
+    operationKey: operation.operationKey,
+    kind: operation.kind,
+    status: operation.status,
+    phase: operation.phase,
+    progress: operation.progress,
+    attempt: operation.attempt,
+    createdAt: operation.createdAt,
+    updatedAt: operation.updatedAt,
+    ...subject === void 0 ? {} : { subject },
+    ...operation.result === void 0 ? {} : { result: structuredClone(operation.result) },
+    ...operation.error === void 0 ? {} : { error: structuredClone(operation.error) }
+  };
+}
+function operationSubject(operation) {
+  if (operation.kind !== "context_continue" && operation.kind !== "context_restore" && operation.kind !== "context_save") {
+    return void 0;
+  }
+  const subjectId = operation.input.taskId;
+  if (typeof subjectId !== "string" || subjectId.length === 0) {
+    return void 0;
+  }
+  const checkpointId = operation.input.checkpointId;
+  return {
+    subjectId,
+    ...typeof checkpointId === "string" && checkpointId.length > 0 ? { checkpointId } : {}
+  };
+}
+function ownedOperation(operations, claimed) {
+  const current = operations.find(
+    (entry) => entry.operationId === claimed.operationId
+  );
+  if (current?.owner === null || current?.owner === void 0 || claimed.owner === null || current.owner.ownerId !== claimed.owner.ownerId || current.owner.generation !== claimed.owner.generation) {
+    throw new LocalOperationLeaseLostError();
+  }
+  return current;
+}
+function replaceOperation(operations, replacement) {
+  return operations.map(
+    (operation) => operation.operationId === replacement.operationId ? replacement : operation
+  );
+}
+function pruneOperations(operations, now) {
+  const terminalCutoff = now.getTime() - 7 * 24 * 60 * 60 * 1e3;
+  const retained = operations.filter(
+    (operation) => operation.status === "accepted" || operation.status === "running" || operation.status === "awaiting_ack" || Date.parse(operation.updatedAt) >= terminalCutoff
+  );
+  return retained.length <= 256 ? retained : retained.slice(-256);
+}
+function parseStore(value) {
+  if (!isRecord3(value) || value.version !== STORE_VERSION) {
+    throw new Error("local_operation_store_invalid");
+  }
+  if (!Array.isArray(value.operations)) {
+    throw new Error("local_operation_store_invalid");
+  }
+  return value.operations.map(parseOperation);
+}
+function parseOperation(value) {
+  if (!isRecord3(value)) throw new Error("local_operation_record_invalid");
+  if (value.version !== LOCAL_OPERATION_CONTRACT_VERSION) {
+    throw new Error("local_operation_record_invalid");
+  }
+  assertOperationId(value.operationId);
+  assertOperationKey(value.operationKey);
+  if (!isOperationKind(value.kind) || !isRecord3(value.input)) {
+    throw new Error("local_operation_record_invalid");
+  }
+  if (!isOperationStatus(value.status)) {
+    throw new Error("local_operation_record_invalid");
+  }
+  assertPhase(value.phase);
+  assertProgress(value.progress, value.status === "succeeded");
+  if (typeof value.attempt !== "number" || !Number.isSafeInteger(value.attempt) || value.attempt < 0) {
+    throw new Error("local_operation_record_invalid");
+  }
+  if (!isIsoDate2(value.createdAt) || !isIsoDate2(value.updatedAt)) {
+    throw new Error("local_operation_record_invalid");
+  }
+  const owner = parseOwner(value.owner);
+  if ((value.status === "accepted" || value.status === "running") && value.status === "running" && owner === null) {
+    throw new Error("local_operation_record_invalid");
+  }
+  if ((value.status === "awaiting_ack" || value.status === "succeeded" || value.status === "failed") && owner !== null) {
+    throw new Error("local_operation_record_invalid");
+  }
+  const result2 = value.result;
+  if (result2 !== void 0 && !isRecord3(result2)) {
+    throw new Error("local_operation_record_invalid");
+  }
+  const error51 = value.error === void 0 ? void 0 : parseOperationError(value.error);
+  return {
+    version: LOCAL_OPERATION_CONTRACT_VERSION,
+    operationId: value.operationId,
+    operationKey: value.operationKey,
+    kind: value.kind,
+    input: structuredClone(value.input),
+    status: value.status,
+    phase: value.phase,
+    progress: value.progress,
+    attempt: value.attempt,
+    owner,
+    createdAt: value.createdAt,
+    updatedAt: value.updatedAt,
+    ...result2 === void 0 ? {} : { result: structuredClone(result2) },
+    ...error51 === void 0 ? {} : { error: error51 }
+  };
+}
+function parseOwner(value) {
+  if (value === null) return null;
+  if (!isRecord3(value) || typeof value.ownerId !== "string" || !Number.isSafeInteger(value.generation) || value.generation < 1 || !isIsoDate2(value.leaseExpiresAt)) {
+    throw new Error("local_operation_owner_invalid");
+  }
+  return {
+    ownerId: value.ownerId,
+    generation: value.generation,
+    leaseExpiresAt: value.leaseExpiresAt
+  };
+}
+function parseOperationError(value) {
+  if (!isRecord3(value)) throw new Error("local_operation_error_invalid");
+  return normalizeOperationError({
+    code: value.code,
+    retryable: value.retryable,
+    action: value.action
+  });
+}
+function normalizeOperationError(error51) {
+  if (typeof error51.code !== "string" || !/^[A-Z][A-Z0-9_]{2,63}$/u.test(error51.code) || typeof error51.retryable !== "boolean" || typeof error51.action !== "string" || !/^[a-z][a-z0-9_]{1,63}$/u.test(error51.action)) {
+    throw new Error("local_operation_error_invalid");
+  }
+  return {
+    code: error51.code,
+    retryable: error51.retryable,
+    action: error51.action
+  };
+}
+function defaultOperationError() {
+  return {
+    code: "LOCAL_OPERATION_FAILED",
+    retryable: false,
+    action: "none"
+  };
+}
+function withoutOperationError(operation) {
+  return Object.fromEntries(
+    Object.entries(operation).filter(([key]) => key !== "error")
+  );
+}
+function assertOperationKey(value) {
+  if (typeof value !== "string" || !/^opkey_[a-f0-9]{64}$/u.test(value)) {
+    throw new Error("local_operation_key_invalid");
+  }
+}
+function assertOperationId(value) {
+  if (typeof value !== "string" || !/^localop_[a-f0-9]{24}$/u.test(value)) {
+    throw new Error("local_operation_id_invalid");
+  }
+}
+function assertPhase(value) {
+  if (typeof value !== "string" || !/^[a-z][a-z0-9_]{1,63}$/u.test(value)) {
+    throw new Error("local_operation_phase_invalid");
+  }
+}
+function assertProgress(value, succeeded) {
+  if (!Number.isSafeInteger(value) || value < 0 || value > 100 || succeeded && value !== 100) {
+    throw new Error("local_operation_progress_invalid");
+  }
+}
+function isOperationKind(value) {
+  return ["context_continue", "context_restore", "context_save"].includes(
+    String(value)
+  );
+}
+function isOperationStatus(value) {
+  return [
+    "accepted",
+    "running",
+    "awaiting_ack",
+    "succeeded",
+    "failed"
+  ].includes(String(value));
+}
+function isAwaitingAcknowledgement(value) {
+  return isRecord3(value) && value.awaitAcknowledgement === true && typeof value.phase === "string" && typeof value.progress === "number" && isRecord3(value.result);
+}
+function isIsoDate2(value) {
+  return typeof value === "string" && !Number.isNaN(Date.parse(value));
+}
+function isRecord3(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+function isMissing4(error51) {
+  return isRecord3(error51) && error51.code === "ENOENT";
+}
+function stableJson(value) {
+  if (Array.isArray(value)) return `[${value.map(stableJson).join(",")}]`;
+  if (isRecord3(value)) {
+    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stableJson(value[key])}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+// connectors/agenthall-codex-mcp/src/pending-auth.ts
+var import_promises12 = require("node:fs/promises");
+var JsonPendingAuthStore = class {
+  constructor(path) {
+    this.path = path;
+  }
+  async get(requestId) {
+    const sessions = await this.#load();
+    if (requestId !== void 0) {
+      return sessions.find((entry) => entry.pairing.pairingId === requestId);
+    }
+    return [...sessions].sort(
+      (left, right) => right.updatedAt.localeCompare(left.updatedAt)
+    )[0];
+  }
+  async save(session) {
+    await this.#transaction((sessions) => [
+      ...sessions.filter(
+        (entry) => entry.pairing.pairingId !== session.pairing.pairingId
+      ),
+      parseSession(session)
+    ]);
+  }
+  async remove(requestId) {
+    await this.#transaction(
+      (sessions) => sessions.filter((entry) => entry.pairing.pairingId !== requestId)
+    );
+  }
+  async clear() {
+    await this.#transaction(() => []);
+  }
+  async #load() {
+    try {
+      const parsed = JSON.parse(await (0, import_promises12.readFile)(this.path, "utf8"));
+      if (!isRecord4(parsed) || parsed.version !== 1) {
+        throw new Error("pending_auth_store_invalid");
+      }
+      if (!Array.isArray(parsed.sessions)) {
+        throw new Error("pending_auth_store_invalid");
+      }
+      return parsed.sessions.map(parseSession);
+    } catch (error51) {
+      if (isMissing5(error51)) return [];
+      throw error51;
+    }
+  }
+  async #transaction(update) {
+    await withPrivateJsonLock(
+      this.path,
+      async () => {
+        const next = update(await this.#load()).map(parseSession);
+        await atomicWritePrivateJson(this.path, { version: 1, sessions: next });
+      },
+      {
+        timeoutCode: "pending_auth_store_lock_timeout"
+      }
+    );
+  }
+};
+function parseSession(value) {
+  if (!isRecord4(value)) throw new Error("pending_auth_store_invalid");
+  const pairing = value.pairing;
+  const keys = value.keys;
+  if (!isRecord4(pairing) || !isRecord4(keys) || typeof pairing.pairingId !== "string" || typeof pairing.pairingVerifier !== "string" || typeof pairing.expiresAt !== "string" || typeof keys.signingPublicKey !== "string" || typeof keys.signingPrivateKey !== "string" || typeof keys.receivingPublicKey !== "string" || typeof keys.receivingPrivateKey !== "string" || typeof keys.localStorageMasterKey !== "string" || typeof value.displayName !== "string" || typeof value.updatedAt !== "string") {
+    throw new Error("pending_auth_store_invalid");
+  }
+  return structuredClone(value);
+}
+function isRecord4(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+function isMissing5(error51) {
+  return isRecord4(error51) && error51.code === "ENOENT";
+}
+
 // connectors/agenthall-codex-mcp/src/runtime.ts
 var AgentHallMcpRuntime = class {
   #baseUrl;
@@ -69919,7 +70762,11 @@ var AgentHallMcpRuntime = class {
   #currentCwd;
   #codexCommand;
   #hostVersion;
+  #pendingAuthStore;
   #contextCoordinator;
+  #operationCoordinator;
+  #operationAccountScope;
+  #operationEndpointId;
   #pairings = /* @__PURE__ */ new Map();
   #drafts = /* @__PURE__ */ new Map();
   #connectionActionTokens = /* @__PURE__ */ new Map();
@@ -69937,6 +70784,12 @@ var AgentHallMcpRuntime = class {
     this.#currentCwd = options.currentCwd ?? process.cwd();
     this.#codexCommand = options.codexCommand;
     this.#hostVersion = options.hostVersion ?? "current";
+    this.#pendingAuthStore = new JsonPendingAuthStore(
+      (0, import_node_path11.join)(
+        this.#credentialDirectory,
+        `${this.#profile}.pending-widget-auth.json`
+      )
+    );
   }
   async pair(input) {
     return this.#protect(async () => {
@@ -69972,7 +70825,7 @@ var AgentHallMcpRuntime = class {
           locale: input.locale ?? locale(),
           keys
         });
-        this.#pairings.set(pairing.pairingId, {
+        await this.#rememberPairing({
           pairing,
           keys,
           displayName,
@@ -69994,7 +70847,7 @@ var AgentHallMcpRuntime = class {
           nextAction: invitationPath === void 0 ? "approve_in_browser_then_complete_pairing" : "register_or_sign_in_then_approve_and_continue_invitation"
         };
       }
-      const pending = input.requestId ? this.#pairings.get(input.requestId) : void 0;
+      const pending = await this.#pendingPairing(input.requestId);
       if (pending === void 0) {
         throw new ConnectorSdkError("AUTH_REQUIRED", false, "pair_again");
       }
@@ -70009,12 +70862,12 @@ var AgentHallMcpRuntime = class {
         };
       }
       if (status !== "approved") {
-        this.#pairings.delete(pending.pairing.pairingId);
+        await this.#forgetPairing(pending.pairing.pairingId);
         throw new ConnectorSdkError("AUTH_REQUIRED", false, "pair_again");
       }
       const credentials = await client.exchange(pending.pairing, pending);
       await this.#savePairingCredentials(credentials, pending);
-      this.#pairings.delete(pending.pairing.pairingId);
+      await this.#forgetPairing(pending.pairing.pairingId);
       return { status: "connected", nextAction: "list_connections" };
     });
   }
@@ -70031,7 +70884,7 @@ var AgentHallMcpRuntime = class {
       );
       if (input.action === "start_google") {
         await requireAgentHallNetwork(this.#request, this.#baseUrl);
-        let pending2 = input.requestId === void 0 ? void 0 : this.#pairings.get(input.requestId);
+        let pending2 = input.requestId === void 0 ? void 0 : await this.#pendingPairing(input.requestId);
         if (pending2 === void 0) {
           const keys = generateLocalConnectorKeys();
           const displayName = `${this.#hostDisplayName} on ${(0, import_node_os4.hostname)()}`;
@@ -70046,12 +70899,13 @@ var AgentHallMcpRuntime = class {
             displayName,
             replaceExistingProfile: existingProfile === "stale"
           };
+          await this.#rememberPairing(pending2);
         }
         const started = await client.requestGoogleAuthorization(
           pending2.pairing,
           { locale: input.locale ?? pending2.locale ?? locale() }
         );
-        this.#pairings.set(pending2.pairing.pairingId, {
+        await this.#rememberPairing({
           ...pending2,
           locale: input.locale ?? pending2.locale ?? locale(),
           googleAuthorizationUrl: started.authorizationUrl
@@ -70065,7 +70919,7 @@ var AgentHallMcpRuntime = class {
         };
       }
       if (input.action === "complete_google") {
-        const pending2 = input.requestId === void 0 ? void 0 : this.#pairings.get(input.requestId);
+        const pending2 = input.requestId === void 0 ? void 0 : await this.#pendingPairing(input.requestId);
         if (pending2 === void 0) {
           throw new ConnectorSdkError("AUTH_REQUIRED", false, "sign_in");
         }
@@ -70080,7 +70934,7 @@ var AgentHallMcpRuntime = class {
           };
         }
         if (status !== "approved") {
-          this.#pairings.delete(pending2.pairing.pairingId);
+          await this.#forgetPairing(pending2.pairing.pairingId);
           throw new ConnectorSdkError("AUTH_REQUIRED", false, "sign_in");
         }
         await this.#finishWidgetPairing(client, pending2);
@@ -70092,7 +70946,7 @@ var AgentHallMcpRuntime = class {
           throw new ConnectorSdkError("AUTH_REQUIRED", false, "sign_in");
         }
         await requireAgentHallNetwork(this.#request, this.#baseUrl);
-        let pending2 = input.requestId === void 0 ? void 0 : this.#pairings.get(input.requestId);
+        let pending2 = input.requestId === void 0 ? void 0 : await this.#pendingPairing(input.requestId);
         if (pending2 === void 0) {
           const keys = generateLocalConnectorKeys();
           const displayName = `${this.#hostDisplayName} on ${(0, import_node_os4.hostname)()}`;
@@ -70107,6 +70961,7 @@ var AgentHallMcpRuntime = class {
             displayName,
             replaceExistingProfile: existingProfile === "stale"
           };
+          await this.#rememberPairing(pending2);
         }
         const challengeId = await client.requestEmailChallenge(
           pending2.pairing,
@@ -70123,7 +70978,7 @@ var AgentHallMcpRuntime = class {
           locale: input.locale ?? pending2.locale ?? locale(),
           challengeId
         };
-        this.#pairings.set(pending2.pairing.pairingId, nextPending);
+        await this.#rememberPairing(nextPending);
         return {
           status: "awaiting_code",
           requestId: pending2.pairing.pairingId,
@@ -70131,7 +70986,7 @@ var AgentHallMcpRuntime = class {
           nextAction: "enter_six_digit_code"
         };
       }
-      const pending = input.requestId === void 0 ? void 0 : this.#pairings.get(input.requestId);
+      const pending = input.requestId === void 0 ? void 0 : await this.#pendingPairing(input.requestId);
       if (pending === void 0 || pending.email === void 0) {
         throw new ConnectorSdkError("AUTH_REQUIRED", false, "sign_in");
       }
@@ -70145,7 +71000,7 @@ var AgentHallMcpRuntime = class {
           otp: input.otp
         });
         if (verified.status === "registration_required") {
-          this.#pairings.set(pending.pairing.pairingId, {
+          await this.#rememberPairing({
             ...pending,
             registrationToken: verified.registrationToken
           });
@@ -70171,6 +71026,50 @@ var AgentHallMcpRuntime = class {
       return { status: "connected", nextAction: "refresh_sidebar" };
     });
   }
+  async widgetAuthStatus(input) {
+    return this.#protect(async () => {
+      if (await this.#existingProfileState() === "connected") {
+        return { status: "connected", nextAction: "refresh_sidebar" };
+      }
+      const pending = await this.#pendingPairing(input.requestId);
+      if (pending === void 0) {
+        return { status: "idle", nextAction: "choose_sign_in_method" };
+      }
+      const common = {
+        requestId: pending.pairing.pairingId,
+        expiresAt: pending.pairing.expiresAt
+      };
+      if (pending.registrationToken !== void 0) {
+        return {
+          status: "registration_required",
+          ...common,
+          ...pending.email === void 0 ? {} : { email: pending.email },
+          nextAction: "enter_nickname"
+        };
+      }
+      if (pending.googleAuthorizationUrl !== void 0) {
+        return {
+          status: "awaiting_google",
+          ...common,
+          authorizationUrl: pending.googleAuthorizationUrl,
+          nextAction: "complete_google_in_secure_browser"
+        };
+      }
+      if (pending.challengeId !== void 0 && pending.email !== void 0) {
+        return {
+          status: "awaiting_code",
+          ...common,
+          email: pending.email,
+          nextAction: "enter_six_digit_code"
+        };
+      }
+      return {
+        status: "awaiting_pairing",
+        ...common,
+        nextAction: "retry_sign_in_start"
+      };
+    });
+  }
   async disconnect() {
     return this.#protect(async () => {
       const path = connectorProfilePath(
@@ -70181,6 +71080,7 @@ var AgentHallMcpRuntime = class {
       await client.disconnectSelf();
       await removeConnectorCredentials(path);
       this.#pairings.clear();
+      await this.#pendingAuthStore.clear();
       this.#drafts.clear();
       this.#connectionActionTokens.clear();
       this.#connectionTokensById.clear();
@@ -70281,7 +71181,7 @@ var AgentHallMcpRuntime = class {
       );
       const context = await client.handoffContext(connection.connectionId);
       const createdAt = this.#now();
-      const handoffId = `handoff_${(0, import_node_crypto17.randomUUID)().replaceAll("-", "")}`;
+      const handoffId = `handoff_${(0, import_node_crypto19.randomUUID)().replaceAll("-", "")}`;
       const masterKey = localMasterKey(client.connectorCredentials());
       try {
         const artifact = await prepareAttachmentDraft({
@@ -70408,15 +71308,49 @@ var AgentHallMcpRuntime = class {
       tasks: await (await this.#context()).listLocalTasks()
     }));
   }
-  async saveContextTask(taskToken) {
-    return this.#protect(
-      async () => (await this.#context()).saveLocalTask(taskToken)
-    );
+  async saveContextTask(taskToken, nativeUpdatedAt) {
+    return this.#startContextSaveOperation({
+      taskToken,
+      nativeUpdatedAt,
+      action: "save"
+    });
   }
-  async resolveContextSaveReview(taskToken, decision) {
-    return this.#protect(
-      async () => (await this.#context()).resolveSaveReview(taskToken, decision)
-    );
+  async resolveContextSaveReview(taskToken, decision, nativeUpdatedAt) {
+    return this.#startContextSaveOperation({
+      taskToken,
+      nativeUpdatedAt,
+      action: "resolve",
+      decision
+    });
+  }
+  #startContextSaveOperation(input) {
+    return this.#protect(async () => {
+      if (!Number.isSafeInteger(input.nativeUpdatedAt)) {
+        throw new Error("context_save_revision_invalid");
+      }
+      await this.#context();
+      return {
+        ...await this.#requireOperations().start({
+          operationKey: localOperationKey({
+            accountScope: this.#operationAccountScope,
+            endpointId: this.#operationEndpointId,
+            kind: "context_save",
+            subjectId: `${input.taskToken}:${input.action}:${input.decision ?? "none"}`,
+            checkpointId: String(input.nativeUpdatedAt),
+            hostKind: this.#connectorType
+          }),
+          kind: "context_save",
+          input: {
+            taskId: `${input.taskToken}:${input.action}:${input.decision ?? "none"}`,
+            checkpointId: String(input.nativeUpdatedAt),
+            taskToken: input.taskToken,
+            nativeUpdatedAt: input.nativeUpdatedAt,
+            action: input.action,
+            ...input.decision === void 0 ? {} : { decision: input.decision }
+          }
+        })
+      };
+    });
   }
   async settleContextSavedLocalRevision(settlementToken, nativeUpdatedAt) {
     return this.#protect(
@@ -70442,9 +71376,28 @@ var AgentHallMcpRuntime = class {
     );
   }
   async confirmContextFirstRestore(input) {
-    return this.#protect(
-      async () => (await this.#context()).confirmFirstRestore(input)
-    );
+    return this.#protect(async () => {
+      await this.#context();
+      return {
+        ...await this.#requireOperations().start({
+          operationKey: localOperationKey({
+            accountScope: this.#operationAccountScope,
+            endpointId: this.#operationEndpointId,
+            kind: "context_restore",
+            subjectId: `${input.taskId}:${input.keepSeparate === true ? "separate" : "exact"}`,
+            checkpointId: input.checkpointId,
+            hostKind: this.#connectorType
+          }),
+          kind: "context_restore",
+          input: {
+            taskId: input.taskId,
+            checkpointId: input.checkpointId,
+            previewToken: input.previewToken,
+            keepSeparate: input.keepSeparate === true
+          }
+        })
+      };
+    });
   }
   async listContextImportBatches() {
     return this.#protect(async () => ({
@@ -70477,9 +71430,44 @@ var AgentHallMcpRuntime = class {
     }));
   }
   async continueContext(input) {
-    return this.#protect(
-      async () => (await this.#context()).continueFromCloud(input)
-    );
+    return this.#protect(async () => {
+      await this.#context();
+      const operations = this.#requireOperations();
+      return {
+        ...await operations.start({
+          operationKey: localOperationKey({
+            accountScope: this.#operationAccountScope,
+            endpointId: this.#operationEndpointId,
+            kind: "context_continue",
+            subjectId: input.taskId,
+            checkpointId: input.checkpointId,
+            hostKind: this.#connectorType
+          }),
+          kind: "context_continue",
+          input
+        })
+      };
+    });
+  }
+  async localOperationStatus(operationId) {
+    return this.#protect(async () => {
+      await this.#context();
+      return { ...await this.#requireOperations().status(operationId) };
+    });
+  }
+  async localOperationBootstrap() {
+    return this.#protect(async () => {
+      await this.#context();
+      return { operations: await this.#requireOperations().bootstrap() };
+    });
+  }
+  async acknowledgeLocalOperation(operationId) {
+    return this.#protect(async () => {
+      await this.#context();
+      return {
+        ...await this.#requireOperations().acknowledge(operationId)
+      };
+    });
   }
   async receiveHandoff(handoffId) {
     return this.#protect(async () => {
@@ -70512,7 +71500,7 @@ var AgentHallMcpRuntime = class {
           recipientKeyId: readClaimField(keyWrap, "recipient_key_id"),
           recipientPrivateKey: receivingPrivateKey,
           downloadUrl: readClaimField(download, "url"),
-          quarantineDirectory: (0, import_node_path10.join)(
+          quarantineDirectory: (0, import_node_path11.join)(
             this.#home,
             ".config",
             "agenthall",
@@ -70606,20 +71594,20 @@ var AgentHallMcpRuntime = class {
       currentCwd: this.#currentCwd,
       bindingStore: accountStorage.bindingStore,
       importBatches: new JsonLocalImportBatchStore(
-        (0, import_node_path10.join)(
+        (0, import_node_path11.join)(
           this.#credentialDirectory,
           `${this.#profile}.${accountStorage.accountScope}.context-import-batches.json`
         )
       ),
       pendingSaves: new JsonPendingContextSaveStore(
-        (0, import_node_path10.join)(
+        (0, import_node_path11.join)(
           this.#credentialDirectory,
           `${this.#profile}.${accountStorage.accountScope}.context-pending-saves.json`
         )
       ),
       workMaterials: new GitWorkMaterialSaver({
         authorizations: new JsonWorkMaterialAuthorizationStore(
-          (0, import_node_path10.join)(
+          (0, import_node_path11.join)(
             this.#credentialDirectory,
             `${this.#profile}.${accountStorage.accountScope}.work-material-authorizations.json`
           )
@@ -70633,12 +71621,128 @@ var AgentHallMcpRuntime = class {
         ...this.#codexCommand === void 0 ? {} : { codexCommand: this.#codexCommand }
       })
     });
+    this.#operationAccountScope = accountStorage.accountScope;
+    this.#operationEndpointId = accountStorage.endpointId;
+    this.#operationCoordinator = new LocalOperationCoordinator({
+      store: new JsonLocalOperationStore(
+        (0, import_node_path11.join)(
+          this.#credentialDirectory,
+          `${this.#profile}.${accountStorage.accountScope}.local-operations.json`
+        )
+      ),
+      mapError: localOperationError
+    });
+    this.#operationCoordinator.register(
+      "context_restore",
+      async ({ operation, checkpoint }) => {
+        const input = contextRestoreInput(operation);
+        const state = operationResultState(operation);
+        const restored = await this.#contextCoordinator?.confirmFirstRestore({
+          ...input,
+          operation: {
+            ...state === void 0 ? {} : { state },
+            checkpoint: async (phase, progress, nextState) => {
+              await checkpoint(phase, progress, { ...nextState });
+            }
+          }
+        });
+        if (restored === void 0) {
+          throw new Error("local_operation_context_unavailable");
+        }
+        return {
+          awaitAcknowledgement: true,
+          phase: "ready_to_open",
+          progress: 98,
+          result: { ...restored }
+        };
+      }
+    );
+    this.#operationCoordinator.register(
+      "context_save",
+      async ({ operation, checkpoint }) => {
+        const input = contextSaveInput(operation);
+        await checkpoint("reading_local_context", 18);
+        const available = await this.#contextCoordinator?.listLocalTasks();
+        const selected = available?.find(
+          (task) => task.taskToken === input.taskToken
+        );
+        if (selected?.updatedAt !== input.nativeUpdatedAt) {
+          throw new Error("context_task_selection_expired");
+        }
+        await checkpoint("saving_context", 38);
+        const saved = input.action === "resolve" ? await this.#contextCoordinator?.resolveSaveReview(
+          input.taskToken,
+          input.decision
+        ) : await this.#contextCoordinator?.saveLocalTask(input.taskToken);
+        if (saved === void 0) {
+          throw new Error("local_operation_context_unavailable");
+        }
+        await checkpoint("saved_context_verified", 94);
+        return { ...saved };
+      }
+    );
+    this.#operationCoordinator.register(
+      "context_continue",
+      async ({ operation, checkpoint }) => {
+        const input = contextContinueInput(operation);
+        const state = operationResultState(operation);
+        const continued = await this.#contextCoordinator?.continueFromCloud(
+          input,
+          void 0,
+          {
+            ...state === void 0 ? {} : { state },
+            checkpoint: (phase, progress, checkpointState) => checkpoint(phase, progress, { ...checkpointState }).then(
+              () => void 0
+            )
+          }
+        );
+        if (continued === void 0) {
+          throw new Error("local_operation_context_unavailable");
+        }
+        return {
+          awaitAcknowledgement: true,
+          phase: "ready_to_open",
+          progress: 98,
+          result: continued
+        };
+      }
+    );
     return this.#contextCoordinator;
+  }
+  #requireOperations() {
+    if (this.#operationCoordinator === void 0) {
+      throw new Error("local_operation_coordinator_unavailable");
+    }
+    return this.#operationCoordinator;
   }
   async #finishWidgetPairing(client, pending) {
     const credentials = await client.exchange(pending.pairing, pending);
     await this.#savePairingCredentials(credentials, pending);
-    this.#pairings.delete(pending.pairing.pairingId);
+    await this.#forgetPairing(pending.pairing.pairingId);
+  }
+  async #rememberPairing(pending) {
+    this.#pairings.set(pending.pairing.pairingId, pending);
+    await this.#pendingAuthStore.save({
+      ...pending,
+      updatedAt: this.#now().toISOString()
+    });
+  }
+  async #pendingPairing(requestId) {
+    if (requestId !== void 0) {
+      const cached2 = this.#pairings.get(requestId);
+      if (cached2 !== void 0) return cached2;
+    }
+    const stored = await this.#pendingAuthStore.get(requestId);
+    if (stored === void 0) return void 0;
+    const pending = Object.fromEntries(
+      Object.entries(stored).filter(([key]) => key !== "updatedAt")
+    );
+    this.#pairings.set(pending.pairing.pairingId, pending);
+    return pending;
+  }
+  async #forgetPairing(requestId) {
+    this.#pairings.delete(requestId);
+    await this.#pendingAuthStore.remove(requestId);
   }
   async #existingProfileState() {
     if (!await connectorProfileExists(this.#credentialDirectory, this.#profile)) {
@@ -70693,7 +71797,7 @@ var AgentHallMcpRuntime = class {
   #connectionActionToken(connectionId) {
     const existing = this.#connectionTokensById.get(connectionId);
     if (existing !== void 0) return existing;
-    const token = `connection_action_${(0, import_node_crypto17.randomUUID)().replaceAll("-", "")}`;
+    const token = `connection_action_${(0, import_node_crypto19.randomUUID)().replaceAll("-", "")}`;
     this.#connectionTokensById.set(connectionId, token);
     this.#connectionActionTokens.set(token, connectionId);
     return token;
@@ -70728,6 +71832,75 @@ function mapExpectedLocalError(error51) {
     };
   }
   return null;
+}
+function contextContinueInput(operation) {
+  const taskId = operation.input.taskId;
+  const checkpointId = operation.input.checkpointId;
+  if (typeof taskId !== "string" || taskId.length === 0 || typeof checkpointId !== "string" || checkpointId.length === 0) {
+    throw new Error("local_operation_input_invalid");
+  }
+  return { taskId, checkpointId };
+}
+function contextSaveInput(operation) {
+  const taskToken = operation.input.taskToken;
+  const nativeUpdatedAt = operation.input.nativeUpdatedAt;
+  const action = operation.input.action;
+  const decision = operation.input.decision;
+  if (typeof taskToken !== "string" || taskToken.length === 0 || !Number.isSafeInteger(nativeUpdatedAt) || action !== "save" && action !== "resolve" || action === "resolve" && decision !== "continue_existing" && decision !== "keep_separate") {
+    throw new Error("local_operation_input_invalid");
+  }
+  return {
+    taskToken,
+    nativeUpdatedAt,
+    action,
+    ...action === "resolve" ? {
+      decision
+    } : {}
+  };
+}
+function contextRestoreInput(operation) {
+  const previewToken = operation.input.previewToken;
+  const taskId = operation.input.taskId;
+  const checkpointId = operation.input.checkpointId;
+  const keepSeparate = operation.input.keepSeparate;
+  if (typeof previewToken !== "string" || previewToken.length === 0 || typeof taskId !== "string" || taskId.length === 0 || typeof checkpointId !== "string" || checkpointId.length === 0 || typeof keepSeparate !== "boolean") {
+    throw new Error("local_operation_input_invalid");
+  }
+  return {
+    previewToken,
+    taskId,
+    checkpointId,
+    ...keepSeparate ? { keepSeparate: true } : {}
+  };
+}
+function operationResultState(operation) {
+  const result2 = operation.result;
+  if (result2 === void 0) return void 0;
+  const nativeThreadId = result2.nativeThreadId;
+  const turnId = result2.turnId;
+  const goalRestored = result2.goalRestored;
+  const state = {
+    ...typeof nativeThreadId === "string" ? { nativeThreadId } : {},
+    ...typeof turnId === "string" ? { turnId } : {},
+    ...typeof goalRestored === "boolean" ? { goalRestored } : {}
+  };
+  return Object.keys(state).length === 0 ? void 0 : state;
+}
+function localOperationError(error51) {
+  if (error51 instanceof ConnectorSdkError) {
+    return {
+      code: error51.code,
+      retryable: error51.retryable,
+      action: error51.action
+    };
+  }
+  const expected = mapExpectedLocalError(error51);
+  if (expected !== null) return expected;
+  return {
+    code: "LOCAL_OPERATION_FAILED",
+    retryable: false,
+    action: "none"
+  };
 }
 function presentHandoffConfirmation(preview, filePath, recipient, handoffId) {
   return {
@@ -70819,8 +71992,8 @@ function safeIsoDateTime(value) {
 
 // connectors/agenthall-codex-mcp/src/server.ts
 var import_meta = {};
-var VERSION = "0.3.1-alpha.82";
-var MODULE_URL = import_meta.url || (0, import_node_url.pathToFileURL)((0, import_node_path11.resolve)(process.argv[1] ?? ".")).href;
+var VERSION = "0.3.1-alpha.83";
+var MODULE_URL = import_meta.url || (0, import_node_url.pathToFileURL)((0, import_node_path12.resolve)(process.argv[1] ?? ".")).href;
 var SIDEBAR_TEMPLATE_URI = `ui://agenthall/sidebar-v${VERSION}.html`;
 var HANDOFF_CONFIRMATION_TEMPLATE_URI = "ui://agenthall/handoff-confirmation-v4.html";
 var SIDEBAR_TEMPLATE_PATH = new URL(
@@ -70844,12 +72017,15 @@ var pairOutputSchema = successOutputSchema(
 var widgetAuthOutputSchema = successOutputSchema(
   object2({
     status: _enum2([
+      "idle",
+      "awaiting_pairing",
       "awaiting_code",
       "awaiting_google",
       "registration_required",
       "connected"
     ]),
     requestId: string2().optional(),
+    email: string2().email().optional(),
     authorizationUrl: string2().url().optional(),
     expiresAt: string2().optional(),
     nextAction: string2()
@@ -70974,29 +72150,11 @@ var localContextTasksOutputSchema = successOutputSchema(
     )
   })
 );
-var savedContextValueSchema = object2({
-  status: string2(),
-  savedAt: string2().datetime({ offset: true }),
-  addedCount: number2().int().nonnegative(),
-  hasTwoProgressVersions: boolean2(),
-  settlementToken: string2().min(1),
-  receipt: SAVE_RECEIPT_SCHEMA
-});
 var saveContextOutputSchema = successOutputSchema(
-  union([
-    savedContextValueSchema,
-    object2({
-      status: literal("review_required"),
-      reason: literal("same_name"),
-      candidateCount: number2().int().nonnegative(),
-      canContinueExisting: boolean2(),
-      projectName: string2(),
-      taskName: string2()
-    })
-  ])
+  lazy(() => localOperationSchema)
 );
 var resolveSaveReviewOutputSchema = successOutputSchema(
-  savedContextValueSchema
+  lazy(() => localOperationSchema)
 );
 var settleSavedContextOutputSchema = successOutputSchema(
   object2({
@@ -71060,18 +72218,42 @@ var cloudContextCheckpointsOutputSchema = successOutputSchema(
     )
   })
 );
-var continueContextOutputSchema = successOutputSchema(
-  object2({
-    status: literal("continued"),
-    mode: _enum2(["native_resume", "portable_new_task"]),
-    taskId: string2(),
-    threadUrl: string2().regex(/^codex:\/\/threads\/[A-Za-z0-9_-]+$/u),
-    materials: array(MATERIAL_REFERENCE_SCHEMA),
-    nextAction: object2({
-      kind: _enum2(["retry_failed", "reauthorize"]),
-      target: string2()
-    }).optional()
-  })
+var localOperationSchema = object2({
+  operationId: string2().regex(/^localop_[a-f0-9]{24}$/u),
+  operationKey: string2().regex(/^opkey_[a-f0-9]{64}$/u),
+  kind: _enum2([
+    "context_continue",
+    "context_restore",
+    "context_save",
+    "widget_auth"
+  ]),
+  status: _enum2([
+    "accepted",
+    "running",
+    "awaiting_ack",
+    "succeeded",
+    "failed"
+  ]),
+  phase: string2(),
+  progress: number2().int().min(0).max(100),
+  attempt: number2().int().nonnegative(),
+  createdAt: string2().datetime({ offset: true }),
+  updatedAt: string2().datetime({ offset: true }),
+  subject: object2({
+    subjectId: string2().min(1),
+    checkpointId: string2().min(1).optional()
+  }).optional(),
+  result: record(string2(), unknown()).optional(),
+  error: object2({
+    code: string2(),
+    retryable: boolean2(),
+    action: string2()
+  }).optional()
+});
+var continueContextOutputSchema = successOutputSchema(localOperationSchema);
+var localOperationStatusOutputSchema = successOutputSchema(localOperationSchema);
+var localOperationBootstrapOutputSchema = successOutputSchema(
+  object2({ operations: array(localOperationSchema) })
 );
 var prepareRestoreOutputSchema = successOutputSchema(
   union([
@@ -71090,18 +72272,7 @@ var prepareRestoreOutputSchema = successOutputSchema(
   ])
 );
 var confirmRestoreOutputSchema = successOutputSchema(
-  object2({
-    status: literal("continued"),
-    mode: _enum2(["native_resume", "portable_new_task"]),
-    taskId: string2(),
-    threadUrl: string2().regex(/^codex:\/\/threads\/[A-Za-z0-9_-]+$/u),
-    materials: array(MATERIAL_REFERENCE_SCHEMA),
-    nextAction: object2({
-      kind: _enum2(["retry_failed", "reauthorize"]),
-      target: string2()
-    }).optional(),
-    importBatchId: string2()
-  })
+  lazy(() => localOperationSchema)
 );
 var importBatchesOutputSchema = successOutputSchema(
   object2({
@@ -71126,6 +72297,10 @@ var undoImportBatchOutputSchema = successOutputSchema(
   })
 );
 var CODEX_CONTEXT_TOOL_NAMES = Object.freeze([
+  "agenthall_widget_auth_status",
+  "agenthall_operation_status",
+  "agenthall_operation_bootstrap",
+  "agenthall_operation_acknowledge",
   "agenthall_context_local_tasks",
   "agenthall_context_save",
   "agenthall_context_save_resolve",
@@ -71203,7 +72378,8 @@ function createAgentHallMcpServer(runtime = new AgentHallMcpRuntime(), serverNam
       annotations: {
         readOnlyHint: false,
         openWorldHint: true,
-        destructiveHint: false
+        destructiveHint: false,
+        idempotentHint: true
       },
       _meta: appCallableToolMeta()
     },
@@ -71219,6 +72395,86 @@ function createAgentHallMcpServer(runtime = new AgentHallMcpRuntime(), serverNam
     )
   );
   if (serverName === "agenthall-codex") {
+    K3(
+      server,
+      "agenthall_widget_auth_status",
+      {
+        title: "\u6062\u590D\u767B\u5F55\u72B6\u6001",
+        description: "Private Sidebar-only read of the durable local AgentHall authentication session. It never returns an OTP, pairing verifier, registration token, Connector credential, or private key.",
+        inputSchema: { request_id: string2().min(1).optional() },
+        outputSchema: widgetAuthOutputSchema,
+        annotations: {
+          readOnlyHint: true,
+          openWorldHint: false,
+          destructiveHint: false,
+          idempotentHint: true
+        },
+        _meta: privateSidebarToolMeta()
+      },
+      (input) => result(
+        runtime.widgetAuthStatus({
+          ...input.request_id === void 0 ? {} : { requestId: input.request_id }
+        })
+      )
+    );
+    K3(
+      server,
+      "agenthall_operation_status",
+      {
+        title: "\u8BFB\u53D6\u672C\u673A\u64CD\u4F5C\u72B6\u6001",
+        description: "Private Sidebar-only status query for one durable AgentHall local operation. Calling it may let an expired local owner resume the same operation, but never creates a second business operation.",
+        inputSchema: {
+          operation_id: string2().regex(/^localop_[a-f0-9]{24}$/u)
+        },
+        outputSchema: localOperationStatusOutputSchema,
+        annotations: {
+          readOnlyHint: true,
+          openWorldHint: false,
+          destructiveHint: false,
+          idempotentHint: true
+        },
+        _meta: privateSidebarToolMeta()
+      },
+      (input) => result(runtime.localOperationStatus(input.operation_id))
+    );
+    K3(
+      server,
+      "agenthall_operation_bootstrap",
+      {
+        title: "\u6062\u590D\u672C\u673A\u64CD\u4F5C\u72B6\u6001",
+        description: "Private Sidebar-only bootstrap query for durable AgentHall operations after a fresh Widget mount.",
+        inputSchema: {},
+        outputSchema: localOperationBootstrapOutputSchema,
+        annotations: {
+          readOnlyHint: true,
+          openWorldHint: false,
+          destructiveHint: false,
+          idempotentHint: true
+        },
+        _meta: privateSidebarToolMeta()
+      },
+      () => result(runtime.localOperationBootstrap())
+    );
+    K3(
+      server,
+      "agenthall_operation_acknowledge",
+      {
+        title: "\u786E\u8BA4\u672C\u673A\u4EFB\u52A1\u5DF2\u6253\u5F00",
+        description: "Private Sidebar-only idempotent acknowledgement after the host successfully opens the prepared Codex task. This is the only transition from ready_to_open to 100 percent success.",
+        inputSchema: {
+          operation_id: string2().regex(/^localop_[a-f0-9]{24}$/u)
+        },
+        outputSchema: localOperationStatusOutputSchema,
+        annotations: {
+          readOnlyHint: false,
+          openWorldHint: false,
+          destructiveHint: false,
+          idempotentHint: true
+        },
+        _meta: privateSidebarToolMeta()
+      },
+      (input) => result(runtime.acknowledgeLocalOperation(input.operation_id))
+    );
     registerCodexContextTools(server, runtime);
   }
   K3(
@@ -71377,7 +72633,7 @@ function createAgentHallMcpServer(runtime = new AgentHallMcpRuntime(), serverNam
         {
           uri: SIDEBAR_TEMPLATE_URI,
           mimeType: p,
-          text: await (0, import_promises10.readFile)(SIDEBAR_TEMPLATE_PATH, "utf8"),
+          text: await (0, import_promises13.readFile)(SIDEBAR_TEMPLATE_PATH, "utf8"),
           _meta: {
             ui: {
               prefersBorder: false,
@@ -71407,7 +72663,7 @@ function createAgentHallMcpServer(runtime = new AgentHallMcpRuntime(), serverNam
         {
           uri: HANDOFF_CONFIRMATION_TEMPLATE_URI,
           mimeType: p,
-          text: await (0, import_promises10.readFile)(HANDOFF_CONFIRMATION_TEMPLATE_PATH, "utf8"),
+          text: await (0, import_promises13.readFile)(HANDOFF_CONFIRMATION_TEMPLATE_PATH, "utf8"),
           _meta: {
             ui: {
               prefersBorder: false,
@@ -71550,6 +72806,10 @@ function sidebarToolMeta(invoking, invoked) {
       resourceUri: SIDEBAR_TEMPLATE_URI,
       visibility: ["model", "app"]
     },
+    "openai/ui": {
+      entrypoints: [{ type: "global" }, { type: "thread" }],
+      preferredModelDisplayMode: "fullscreen"
+    },
     "openai/outputTemplate": SIDEBAR_TEMPLATE_URI,
     "openai/widgetAccessible": true,
     "openai/toolInvocation/invoking": invoking,
@@ -71596,16 +72856,22 @@ function registerCodexContextTools(server, runtime) {
     {
       title: "\u4FDD\u5B58\u5DE5\u4F5C\u8FDB\u5EA6",
       description: "Private Sidebar-only save of one selected local Codex task to AgentHall.",
-      inputSchema: { task_token: string2().min(1) },
+      inputSchema: {
+        task_token: string2().min(1),
+        native_updated_at: number2().int().nonnegative()
+      },
       outputSchema: saveContextOutputSchema,
       annotations: {
         readOnlyHint: false,
         openWorldHint: true,
-        destructiveHint: false
+        destructiveHint: false,
+        idempotentHint: true
       },
       _meta: privateSidebarToolMeta()
     },
-    (input) => result(runtime.saveContextTask(input.task_token))
+    (input) => result(
+      runtime.saveContextTask(input.task_token, input.native_updated_at)
+    )
   );
   K3(
     server,
@@ -71615,18 +72881,24 @@ function registerCodexContextTools(server, runtime) {
       description: "Private Sidebar-only explicit choice to continue one unique same-name AgentHall task or preserve the current Codex task as a separate same-name task before saving.",
       inputSchema: {
         task_token: string2().min(1),
+        native_updated_at: number2().int().nonnegative(),
         decision: _enum2(["continue_existing", "keep_separate"])
       },
       outputSchema: resolveSaveReviewOutputSchema,
       annotations: {
         readOnlyHint: false,
         openWorldHint: true,
-        destructiveHint: false
+        destructiveHint: false,
+        idempotentHint: true
       },
       _meta: privateSidebarToolMeta()
     },
     (input) => result(
-      runtime.resolveContextSaveReview(input.task_token, input.decision)
+      runtime.resolveContextSaveReview(
+        input.task_token,
+        input.decision,
+        input.native_updated_at
+      )
     )
   );
   K3(
@@ -71770,7 +73042,8 @@ function registerCodexContextTools(server, runtime) {
       annotations: {
         readOnlyHint: false,
         openWorldHint: true,
-        destructiveHint: false
+        destructiveHint: false,
+        idempotentHint: true
       },
       _meta: privateSidebarToolMeta()
     },
@@ -71814,19 +73087,24 @@ function registerCodexContextTools(server, runtime) {
       description: "Private Sidebar-only confirmation of a prepared non-destructive restore preview.",
       inputSchema: {
         preview_token: string2().min(1),
+        task_id: string2().min(1),
+        checkpoint_id: string2().min(1),
         keep_separate: boolean2().optional()
       },
       outputSchema: confirmRestoreOutputSchema,
       annotations: {
         readOnlyHint: false,
         openWorldHint: true,
-        destructiveHint: false
+        destructiveHint: false,
+        idempotentHint: true
       },
       _meta: privateSidebarToolMeta()
     },
     (input) => result(
       runtime.confirmContextFirstRestore({
         previewToken: input.preview_token,
+        taskId: input.task_id,
+        checkpointId: input.checkpoint_id,
         ...input.keep_separate === void 0 ? {} : { keepSeparate: input.keep_separate }
       })
     )
@@ -71907,7 +73185,7 @@ async function main() {
   });
   await createCodexMcpServer(runtime).connect(new StdioServerTransport());
 }
-if (MODULE_URL === (0, import_node_url.pathToFileURL)((0, import_node_path11.resolve)(process.argv[1] ?? ".")).href || /[/\\]server\.(?:mjs|cjs)$/u.test(process.argv[1] ?? "")) {
+if (MODULE_URL === (0, import_node_url.pathToFileURL)((0, import_node_path12.resolve)(process.argv[1] ?? ".")).href || /[/\\]server\.(?:mjs|cjs)$/u.test(process.argv[1] ?? "")) {
   main().catch(() => {
     process.stderr.write("AgentHall MCP failed to start safely.\n");
     process.exitCode = 1;
