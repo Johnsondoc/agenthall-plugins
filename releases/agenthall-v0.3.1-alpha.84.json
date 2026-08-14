@@ -1,0 +1,34 @@
+{
+  "release_version": "0.3.1-alpha.84",
+  "status": "partial",
+  "channel": "public-prerelease",
+  "source_commit": "41c02f9d0a9dc50d1b9f9cc358b8e85329967cf0",
+  "protocol_version": "agenthall.v0.1",
+  "context_protocol_version": "agenthall.context.v0.3.1",
+  "migration_max": 19,
+  "codex_plugin_version": "0.3.1-alpha.84",
+  "marketplace_commit": "b591e101cf31ca00c347ff0d9cf484a935846c07",
+  "marketplace_version": "0.3.1-alpha.84",
+  "api_release": null,
+  "api_artifact_reused_from": "0.3.1-alpha.81",
+  "web_release": null,
+  "artifact_sha256": {
+    "codex_plugin_manifest": "4cd500ac7b4337ba2ab769010e29809988643d587b1c031dc9ea6f6cfe49bf4a",
+    "codex_mcp_config": "45581d920318e53b101ec07617a954d04e1b6f8eb9672d9a1320eaccea898ffc",
+    "codex_mcp_server": "1df97ba5ababc4eeb329d54d4e9114a8b224100ab13c73ae9de016cbe746f02e",
+    "codex_skill": "224dcd5dc6ed0033a22a04d78fee6e1399d7301b301d33e8b300339d6facae06",
+    "sidebar_widget": "f75f1d687ef7ae977f633fe73557cdf8dabbd1330c500d455010be3213101344",
+    "logo": "e6366bec291df5c514a8da289ee7798f3cfc4a23aed21f91f59eb0a8849bc8a6",
+    "macos_installer": "d576d087f6662ae52cd354c871e2d559983c9d32bef2237b8b5fcdae9f062b61"
+  },
+  "git_tag": "agenthall-v0.3.1-alpha.84",
+  "github_release": "https://github.com/Johnsondoc/agenthall-plugins/releases/tag/agenthall-v0.3.1-alpha.84",
+  "rollback_target": "0.3.1-alpha.82",
+  "api_rollback_target": "0.3.1-alpha.81",
+  "complete": false,
+  "incomplete_reasons": [
+    "The production Web installation and upgrade copy has not yet been switched to alpha.84",
+    "Computer B has not yet completed its one allowed official-channel alpha.84 upgrade and current-Runtime verification",
+    "The real A to B to A continuation has not yet completed with one stable Operation"
+  ]
+}
