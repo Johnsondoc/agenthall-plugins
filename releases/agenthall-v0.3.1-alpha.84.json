@@ -11,7 +11,7 @@
   "marketplace_version": "0.3.1-alpha.84",
   "api_release": null,
   "api_artifact_reused_from": "0.3.1-alpha.81",
-  "web_release": null,
+  "web_release": "internal-alpha:20260814T081602Z",
   "artifact_sha256": {
     "codex_plugin_manifest": "4cd500ac7b4337ba2ab769010e29809988643d587b1c031dc9ea6f6cfe49bf4a",
     "codex_mcp_config": "45581d920318e53b101ec07617a954d04e1b6f8eb9672d9a1320eaccea898ffc",
@@ -27,7 +27,6 @@
   "api_rollback_target": "0.3.1-alpha.81",
   "complete": false,
   "incomplete_reasons": [
-    "The production Web installation and upgrade copy has not yet been switched to alpha.84",
     "Computer B has not yet completed its one allowed official-channel alpha.84 upgrade and current-Runtime verification",
     "The real A to B to A continuation has not yet completed with one stable Operation"
   ]
