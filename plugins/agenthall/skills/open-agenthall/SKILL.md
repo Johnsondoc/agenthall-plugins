@@ -1,11 +1,22 @@
 ---
 name: open-agenthall
-description: Open AgentHall without requiring a typed command. Use when the user selects the AgentHall plugin, enters or pastes an AgentHall invitation code or link, clicks its conversation entry, asks to open AgentHall, view collaborators or Inbox, receive a Handoff, or send the current Agent output through AgentHall.
+description: Open AgentHall or save the exact current Codex task without requiring the Sidebar. Use when the user selects the AgentHall plugin, asks to save, update, or upload the current task to AgentHall, enters or pastes an AgentHall invitation code or link, clicks its conversation entry, asks to open AgentHall, view collaborators or Inbox, receive a Handoff, or send the current Agent output through AgentHall.
 ---
 
 # Open AgentHall
 
 Use the AgentHall MCP tools directly. Do not search the web, repository, logs, or local files to discover AgentHall.
+
+## Save the current Codex task
+
+When the user affirmatively says **保存到 AgentHall**, **更新到 AgentHall**, or **上传到 AgentHall** in the task they want to preserve:
+
+1. Call `agenthall_context_save_current` exactly once with no arguments. Do not open the Sidebar, ask for confirmation, or require a ticket, terminal, project choice, or manual refresh.
+2. The Tool uses Codex's private request metadata to select the exact current native task. Never supply, infer, repair, or substitute a task ID from the title, recent-task order, current project, working directory, Sidebar list, or conversation history.
+3. On the first save, preserve this native task as a separate AgentHall task even when an unrelated cloud task has the same display name. On later saves, update the exact previously bound AgentHall task and append one child checkpoint.
+4. Report success only when the returned operation has `status: succeeded` and `progress: 100`. A start/running snapshot is not success. On failure, report the stable error category and its single retry action without claiming that the cloud task was updated.
+5. Treat normal case, whitespace, and trailing punctuation variations as the same affirmative intent. A question such as “能保存到 AgentHall 吗？” or quoted/example text containing the phrase is not authorization to save.
+6. This is an explicit one-shot save, not background synchronization. Do not repeat the Tool call after an ambiguous response; its durable LocalOperation owns safe retry and idempotency.
 
 ## Open the interface
 
@@ -33,6 +44,21 @@ When the user enters or pastes an AgentHall invitation code or `https://agent-ha
 8. After Web approval, call `agenthall_pair` with `action: complete` and the returned request ID. If pairing was already complete, do not call it again.
 9. The completion result must say: **“已使用 Codex 内置浏览器打开 AgentHall 邀请。请在当前标签中完成注册或登录、邮箱验证、授权当前 Agent，并接受邀请。”** If manual paste was required, say that instead of claiming the URL was opened.
 10. Never request or repeat an email OTP in chat, and never accept an invitation without the user's action in the Web flow.
+
+## Continue a cloud checkpoint in Codex
+
+When the user explicitly clicks **在本机继续**, the Sidebar sends a follow-up whose first line is exactly `AgentHall continuation ticket: <ticket>`. That one click is the user's explicit request to create one local Codex task. Complete the host continuation without asking the user to send another message, restart Codex, refresh the task list, choose a directory, or move the task manually.
+
+1. Extract only the exact ticket from that first line and call `agenthall_context_host_claim`. Never repair, guess, reuse, search for, or substitute another ticket.
+2. If the claim status is `already_claimed` or `attached`, stop. **Do not create a second task.** The existing host flow or LocalOperation owns the ticket.
+3. Only when the claim status is `ready_to_create`, call `codex_app__list_projects`. Ignore the host-default home workspace: a project whose only root is the current user's home directory and whose name is that directory's basename is product-semantic projectless, not a user-created business project. If `projectName` is not `独立任务` and exactly one remaining local project has that exact display name, choose `destination_kind: "named_project"` and that project ID. If there is no exact remaining match, choose `destination_kind: "projectless"`. If more than one remaining project has the exact name, stop as ambiguous without creating a task. Never fall back to the current or selected project, a machine/user/home name, an unrelated directory, or list position.
+4. Call `codex_app__create_thread` exactly once with the claim's task name as the title and `environment: { type: "local" }`. For `destination_kind: "named_project"`, use the selected project ID and set `target.type` to `project`. For `destination_kind: "projectless"`, omit every project ID and set `target.type` to `projectless`. Use a short initial prompt saying AgentHall is preparing the saved context and that the task must not modify files before the next injected turn. Never use a worktree for this continuation.
+5. Use `wait_threads` with the exact thread and host returned by `codex_app__create_thread` until its initial turn is no longer running. Do not infer completion from elapsed time and do not create a replacement if waiting times out or is interrupted.
+6. Call `agenthall_context_host_attach` once with the original ticket, the exact thread ID returned by `codex_app__create_thread`, and the exact `destination_kind` selected in step 3. Never use a title match, list position, guessed ID, another task ID, or an ID from conversation history.
+7. The attach Tool starts or recovers the single AgentHall LocalOperation and returns one `hostWriterAction`. Call `codex_app__send_message_to_thread` exactly once with the exact thread and host returned by `codex_app__create_thread` and the exact `hostWriterAction.prompt`; do not summarize, edit, reveal, or reuse that prompt. This is the only Context injection turn and must stay on the original host writer.
+8. Use `wait_threads` again with that exact thread and host until the host-writer Context turn is no longer running. Do not infer completion from elapsed time, do not call a Connector App Server `thread/resume` or `turn/start`, and do not create a replacement task if waiting times out or is interrupted.
+9. After that exact turn completes, call `agenthall_context_host_complete` once with the original ticket and exact thread ID. This Tool performs read-only turn verification, records the local Binding, and settles the same LocalOperation. Do not call it before terminal completion and never substitute a title match or another ID.
+10. Do not call the legacy `agenthall_context_continue` Tool, do not acknowledge the Operation, and do not navigate or restart Codex; the Sidebar owns progress polling, opening the completed task, and the final receipt.
 
 ## Preserve safety boundaries
 

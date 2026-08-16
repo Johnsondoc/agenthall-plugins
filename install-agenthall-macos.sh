@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-release_version="0.3.1-alpha.84"
+release_version="0.3.1-alpha.103"
 release_tag="agenthall-v${release_version}"
 marketplace_source="Johnsondoc/agenthall-plugins"
 marketplace_name="agenthall"
 plugin_id="agenthall@agenthall"
 local_marketplace_source="${AGENTHALL_INSTALLER_LOCAL_MARKETPLACE_SOURCE:-}"
-expected_plugin_manifest_sha="4cd500ac7b4337ba2ab769010e29809988643d587b1c031dc9ea6f6cfe49bf4a"
+expected_plugin_manifest_sha="a20505d6850d304901e4f98dd0e02ff945b8c8a0453615289a03102762160a27"
 expected_mcp_config_sha="45581d920318e53b101ec07617a954d04e1b6f8eb9672d9a1320eaccea898ffc"
-expected_mcp_server_sha="1df97ba5ababc4eeb329d54d4e9114a8b224100ab13c73ae9de016cbe746f02e"
-expected_skill_sha="224dcd5dc6ed0033a22a04d78fee6e1399d7301b301d33e8b300339d6facae06"
-expected_sidebar_sha="f75f1d687ef7ae977f633fe73557cdf8dabbd1330c500d455010be3213101344"
+expected_mcp_server_sha="5a3fde2eafe2333aa2ab6b4b6068b162c7db3f3ebbf28ec4a9dfc1b8b09e9073"
+expected_skill_sha="5b2f80c481b13afaee416be54d68dca6550df37fdf4e6535c1dc4adb1ddaa8b2"
+expected_sidebar_sha="65ac069844907c807b8e1a850ab79207e975160c7cbe3b517da43a5aa7ae6e6d"
 expected_logo_sha="e6366bec291df5c514a8da289ee7798f3cfc4a23aed21f91f59eb0a8849bc8a6"
 
 fail() {
@@ -453,20 +453,32 @@ log_runtime_observation() {
 verify_agenthall_runtime_via_app_server() {
   record_test_event "app_server_runtime_probe_requested"
   if [[ "$test_mode" == "1" ]]; then
-    local simulated="${AGENTHALL_TEST_RUNTIME_PROBE_RESULT:-current}"
-    if [[ "$simulated" == "current" ]]; then
-      record_test_event "app_server_runtime_probe_verified"
-      printf 'AgentHall app-server probe: state=current version=%s resource=ui://agenthall/sidebar-v%s.html\n' \
-        "$release_version" "$release_version"
-      return 0
-    fi
-    record_test_event "app_server_runtime_probe_failed:$simulated"
-    printf 'AgentHall app-server probe: state=%s\n' "$simulated" >&2
+    local sequence="${AGENTHALL_TEST_RUNTIME_PROBE_SEQUENCE:-${AGENTHALL_TEST_RUNTIME_PROBE_RESULT:-current}}"
+    local simulated=""
+    for simulated in $(printf '%s' "$sequence" | /usr/bin/tr ',' ' '); do
+      if [[ "$simulated" == "not_ready" || "$simulated" == "status_timeout" ]]; then
+        record_test_event "app_server_runtime_probe_waiting:$simulated"
+        printf 'AgentHall app-server probe: state=waiting observed=%s\n' "$simulated"
+        continue
+      fi
+      if [[ "$simulated" == "current" ]]; then
+        record_test_event "app_server_runtime_probe_verified"
+        printf 'AgentHall app-server probe: state=current version=%s resource=ui://agenthall/sidebar-v%s.html\n' \
+          "$release_version" "$release_version"
+        return 0
+      fi
+      record_test_event "app_server_runtime_probe_failed:$simulated"
+      printf 'AgentHall app-server probe: state=%s\n' "$simulated" >&2
+      return 1
+    done
+    record_test_event "app_server_runtime_probe_failed:runtime_readiness_timeout"
+    printf 'AgentHall app-server probe: state=runtime_readiness_timeout\n' >&2
     return 1
   fi
 
   AGENTHALL_EXPECTED_RELEASE_VERSION="$release_version" \
     AGENTHALL_EXPECTED_SIDEBAR_SHA256="$expected_sidebar_sha" \
+    AGENTHALL_RUNTIME_NODE_DIR="$(dirname "$json_node")" \
     "$json_node" - "$codex_bin" <<'NODE'
 const { createHash } = require("node:crypto");
 const { spawn } = require("node:child_process");
@@ -476,9 +488,12 @@ const codex = process.argv[2];
 const expectedVersion = process.env.AGENTHALL_EXPECTED_RELEASE_VERSION;
 const expectedSha256 = process.env.AGENTHALL_EXPECTED_SIDEBAR_SHA256;
 const expectedUri = `ui://agenthall/sidebar-v${expectedVersion}.html`;
+const runtimeNodeDir = process.env.AGENTHALL_RUNTIME_NODE_DIR;
+const inheritedPath = process.env.PATH || "/usr/bin:/bin:/usr/sbin:/sbin";
+const probePath = runtimeNodeDir ? `${runtimeNodeDir}:${inheritedPath}` : inheritedPath;
 const child = spawn(codex, ["app-server", "--listen", "stdio://"], {
   cwd: process.cwd(),
-  env: process.env,
+  env: { ...process.env, PATH: probePath },
   stdio: ["pipe", "pipe", "pipe"],
 });
 const pending = new Map();
@@ -538,13 +553,13 @@ function request(method, params, timeoutMs) {
   });
 }
 
-async function listAgentHall() {
+async function listAgentHall(timeoutMs) {
   let cursor = null;
   for (let page = 0; page < 10; page += 1) {
     const response = await request(
       "mcpServerStatus/list",
       { detail: "full", limit: 100, ...(cursor ? { cursor } : {}) },
-      60_000,
+      timeoutMs,
     );
     const match = (response?.data || []).find((entry) => entry?.name === "agenthall");
     if (match) return match;
@@ -552,6 +567,83 @@ async function listAgentHall() {
     if (!cursor) break;
   }
   throw new Error("agenthall_server_missing");
+}
+
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function waitForAgentHallReady() {
+  const readinessDeadline = Date.now() + 90_000;
+  let attempt = 0;
+  let lastObserved = "agenthall_server_missing";
+  while (Date.now() < readinessDeadline) {
+    attempt += 1;
+    const remaining = readinessDeadline - Date.now();
+    let server;
+    try {
+      server = await listAgentHall(Math.max(1_000, Math.min(20_000, remaining)));
+    } catch (error) {
+      const category = error instanceof Error ? error.message : "unknown";
+      if (category !== "agenthall_server_missing" && category !== "mcpServerStatus/list_timeout") {
+        throw error;
+      }
+      lastObserved = category;
+      process.stdout.write(
+        `AgentHall app-server probe: state=waiting attempt=${attempt} observed=${lastObserved}\n`,
+      );
+      await delay(Math.min(1_000, Math.max(0, readinessDeadline - Date.now())));
+      continue;
+    }
+
+    const reportedVersion = server?.serverInfo?.version;
+    if (typeof reportedVersion === "string" && reportedVersion.length > 0 && reportedVersion !== expectedVersion) {
+      throw new Error("version_mismatch");
+    }
+    const toolCount = server.tools ? Object.keys(server.tools).length : 0;
+    const resource = (server.resources || []).find((entry) => entry?.uri === expectedUri);
+    if (reportedVersion !== expectedVersion || toolCount === 0 || !resource) {
+      lastObserved = reportedVersion !== expectedVersion
+        ? "server_info_pending"
+        : toolCount === 0
+          ? "tool_catalog_pending"
+          : "sidebar_resource_pending";
+      process.stdout.write(
+        `AgentHall app-server probe: state=waiting attempt=${attempt} observed=${lastObserved}\n`,
+      );
+      await delay(Math.min(1_000, Math.max(0, readinessDeadline - Date.now())));
+      continue;
+    }
+
+    let read;
+    try {
+      read = await request(
+        "mcpServer/resource/read",
+        { server: "agenthall", uri: expectedUri },
+        Math.max(1_000, Math.min(30_000, readinessDeadline - Date.now())),
+      );
+    } catch (error) {
+      lastObserved = "sidebar_resource_read_pending";
+      process.stdout.write(
+        `AgentHall app-server probe: state=waiting attempt=${attempt} observed=${lastObserved}\n`,
+      );
+      await delay(Math.min(1_000, Math.max(0, readinessDeadline - Date.now())));
+      continue;
+    }
+    const text = (read?.contents || []).find(
+      (entry) => typeof entry?.text === "string",
+    )?.text;
+    if (typeof text !== "string" || text.length === 0) {
+      lastObserved = "sidebar_resource_empty";
+      process.stdout.write(
+        `AgentHall app-server probe: state=waiting attempt=${attempt} observed=${lastObserved}\n`,
+      );
+      await delay(Math.min(1_000, Math.max(0, readinessDeadline - Date.now())));
+      continue;
+    }
+    const sha256 = createHash("sha256").update(text).digest("hex");
+    if (sha256 !== expectedSha256) throw new Error("sidebar_checksum_mismatch");
+    return { server, sha256, toolCount };
+  }
+  throw new Error(`runtime_readiness_timeout:${lastObserved}`);
 }
 
 (async () => {
@@ -575,32 +667,9 @@ async function listAgentHall() {
     } catch {
       reloadState = "unavailable";
     }
-    const server = await listAgentHall();
-    if (server?.serverInfo?.version !== expectedVersion) {
-      throw new Error("version_mismatch");
-    }
-    if (!server.tools || Object.keys(server.tools).length === 0) {
-      throw new Error("tool_catalog_empty");
-    }
-    const resource = (server.resources || []).find(
-      (entry) => entry?.uri === expectedUri,
-    );
-    if (!resource) throw new Error("sidebar_resource_missing");
-    const read = await request(
-      "mcpServer/resource/read",
-      { server: "agenthall", uri: expectedUri },
-      30_000,
-    );
-    const text = (read?.contents || []).find(
-      (entry) => typeof entry?.text === "string",
-    )?.text;
-    if (typeof text !== "string" || text.length === 0) {
-      throw new Error("sidebar_resource_empty");
-    }
-    const sha256 = createHash("sha256").update(text).digest("hex");
-    if (sha256 !== expectedSha256) throw new Error("sidebar_checksum_mismatch");
+    const { server, sha256, toolCount } = await waitForAgentHallReady();
     process.stdout.write(
-      `AgentHall app-server probe: state=current version=${expectedVersion} tools=${Object.keys(server.tools).length} resource=${expectedUri} sha256=${sha256} reload=${reloadState} stderr=${stderrSeen ? "warning" : "none"}\n`,
+      `AgentHall app-server probe: state=current version=${expectedVersion} tools=${toolCount} resource=${expectedUri} sha256=${sha256} reload=${reloadState} stderr=${stderrSeen ? "warning" : "none"}\n`,
     );
   } catch (error) {
     process.stderr.write(

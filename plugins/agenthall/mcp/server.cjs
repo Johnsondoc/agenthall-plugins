@@ -16408,11 +16408,11 @@ var require_errors = __commonJS({
       gen.code((0, codegen_1._)`${names_1.default.errors}++`);
     }
     function returnErrors(it, errs) {
-      const { gen, validateName, schemaEnv } = it;
+      const { gen, validateName: validateName2, schemaEnv } = it;
       if (schemaEnv.$async) {
         gen.throw((0, codegen_1._)`new ${it.ValidationError}(${errs})`);
       } else {
-        gen.assign((0, codegen_1._)`${validateName}.errors`, errs);
+        gen.assign((0, codegen_1._)`${validateName2}.errors`, errs);
         gen.return(false);
       }
     }
@@ -16481,13 +16481,13 @@ var require_boolSchema = __commonJS({
       message: "boolean schema is false"
     };
     function topBoolOrEmptySchema(it) {
-      const { gen, schema, validateName } = it;
+      const { gen, schema, validateName: validateName2 } = it;
       if (schema === false) {
         falseSchemaError(it, false);
       } else if (typeof schema == "object" && schema.$async === true) {
         gen.return(names_1.default.data);
       } else {
-        gen.assign((0, codegen_1._)`${validateName}.errors`, null);
+        gen.assign((0, codegen_1._)`${validateName2}.errors`, null);
         gen.return(true);
       }
     }
@@ -17323,8 +17323,8 @@ var require_resolve = __commonJS({
       }
       return count;
     }
-    function getFullPath(resolver, id = "", normalize2) {
-      if (normalize2 !== false)
+    function getFullPath(resolver, id = "", normalize3) {
+      if (normalize3 !== false)
         id = normalizeId(id);
       const p2 = resolver.parse(id);
       return _getFullPath(resolver, p2);
@@ -17436,15 +17436,15 @@ var require_validate = __commonJS({
       validateFunction(it, () => (0, boolSchema_1.topBoolOrEmptySchema)(it));
     }
     exports2.validateFunctionCode = validateFunctionCode;
-    function validateFunction({ gen, validateName, schema, schemaEnv, opts }, body) {
+    function validateFunction({ gen, validateName: validateName2, schema, schemaEnv, opts }, body) {
       if (opts.code.es5) {
-        gen.func(validateName, (0, codegen_1._)`${names_1.default.data}, ${names_1.default.valCxt}`, schemaEnv.$async, () => {
+        gen.func(validateName2, (0, codegen_1._)`${names_1.default.data}, ${names_1.default.valCxt}`, schemaEnv.$async, () => {
           gen.code((0, codegen_1._)`"use strict"; ${funcSourceUrl(schema, opts)}`);
           destructureValCxtES5(gen, opts);
           gen.code(body);
         });
       } else {
-        gen.func(validateName, (0, codegen_1._)`${names_1.default.data}, ${destructureValCxt(opts)}`, schemaEnv.$async, () => gen.code(funcSourceUrl(schema, opts)).code(body));
+        gen.func(validateName2, (0, codegen_1._)`${names_1.default.data}, ${destructureValCxt(opts)}`, schemaEnv.$async, () => gen.code(funcSourceUrl(schema, opts)).code(body));
       }
     }
     function destructureValCxt(opts) {
@@ -17483,8 +17483,8 @@ var require_validate = __commonJS({
       return;
     }
     function resetEvaluated(it) {
-      const { gen, validateName } = it;
-      it.evaluated = gen.const("evaluated", (0, codegen_1._)`${validateName}.evaluated`);
+      const { gen, validateName: validateName2 } = it;
+      it.evaluated = gen.const("evaluated", (0, codegen_1._)`${validateName2}.evaluated`);
       gen.if((0, codegen_1._)`${it.evaluated}.dynamicProps`, () => gen.assign((0, codegen_1._)`${it.evaluated}.props`, (0, codegen_1._)`undefined`));
       gen.if((0, codegen_1._)`${it.evaluated}.dynamicItems`, () => gen.assign((0, codegen_1._)`${it.evaluated}.items`, (0, codegen_1._)`undefined`));
     }
@@ -17566,11 +17566,11 @@ var require_validate = __commonJS({
       }
     }
     function returnResults(it) {
-      const { gen, schemaEnv, validateName, ValidationError, opts } = it;
+      const { gen, schemaEnv, validateName: validateName2, ValidationError, opts } = it;
       if (schemaEnv.$async) {
         gen.if((0, codegen_1._)`${names_1.default.errors} === 0`, () => gen.return(names_1.default.data), () => gen.throw((0, codegen_1._)`new ${ValidationError}(${names_1.default.vErrors})`));
       } else {
-        gen.assign((0, codegen_1._)`${validateName}.errors`, names_1.default.vErrors);
+        gen.assign((0, codegen_1._)`${validateName2}.errors`, names_1.default.vErrors);
         if (opts.unevaluated)
           assignEvaluated(it);
         gen.return((0, codegen_1._)`${names_1.default.errors} === 0`);
@@ -17995,8 +17995,8 @@ var require_compile = __commonJS({
           code: (0, codegen_1._)`require("ajv/dist/runtime/validation_error").default`
         });
       }
-      const validateName = gen.scopeName("validate");
-      sch.validateName = validateName;
+      const validateName2 = gen.scopeName("validate");
+      sch.validateName = validateName2;
       const schemaCxt = {
         gen,
         allErrors: this.opts.allErrors,
@@ -18010,7 +18010,7 @@ var require_compile = __commonJS({
         dataTypes: [],
         definedProperties: /* @__PURE__ */ new Set(),
         topSchemaRef: gen.scopeValue("schema", this.opts.code.source === true ? { ref: sch.schema, code: (0, codegen_1.stringify)(sch.schema) } : { ref: sch.schema }),
-        validateName,
+        validateName: validateName2,
         ValidationError: _ValidationError,
         schema: sch.schema,
         schemaEnv: sch,
@@ -18033,14 +18033,14 @@ var require_compile = __commonJS({
           sourceCode = this.opts.code.process(sourceCode, sch);
         const makeValidate = new Function(`${names_1.default.self}`, `${names_1.default.scope}`, sourceCode);
         const validate2 = makeValidate(this, this.scope.get());
-        this.scope.value(validateName, { ref: validate2 });
+        this.scope.value(validateName2, { ref: validate2 });
         validate2.errors = null;
         validate2.schema = sch.schema;
         validate2.schemaEnv = sch;
         if (sch.$async)
           validate2.$async = true;
         if (this.opts.code.source === true) {
-          validate2.source = { validateName, validateCode, scopeValues: gen._values };
+          validate2.source = { validateName: validateName2, validateCode, scopeValues: gen._values };
         }
         if (this.opts.unevaluated) {
           const { props, items } = schemaCxt;
@@ -18720,7 +18720,7 @@ var require_fast_uri = __commonJS({
     "use strict";
     var { normalizeIPv6, removeDotSegments, recomposeAuthority, normalizePercentEncoding, normalizePathEncoding, escapePreservingEscapes, reescapeHostDelimiters, isIPv4, nonSimpleDomain } = require_utils();
     var { SCHEMES, getSchemeHandler } = require_schemes();
-    function normalize2(uri, options) {
+    function normalize3(uri, options) {
       if (typeof uri === "string") {
         uri = /** @type {T} */
         normalizeString(uri, options);
@@ -19013,7 +19013,7 @@ var require_fast_uri = __commonJS({
     }
     var fastUri = {
       SCHEMES,
-      normalize: normalize2,
+      normalize: normalize3,
       resolve: resolve2,
       resolveComponent,
       equal,
@@ -19680,7 +19680,7 @@ var require_ref = __commonJS({
       schemaType: "string",
       code(cxt) {
         const { gen, schema: $ref, it } = cxt;
-        const { baseId, schemaEnv: env, validateName, opts, self } = it;
+        const { baseId, schemaEnv: env, validateName: validateName2, opts, self } = it;
         const { root } = env;
         if (($ref === "#" || $ref === "#/") && baseId === root.baseId)
           return callRootRef();
@@ -19692,7 +19692,7 @@ var require_ref = __commonJS({
         return inlineRefSchema(schOrEnv);
         function callRootRef() {
           if (env === root)
-            return callRef(cxt, validateName, env, env.$async);
+            return callRef(cxt, validateName2, env, env.$async);
           const rootName = gen.scopeValue("root", { ref: root });
           return callRef(cxt, (0, codegen_1._)`${rootName}.validate`, root, root.$async);
         }
@@ -23176,11 +23176,11 @@ var require_errors2 = __commonJS({
       gen.code((0, codegen_1._)`${names_1.default.errors}++`);
     }
     function returnErrors(it, errs) {
-      const { gen, validateName, schemaEnv } = it;
+      const { gen, validateName: validateName2, schemaEnv } = it;
       if (schemaEnv.$async) {
         gen.throw((0, codegen_1._)`new ${it.ValidationError}(${errs})`);
       } else {
-        gen.assign((0, codegen_1._)`${validateName}.errors`, errs);
+        gen.assign((0, codegen_1._)`${validateName2}.errors`, errs);
         gen.return(false);
       }
     }
@@ -23249,13 +23249,13 @@ var require_boolSchema2 = __commonJS({
       message: "boolean schema is false"
     };
     function topBoolOrEmptySchema(it) {
-      const { gen, schema, validateName } = it;
+      const { gen, schema, validateName: validateName2 } = it;
       if (schema === false) {
         falseSchemaError(it, false);
       } else if (typeof schema == "object" && schema.$async === true) {
         gen.return(names_1.default.data);
       } else {
-        gen.assign((0, codegen_1._)`${validateName}.errors`, null);
+        gen.assign((0, codegen_1._)`${validateName2}.errors`, null);
         gen.return(true);
       }
     }
@@ -24056,8 +24056,8 @@ var require_resolve2 = __commonJS({
       }
       return count;
     }
-    function getFullPath(resolver, id = "", normalize2) {
-      if (normalize2 !== false)
+    function getFullPath(resolver, id = "", normalize3) {
+      if (normalize3 !== false)
         id = normalizeId(id);
       const p2 = resolver.parse(id);
       return _getFullPath(resolver, p2);
@@ -24169,15 +24169,15 @@ var require_validate2 = __commonJS({
       validateFunction(it, () => (0, boolSchema_1.topBoolOrEmptySchema)(it));
     }
     exports2.validateFunctionCode = validateFunctionCode;
-    function validateFunction({ gen, validateName, schema, schemaEnv, opts }, body) {
+    function validateFunction({ gen, validateName: validateName2, schema, schemaEnv, opts }, body) {
       if (opts.code.es5) {
-        gen.func(validateName, (0, codegen_1._)`${names_1.default.data}, ${names_1.default.valCxt}`, schemaEnv.$async, () => {
+        gen.func(validateName2, (0, codegen_1._)`${names_1.default.data}, ${names_1.default.valCxt}`, schemaEnv.$async, () => {
           gen.code((0, codegen_1._)`"use strict"; ${funcSourceUrl(schema, opts)}`);
           destructureValCxtES5(gen, opts);
           gen.code(body);
         });
       } else {
-        gen.func(validateName, (0, codegen_1._)`${names_1.default.data}, ${destructureValCxt(opts)}`, schemaEnv.$async, () => gen.code(funcSourceUrl(schema, opts)).code(body));
+        gen.func(validateName2, (0, codegen_1._)`${names_1.default.data}, ${destructureValCxt(opts)}`, schemaEnv.$async, () => gen.code(funcSourceUrl(schema, opts)).code(body));
       }
     }
     function destructureValCxt(opts) {
@@ -24216,8 +24216,8 @@ var require_validate2 = __commonJS({
       return;
     }
     function resetEvaluated(it) {
-      const { gen, validateName } = it;
-      it.evaluated = gen.const("evaluated", (0, codegen_1._)`${validateName}.evaluated`);
+      const { gen, validateName: validateName2 } = it;
+      it.evaluated = gen.const("evaluated", (0, codegen_1._)`${validateName2}.evaluated`);
       gen.if((0, codegen_1._)`${it.evaluated}.dynamicProps`, () => gen.assign((0, codegen_1._)`${it.evaluated}.props`, (0, codegen_1._)`undefined`));
       gen.if((0, codegen_1._)`${it.evaluated}.dynamicItems`, () => gen.assign((0, codegen_1._)`${it.evaluated}.items`, (0, codegen_1._)`undefined`));
     }
@@ -24299,11 +24299,11 @@ var require_validate2 = __commonJS({
       }
     }
     function returnResults(it) {
-      const { gen, schemaEnv, validateName, ValidationError, opts } = it;
+      const { gen, schemaEnv, validateName: validateName2, ValidationError, opts } = it;
       if (schemaEnv.$async) {
         gen.if((0, codegen_1._)`${names_1.default.errors} === 0`, () => gen.return(names_1.default.data), () => gen.throw((0, codegen_1._)`new ${ValidationError}(${names_1.default.vErrors})`));
       } else {
-        gen.assign((0, codegen_1._)`${validateName}.errors`, names_1.default.vErrors);
+        gen.assign((0, codegen_1._)`${validateName2}.errors`, names_1.default.vErrors);
         if (opts.unevaluated)
           assignEvaluated(it);
         gen.return((0, codegen_1._)`${names_1.default.errors} === 0`);
@@ -24728,8 +24728,8 @@ var require_compile2 = __commonJS({
           code: (0, codegen_1._)`require("ajv/dist/runtime/validation_error").default`
         });
       }
-      const validateName = gen.scopeName("validate");
-      sch.validateName = validateName;
+      const validateName2 = gen.scopeName("validate");
+      sch.validateName = validateName2;
       const schemaCxt = {
         gen,
         allErrors: this.opts.allErrors,
@@ -24743,7 +24743,7 @@ var require_compile2 = __commonJS({
         dataTypes: [],
         definedProperties: /* @__PURE__ */ new Set(),
         topSchemaRef: gen.scopeValue("schema", this.opts.code.source === true ? { ref: sch.schema, code: (0, codegen_1.stringify)(sch.schema) } : { ref: sch.schema }),
-        validateName,
+        validateName: validateName2,
         ValidationError: _ValidationError,
         schema: sch.schema,
         schemaEnv: sch,
@@ -24766,14 +24766,14 @@ var require_compile2 = __commonJS({
           sourceCode = this.opts.code.process(sourceCode, sch);
         const makeValidate = new Function(`${names_1.default.self}`, `${names_1.default.scope}`, sourceCode);
         const validate2 = makeValidate(this, this.scope.get());
-        this.scope.value(validateName, { ref: validate2 });
+        this.scope.value(validateName2, { ref: validate2 });
         validate2.errors = null;
         validate2.schema = sch.schema;
         validate2.schemaEnv = sch;
         if (sch.$async)
           validate2.$async = true;
         if (this.opts.code.source === true) {
-          validate2.source = { validateName, validateCode, scopeValues: gen._values };
+          validate2.source = { validateName: validateName2, validateCode, scopeValues: gen._values };
         }
         if (this.opts.unevaluated) {
           const { props, items } = schemaCxt;
@@ -25578,7 +25578,7 @@ var require_ref2 = __commonJS({
       schemaType: "string",
       code(cxt) {
         const { gen, schema: $ref, it } = cxt;
-        const { baseId, schemaEnv: env, validateName, opts, self } = it;
+        const { baseId, schemaEnv: env, validateName: validateName2, opts, self } = it;
         const { root } = env;
         if (($ref === "#" || $ref === "#/") && baseId === root.baseId)
           return callRootRef();
@@ -25590,7 +25590,7 @@ var require_ref2 = __commonJS({
         return inlineRefSchema(schOrEnv);
         function callRootRef() {
           if (env === root)
-            return callRef(cxt, validateName, env, env.$async);
+            return callRef(cxt, validateName2, env, env.$async);
           const rootName = gen.scopeValue("root", { ref: root });
           return callRef(cxt, (0, codegen_1._)`${rootName}.validate`, root, root.$async);
         }
@@ -32301,8 +32301,8 @@ var require_webidl = __commonJS({
         return new Uint8Array(0);
       }
       const bytes = new Uint8Array(length);
-      const view = new Uint8Array(jsArrayBuffer, offset, length);
-      bytes.set(view);
+      const view2 = new Uint8Array(jsArrayBuffer, offset, length);
+      bytes.set(view2);
       return bytes;
     };
     webidl.converters.DOMString = function(V, prefix, argument, flags) {
@@ -42509,7 +42509,7 @@ var require_snapshot_utils = __commonJS({
 var require_snapshot_recorder = __commonJS({
   "node_modules/undici/lib/mock/snapshot-recorder.js"(exports2, module2) {
     "use strict";
-    var { writeFile: writeFile5, readFile: readFile9, mkdir: mkdir6 } = require("node:fs/promises");
+    var { writeFile: writeFile5, readFile: readFile10, mkdir: mkdir6 } = require("node:fs/promises");
     var { dirname: dirname5, resolve: resolve2 } = require("node:path");
     var { setTimeout: setTimeout2, clearTimeout: clearTimeout2 } = require("node:timers");
     var { InvalidArgumentError, UndiciError } = require_errors3();
@@ -42726,7 +42726,7 @@ var require_snapshot_recorder = __commonJS({
           throw new InvalidArgumentError("Snapshot path is required");
         }
         try {
-          const data = await readFile9(resolve2(path), "utf8");
+          const data = await readFile10(resolve2(path), "utf8");
           const parsed = JSON.parse(data);
           if (Array.isArray(parsed)) {
             this.#snapshots.clear();
@@ -54658,12 +54658,14 @@ ${captureLines}` : capture.stack;
 var server_exports = {};
 __export(server_exports, {
   CODEX_CONTEXT_TOOL_NAMES: () => CODEX_CONTEXT_TOOL_NAMES,
+  CODEX_CURRENT_TASK_TOOL_NAMES: () => CODEX_CURRENT_TASK_TOOL_NAMES,
+  CODEX_HOST_CONTINUATION_TOOL_NAMES: () => CODEX_HOST_CONTINUATION_TOOL_NAMES,
   createAgentHallMcpServer: () => createAgentHallMcpServer,
   createCodexMcpServer: () => createCodexMcpServer,
   main: () => main
 });
 module.exports = __toCommonJS(server_exports);
-var import_promises13 = require("node:fs/promises");
+var import_promises14 = require("node:fs/promises");
 var import_node_path12 = require("node:path");
 var import_node_url = require("node:url");
 
@@ -64869,7 +64871,7 @@ var PreparedAttachmentDraft = class {
 async function prepareAttachmentDraft(input) {
   return prepareAttachmentDraftWithRandom(input, import_node_crypto.randomBytes);
 }
-async function prepareAttachmentDraftWithRandom(input, randomBytes5) {
+async function prepareAttachmentDraftWithRandom(input, randomBytes6) {
   const context = normalizeContext(input);
   const masterKey = exactKey(input.localStorageMasterKey);
   try {
@@ -64887,9 +64889,9 @@ async function prepareAttachmentDraftWithRandom(input, randomBytes5) {
       });
       const container = encodePlaintextContainer(manifest, validated.bytes);
       try {
-        const contentKey = exactRandom(randomBytes5, KEY_BYTES);
+        const contentKey = exactRandom(randomBytes6, KEY_BYTES);
         try {
-          const contentNonce = exactRandom(randomBytes5, GCM_NONCE_BYTES);
+          const contentNonce = exactRandom(randomBytes6, GCM_NONCE_BYTES);
           const encryptedArtifact = sealArtifact(
             container,
             contentKey,
@@ -64897,7 +64899,7 @@ async function prepareAttachmentDraftWithRandom(input, randomBytes5) {
             context
           );
           const encryptedSha256 = sha256(encryptedArtifact);
-          const localNonce = exactRandom(randomBytes5, GCM_NONCE_BYTES);
+          const localNonce = exactRandom(randomBytes6, GCM_NONCE_BYTES);
           const sealed = sealContentKey(
             contentKey,
             masterKey,
@@ -65072,8 +65074,8 @@ function exactKey(value) {
   }
   return Buffer.from(value);
 }
-function exactRandom(randomBytes5, size) {
-  const value = randomBytes5(size);
+function exactRandom(randomBytes6, size) {
+  const value = randomBytes6(size);
   if (!Buffer.isBuffer(value) || value.length !== size) {
     throw new TypeError("Random source returned an invalid result");
   }
@@ -65325,14 +65327,14 @@ function wrapContentKeyForRecipients(contentKey, recipients, context) {
     import_node_crypto3.randomBytes
   );
 }
-function wrapContentKeyForRecipientsWithRandom(contentKey, recipients, context, randomBytes5) {
+function wrapContentKeyForRecipientsWithRandom(contentKey, recipients, context, randomBytes6) {
   const cek = exactBytes(contentKey, KEY_BYTES2);
   try {
     const normalizedContext = normalizeContext2(context);
     const normalizedRecipients = normalizeRecipients(recipients);
     return Object.freeze(
       normalizedRecipients.map((recipient) => {
-        const ephemeralPrivateRaw = exactRandom2(randomBytes5, KEY_BYTES2);
+        const ephemeralPrivateRaw = exactRandom2(randomBytes6, KEY_BYTES2);
         let sharedSecret;
         let kek;
         try {
@@ -65349,8 +65351,8 @@ function wrapContentKeyForRecipientsWithRandom(contentKey, recipients, context, 
           if (sharedSecret.every((value) => value === 0)) {
             throw new CekWrapIntegrityError();
           }
-          const salt = exactRandom2(randomBytes5, KEY_BYTES2);
-          const nonce = exactRandom2(randomBytes5, NONCE_BYTES);
+          const salt = exactRandom2(randomBytes6, KEY_BYTES2);
+          const nonce = exactRandom2(randomBytes6, NONCE_BYTES);
           try {
             kek = Buffer.from(
               (0, import_node_crypto3.hkdfSync)(
@@ -65567,8 +65569,8 @@ function exactBytes(value, size) {
   }
   return Buffer.from(value);
 }
-function exactRandom2(randomBytes5, size) {
-  const value = randomBytes5(size);
+function exactRandom2(randomBytes6, size) {
+  const value = randomBytes6(size);
   if (!Buffer.isBuffer(value) || value.length !== size) {
     throw new TypeError("random source returned an invalid result");
   }
@@ -67680,7 +67682,7 @@ function first(...values) {
 }
 
 // connectors/agenthall-codex-mcp/src/runtime.ts
-var import_node_crypto19 = require("node:crypto");
+var import_node_crypto20 = require("node:crypto");
 var import_node_os4 = require("node:os");
 var import_node_path11 = require("node:path");
 
@@ -67898,6 +67900,8 @@ var CodexAdapter = class _CodexAdapter {
   #summarize;
   #resolveWorkspaceKey;
   #resolveProject;
+  #resolveAssignedProject;
+  #resolveStartCwd;
   constructor(options) {
     this.#client = options.client;
     this.#endpointId = options.endpointId;
@@ -67906,6 +67910,8 @@ var CodexAdapter = class _CodexAdapter {
     this.#summarize = options.summarize;
     this.#resolveWorkspaceKey = options.resolveWorkspaceKey ?? (async (cwd) => localWorkspaceKey(cwd));
     this.#resolveProject = options.resolveProject;
+    this.#resolveAssignedProject = options.resolveAssignedProject;
+    this.#resolveStartCwd = options.resolveStartCwd;
   }
   capabilities() {
     return Object.freeze({
@@ -68003,6 +68009,20 @@ var CodexAdapter = class _CodexAdapter {
     if (this.#resolveProject === void 0) return void 0;
     try {
       const project = await this.#resolveProject(input);
+      if (project === void 0 || project.projectName.trim() === "" || project.localWorkspaceKey.trim() === "") {
+        return void 0;
+      }
+      return project;
+    } catch {
+      return void 0;
+    }
+  }
+  async #resolvedAssignedProject(input) {
+    if (this.#resolveAssignedProject === void 0) {
+      return this.#resolvedProject(input);
+    }
+    try {
+      const project = await this.#resolveAssignedProject(input);
       if (project === void 0 || project.projectName.trim() === "" || project.localWorkspaceKey.trim() === "") {
         return void 0;
       }
@@ -68144,21 +68164,119 @@ var CodexAdapter = class _CodexAdapter {
   async startFromPortableContext(contextInput, options) {
     return this.startOrResumeFromPortableContext(contextInput, options);
   }
+  async prepareHostWriterContinuation(contextInput, options) {
+    const context = PORTABLE_TASK_CONTEXT_SCHEMA.parse(contextInput);
+    const projection = await this.#readHostWriterThread(options);
+    const lastTurn = record2(projection.turns.at(-1));
+    if (lastTurn.status !== void 0 && lastTurn.status !== "completed") {
+      throw new Error("app_server_thread_busy");
+    }
+    const baselineTurnId = safeOptionalId(lastTurn.id);
+    return {
+      prompt: handoffPrompt(context),
+      ...baselineTurnId === void 0 ? {} : { baselineTurnId },
+      baselineUpdatedAt: projection.updatedAt
+    };
+  }
+  async completeHostWriterContinuation(contextInput, options) {
+    const context = PORTABLE_TASK_CONTEXT_SCHEMA.parse(contextInput);
+    const projection = await this.#readHostWriterThread(options);
+    const baselineIndex = options.baselineTurnId === void 0 ? -1 : projection.turns.findIndex(
+      (candidate) => record2(candidate).id === options.baselineTurnId
+    );
+    if (options.baselineTurnId !== void 0 && baselineIndex < 0) {
+      throw new Error("app_server_host_writer_baseline_unavailable");
+    }
+    const promptMatches = projection.turns.slice(baselineIndex + 1).filter(
+      (candidate) => turnHasSingleTrustedHostWriterText(candidate, handoffPrompt(context))
+    );
+    if (promptMatches.length !== 1) {
+      throw new Error("app_server_host_writer_prompt_unconfirmed");
+    }
+    const injected = promptMatches[0];
+    const turnId = safeOptionalId(record2(injected).id);
+    if (turnId === void 0) {
+      throw new Error("app_server_host_writer_prompt_unconfirmed");
+    }
+    if (!hasCompletedFinalTurn(projection.turns, turnId)) {
+      throw new Error("app_server_host_writer_final_unconfirmed");
+    }
+    const cwd = projection.cwd ?? "codex:unknown";
+    const assignedProject = await this.#resolvedAssignedProject({
+      nativeThreadId: options.nativeThreadId,
+      cwd
+    });
+    const resolvedProject = options.destinationKind === "projectless" ? projectlessResolvedProject() : assignedProject;
+    if (resolvedProject === void 0)
+      throw new Error("app_server_thread_project_not_visible");
+    const binding = {
+      agentHallTaskId: context.agentHallTaskId,
+      endpointId: this.#endpointId,
+      hostKind: "codex",
+      nativeThreadId: options.nativeThreadId,
+      localWorkspaceKey: resolvedProject.localWorkspaceKey
+    };
+    return {
+      status: "started",
+      binding,
+      mode: "host_writer_context",
+      turnId,
+      nativeUpdatedAt: projection.updatedAt,
+      nativeContentRevision: await this.readSubstantiveRevision(binding),
+      nativeProjectName: resolvedProject.projectName,
+      nativeTaskName: projection.name ?? (projection.preview || "\u672A\u547D\u540D Codex \u4EFB\u52A1"),
+      threadUrl: `codex://threads/${options.nativeThreadId}`
+    };
+  }
   async startOrResumeFromPortableContext(contextInput, options) {
     const context = PORTABLE_TASK_CONTEXT_SCHEMA.parse(contextInput);
     const checkpoint = options.checkpoint ?? (async () => void 0);
+    const targetCwd = await this.#resolveStartCwd?.({
+      ...options.projectName === void 0 ? {} : { projectName: options.projectName }
+    });
+    if (this.#resolveStartCwd !== void 0 && targetCwd === void 0) {
+      throw new Error("app_server_visible_project_unavailable");
+    }
     let threadId = safeOptionalId(options.state?.nativeThreadId);
     if (threadId === void 0) {
-      const started = await this.#client.request("thread/start", {});
+      const started = await this.#client.request("thread/start", targetCwd === void 0 ? {} : { cwd: targetCwd });
       threadId = projectThread(started.thread ?? {}, false).id;
       await checkpoint("thread_created_or_reused", 28, {
         nativeThreadId: threadId
       });
     } else {
-      await this.#client.request("thread/read", {
-        threadId,
-        includeTurns: false
-      });
+      let resumed;
+      try {
+        resumed = await this.#client.request("thread/resume", { threadId });
+      } catch {
+        throw new Error("app_server_thread_resume_unavailable");
+      }
+      let resumedThreadId;
+      try {
+        resumedThreadId = projectThread(resumed.thread ?? {}, false).id;
+      } catch {
+        throw new Error("app_server_thread_resume_invalid");
+      }
+      if (resumedThreadId !== threadId) {
+        throw new Error("app_server_thread_resume_invalid");
+      }
+      let loadedBeforeInjection;
+      try {
+        loadedBeforeInjection = await this.#client.request("thread/read", {
+          threadId,
+          includeTurns: true
+        });
+      } catch {
+        throw new Error("app_server_thread_read_unavailable");
+      }
+      const turnsBeforeInjection = projectThread(
+        loadedBeforeInjection.thread ?? {},
+        true
+      ).turns;
+      const lastTurnBeforeInjection = record2(turnsBeforeInjection.at(-1));
+      if (safeOptionalId(options.state?.turnId) === void 0 && lastTurnBeforeInjection.status !== void 0 && lastTurnBeforeInjection.status !== "completed") {
+        throw new Error("app_server_thread_busy");
+      }
       await checkpoint("thread_created_or_reused", 28, {
         nativeThreadId: threadId
       });
@@ -68184,10 +68302,15 @@ var CodexAdapter = class _CodexAdapter {
     }
     let turnId = safeOptionalId(options.state?.turnId);
     if (turnId === void 0) {
-      const startedTurn = await this.#client.request("turn/start", {
-        threadId,
-        input: [{ type: "text", text: handoffPrompt(context) }]
-      });
+      let startedTurn;
+      try {
+        startedTurn = await this.#client.request("turn/start", {
+          threadId,
+          input: [{ type: "text", text: handoffPrompt(context) }]
+        });
+      } catch {
+        throw new Error("app_server_turn_start_failed");
+      }
       turnId = safeOptionalId(record2(startedTurn.turn).id);
       if (turnId === void 0) {
         throw new Error("app_server_turn_start_invalid");
@@ -68216,20 +68339,34 @@ var CodexAdapter = class _CodexAdapter {
       turnId,
       goalRestored
     });
-    const visible = (await this.#listThreads()).some(
-      (thread) => projectThread(thread, false).id === threadId
-    );
-    if (!visible) throw new Error("app_server_thread_not_visible");
+    if (options.precreatedByHost === true) {
+      if (targetCwd !== void 0 && !sameWorkspacePath(projection.cwd, targetCwd)) {
+        throw new Error("app_server_thread_project_not_visible");
+      }
+    } else {
+      const listed = (await this.#listThreads()).find(
+        (thread) => projectThread(thread, false).id === threadId
+      );
+      if (listed === void 0)
+        throw new Error("app_server_thread_not_visible");
+      const listedProjection = projectThread(listed, false);
+      if (targetCwd !== void 0 && (!sameWorkspacePath(projection.cwd, targetCwd) || !sameWorkspacePath(listedProjection.cwd, targetCwd))) {
+        throw new Error("app_server_thread_project_not_visible");
+      }
+    }
     await checkpoint("thread_list_verified", 94, {
       nativeThreadId: threadId,
       turnId,
       goalRestored
     });
     const cwd = projection.cwd ?? "codex:unknown";
-    const resolvedProject = await this.#resolvedProject({
+    const resolvedProject = targetCwd === void 0 ? await this.#resolvedProject({ nativeThreadId: threadId, cwd }) : await this.#resolvedAssignedProject({
       nativeThreadId: threadId,
       cwd
     });
+    if (targetCwd !== void 0 && resolvedProject === void 0) {
+      throw new Error("app_server_thread_project_not_visible");
+    }
     const localWorkspaceKey2 = resolvedProject?.localWorkspaceKey ?? await this.#resolvedWorkspaceKey(cwd);
     const binding = {
       agentHallTaskId: context.agentHallTaskId,
@@ -68255,6 +68392,37 @@ var CodexAdapter = class _CodexAdapter {
       threadUrl: `codex://threads/${threadId}`,
       goalRestored
     };
+  }
+  async #readHostWriterThread(options) {
+    if (this.#resolveAssignedProject === void 0) {
+      throw new Error("app_server_visible_project_unavailable");
+    }
+    const targetCwd = options.destinationKind === "named_project" ? await this.#resolveStartCwd?.({ projectName: options.projectName }) : void 0;
+    if (options.destinationKind === "named_project" && targetCwd === void 0) {
+      throw new Error("app_server_visible_project_unavailable");
+    }
+    let loaded;
+    try {
+      loaded = await this.#client.request(
+        "thread/read",
+        { threadId: options.nativeThreadId, includeTurns: true }
+      );
+    } catch {
+      throw new Error("app_server_thread_read_unavailable");
+    }
+    const projection = projectThread(loaded.thread ?? {}, true);
+    if (projection.id !== options.nativeThreadId || projection.name !== safeThreadName(options.taskName) || options.destinationKind === "named_project" && !sameWorkspacePath(projection.cwd, targetCwd ?? "")) {
+      throw new Error("app_server_thread_project_not_visible");
+    }
+    const assigned = await this.#resolvedAssignedProject({
+      nativeThreadId: options.nativeThreadId,
+      cwd: projection.cwd ?? "codex:unknown"
+    });
+    const assignmentMatches = options.destinationKind === "projectless" ? assigned === void 0 || assigned.localWorkspaceKey === "workspace_codex_projectless" : assigned?.projectName === options.projectName;
+    if (!assignmentMatches) {
+      throw new Error("app_server_thread_project_not_visible");
+    }
+    return projection;
   }
   async #waitForCompletedFinalTurn(threadId, turnId) {
     const initial = await this.#client.request("thread/read", { threadId, includeTurns: true });
@@ -68403,6 +68571,15 @@ function safeProjectName(cwd) {
   const name = (0, import_node_path6.basename)(cwd).trim();
   return name || "Codex";
 }
+function projectlessResolvedProject() {
+  return {
+    projectName: "\u72EC\u7ACB\u4EFB\u52A1",
+    localWorkspaceKey: "workspace_codex_projectless"
+  };
+}
+function sameWorkspacePath(actual, expected) {
+  return actual !== null && (0, import_node_path6.normalize)(actual) === (0, import_node_path6.normalize)(expected);
+}
 function safeThreadName(value) {
   const name = safeText(value, 120);
   return name || "AgentHall \u63A5\u529B\u4EFB\u52A1";
@@ -68420,6 +68597,39 @@ function hasCompletedFinalTurn(turns, turnId) {
     const item = record2(candidate);
     return item.type === "agentMessage" && item.phase === "final_answer" && typeof item.text === "string" && item.text.trim().length > 0;
   });
+}
+function turnHasSingleTrustedHostWriterText(turnValue, expected) {
+  const turn = record2(turnValue);
+  if (!Array.isArray(turn.items)) return false;
+  let matches = 0;
+  for (const candidate of turn.items) {
+    const item = record2(candidate);
+    if (item.type !== "userMessage" || !Array.isArray(item.content)) continue;
+    for (const contentValue of item.content) {
+      const content = record2(contentValue);
+      if (content.type === "text" && typeof content.text === "string" && isTrustedHostWriterText(content.text, expected)) {
+        matches += 1;
+      }
+    }
+  }
+  return matches === 1;
+}
+function isTrustedHostWriterText(actual, expected) {
+  if (actual === expected) return true;
+  const prefix = "<codex_delegation>\n  <source_thread_id>";
+  const sourceBoundary = "</source_thread_id>\n  <input>";
+  const suffix = "</input>\n</codex_delegation>";
+  if (!actual.startsWith(prefix) || !actual.endsWith(suffix)) return false;
+  const sourceBoundaryIndex = actual.indexOf(sourceBoundary, prefix.length);
+  if (sourceBoundaryIndex < 0) return false;
+  const sourceThreadId = actual.slice(prefix.length, sourceBoundaryIndex);
+  if (!/^[A-Za-z0-9_-]{1,128}$/u.test(sourceThreadId)) return false;
+  const bodyStart = sourceBoundaryIndex + sourceBoundary.length;
+  const body = actual.slice(bodyStart, -suffix.length);
+  return body === expected || body === canonicalXmlText(expected);
+}
+function canonicalXmlText(value) {
+  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 }
 function localWorkspaceKey(cwd) {
   return `workspace_${digest(cwd).slice(0, 24)}`;
@@ -68502,8 +68712,11 @@ var ContextSyncCoordinator = class {
   #pendingSaves;
   #resolveWorkspaceKey;
   #resolveProject;
+  #resolveAssignedProject;
+  #resolveStartCwd;
   #taskTokens = /* @__PURE__ */ new Map();
   #saveSettlements = /* @__PURE__ */ new Map();
+  #localTasksCache;
   constructor(input) {
     this.#api = input.api;
     this.#bindingStore = input.bindingStore;
@@ -68519,8 +68732,13 @@ var ContextSyncCoordinator = class {
     this.#pendingSaves = input.pendingSaves ?? new MemoryPendingContextSaveStore();
     this.#resolveWorkspaceKey = input.resolveWorkspaceKey;
     this.#resolveProject = input.resolveProject;
+    this.#resolveAssignedProject = input.resolveAssignedProject;
+    this.#resolveStartCwd = input.resolveStartCwd;
   }
-  async listLocalTasks() {
+  async listLocalTasks(options = {}) {
+    if (options.preferCached === true && this.#localTasksCache !== void 0 && this.#localTasksCache.expiresAt > this.#now().getTime()) {
+      return this.#localTasksCache.tasks;
+    }
     await this.#ensureEndpoint();
     const stored = await this.#bindingStore.load();
     const cloudTasks = await this.#api.listContextTasks();
@@ -68530,7 +68748,7 @@ var ContextSyncCoordinator = class {
     const byNativeId = new Map(
       stored.map((binding) => [binding.nativeThreadId, binding])
     );
-    return this.#withAdapter(async (adapter) => {
+    const tasks = await this.#withAdapter(async (adapter) => {
       const discovered = await adapter.discoverProjectsAndTasks({
         currentCwd: this.#currentCwd
       });
@@ -68622,6 +68840,27 @@ var ContextSyncCoordinator = class {
         (left, right) => Number(right.isCurrentWorkspace) - Number(left.isCurrentWorkspace) || right.updatedAt - left.updatedAt || left.taskId.localeCompare(right.taskId)
       );
     });
+    this.#localTasksCache = {
+      expiresAt: this.#now().getTime() + 3e4,
+      tasks: Object.freeze([...tasks])
+    };
+    return this.#localTasksCache.tasks;
+  }
+  async selectLocalTaskByNativeThreadId(nativeThreadId) {
+    const exactNativeThreadId = nativeThreadId.trim();
+    if (exactNativeThreadId.length === 0) {
+      throw new Error("context_current_task_identity_unavailable");
+    }
+    const tasks = await this.listLocalTasks();
+    const exactTaskToken = contextLocalTaskToken(
+      this.#endpointId,
+      exactNativeThreadId
+    );
+    const selected = tasks.find((task) => task.taskToken === exactTaskToken);
+    if (selected === void 0) {
+      throw new Error("context_current_task_unavailable");
+    }
+    return selected;
   }
   async saveLocalTask(taskToken, options = {}) {
     const binding = await this.#bindingForTaskToken(taskToken);
@@ -68827,7 +69066,10 @@ var ContextSyncCoordinator = class {
   async resolveSaveReview(taskToken, decision) {
     const binding = await this.#bindingForTaskToken(taskToken);
     if (decision === "keep_separate") {
-      return this.saveLocalTask(taskToken, { linkDecision: "keep_separate" });
+      const saved2 = await this.saveLocalTask(taskToken, {
+        linkDecision: "keep_separate"
+      });
+      return { ...saved2, resolvedTaskId: binding.agentHallTaskId };
     }
     const candidates = await this.#sameNameCandidates(binding);
     if (candidates.length !== 1) {
@@ -68855,7 +69097,7 @@ var ContextSyncCoordinator = class {
     if (saved.status === "review_required") {
       throw new Error("context_save_candidate_changed");
     }
-    return saved;
+    return { ...saved, resolvedTaskId: rebound.agentHallTaskId };
   }
   async authorizeWorkMaterials(taskToken) {
     const binding = await this.#bindingForTaskToken(taskToken);
@@ -68934,13 +69176,102 @@ var ContextSyncCoordinator = class {
     }
     return enriched;
   }
+  async verifyHostContinuationThread(input) {
+    if (this.#resolveAssignedProject === void 0) {
+      throw new Error("app_server_visible_project_unavailable");
+    }
+    if (input.destinationKind === "projectless") return;
+    const targetCwd = await this.#resolveStartCwd?.(input.projectName);
+    if (targetCwd === void 0) {
+      throw new Error("app_server_visible_project_unavailable");
+    }
+    const assigned = await this.#resolveAssignedProject({
+      nativeThreadId: input.nativeThreadId,
+      cwd: targetCwd
+    });
+    if (assigned?.projectName !== input.projectName) {
+      throw new Error("app_server_thread_project_not_visible");
+    }
+  }
+  async prepareHostWriterContinuation(input) {
+    await this.#ensureEndpoint();
+    const task = (await this.#api.listContextTasks()).find(
+      (entry) => entry.taskId === input.taskId
+    );
+    if (task === void 0) throw new Error("context_cloud_task_unavailable");
+    const checkpoint = await this.#api.getContextCheckpoint(input.checkpointId);
+    if (checkpoint.context.agentHallTaskId !== task.taskId) {
+      throw new Error("context_checkpoint_task_mismatch");
+    }
+    await this.#workMaterials.verify(checkpoint.context.materials);
+    const prepared = await this.#withAdapter(
+      (adapter) => adapter.prepareHostWriterContinuation(checkpoint.context, {
+        nativeThreadId: input.nativeThreadId,
+        taskName: task.taskDisplayName,
+        projectName: task.projectDisplayName,
+        destinationKind: input.destinationKind
+      })
+    );
+    return prepared;
+  }
+  async completeHostWriterContinuation(input) {
+    await this.#ensureEndpoint();
+    const task = (await this.#api.listContextTasks()).find(
+      (entry) => entry.taskId === input.taskId
+    );
+    if (task === void 0) throw new Error("context_cloud_task_unavailable");
+    const checkpoint = await this.#api.getContextCheckpoint(input.checkpointId);
+    if (checkpoint.context.agentHallTaskId !== task.taskId) {
+      throw new Error("context_checkpoint_task_mismatch");
+    }
+    const materials = await this.#workMaterials.verify(
+      checkpoint.context.materials
+    );
+    const completed = await this.#withAdapter(
+      (adapter) => adapter.completeHostWriterContinuation(checkpoint.context, {
+        nativeThreadId: input.nativeThreadId,
+        taskName: task.taskDisplayName,
+        projectName: task.projectDisplayName,
+        destinationKind: input.destinationKind,
+        ...input.baselineTurnId === void 0 ? {} : { baselineTurnId: input.baselineTurnId }
+      })
+    );
+    const binding = Object.freeze({
+      ...completed.binding,
+      projectId: task.projectId,
+      projectName: task.projectDisplayName,
+      taskName: task.taskDisplayName,
+      observedProjectName: completed.nativeProjectName,
+      observedTaskName: completed.nativeTaskName,
+      observedLocalWorkspaceKey: completed.binding.localWorkspaceKey,
+      projectMetadataRevision: task.projectMetadataRevision ?? 1,
+      taskMetadataRevision: task.taskMetadataRevision ?? 1,
+      projectMetadataDirty: false,
+      taskMetadataDirty: false,
+      checkpointId: input.checkpointId,
+      nativeUpdatedAt: completed.nativeUpdatedAt,
+      nativeUpdatedAtAtCheckpoint: completed.nativeUpdatedAt,
+      nativeContentRevisionAtCheckpoint: completed.nativeContentRevision
+    });
+    await this.#replaceContinuationBinding(binding);
+    this.#localTasksCache = void 0;
+    return {
+      status: "continued",
+      mode: "host_writer_context",
+      taskId: task.taskId,
+      nativeThreadId: binding.nativeThreadId,
+      turnId: completed.turnId,
+      threadUrl: completed.threadUrl,
+      ...materialContinueResult(materials)
+    };
+  }
   async prepareFirstRestore(input) {
     const existingBatches = await this.#importBatches.load();
     if (existingBatches.some((batch) => batch.status === "applied")) {
       return { status: "ready" };
     }
     const [localTasks, cloudTasks] = await Promise.all([
-      this.listLocalTasks(),
+      this.listLocalTasks({ preferCached: true }),
       this.#api.listContextTasks()
     ]);
     const selected = cloudTasks.find((task) => task.taskId === input.taskId);
@@ -69039,10 +69370,9 @@ var ContextSyncCoordinator = class {
   }
   async continueFromCloud(input, importBatchId, operation) {
     await this.#ensureEndpoint();
-    const [localTasks, cloudTasks] = await Promise.all([
-      this.listLocalTasks(),
-      this.#api.listContextTasks()
-    ]);
+    const precreatedByHost = operation?.precreatedByHost === true && operation.state?.nativeThreadId !== void 0;
+    const cloudTasks = await this.#api.listContextTasks();
+    const localTasks = precreatedByHost ? [] : await this.listLocalTasks({ preferCached: true });
     const task = cloudTasks.find((entry) => entry.taskId === input.taskId);
     if (task === void 0) throw new Error("context_cloud_task_unavailable");
     const alreadyLoaded = localTasks.some(
@@ -69059,7 +69389,7 @@ var ContextSyncCoordinator = class {
     const nativeBinding = stored.find(
       (entry) => entry.agentHallTaskId === task.taskId && entry.checkpointId === input.checkpointId
     );
-    if (nativeBinding !== void 0) {
+    if (!precreatedByHost && nativeBinding !== void 0) {
       const resumed = await this.#withAdapter(
         (adapter) => adapter.resumeNative(nativeBinding, { taskName: task.taskDisplayName })
       );
@@ -69087,7 +69417,12 @@ var ContextSyncCoordinator = class {
     const started = await this.#withAdapter(
       (adapter) => adapter.startOrResumeFromPortableContext(checkpoint.context, {
         taskName: task.taskDisplayName,
-        ...operation === void 0 ? {} : { state: operation.state, checkpoint: operation.checkpoint }
+        projectName: task.projectDisplayName,
+        ...operation === void 0 ? {} : {
+          state: operation.state,
+          precreatedByHost: operation.precreatedByHost,
+          checkpoint: operation.checkpoint
+        }
       })
     );
     const binding = Object.freeze({
@@ -69108,6 +69443,7 @@ var ContextSyncCoordinator = class {
       nativeContentRevisionAtCheckpoint: started.nativeContentRevision
     });
     await this.#replaceContinuationBinding(binding);
+    this.#localTasksCache = void 0;
     if (importBatchId !== void 0) {
       await this.#recordImportBatch({
         importBatchId,
@@ -69193,6 +69529,7 @@ var ContextSyncCoordinator = class {
   }
   async #withAdapter(operation) {
     const client = await this.#appServer();
+    const resolveStartCwd = this.#resolveStartCwd;
     try {
       return await operation(
         new CodexAdapter({
@@ -69202,7 +69539,11 @@ var ContextSyncCoordinator = class {
           now: this.#now,
           summarize: summarizeCodexProjection,
           ...this.#resolveWorkspaceKey === void 0 ? {} : { resolveWorkspaceKey: this.#resolveWorkspaceKey },
-          ...this.#resolveProject === void 0 ? {} : { resolveProject: this.#resolveProject }
+          ...this.#resolveProject === void 0 ? {} : { resolveProject: this.#resolveProject },
+          ...this.#resolveAssignedProject === void 0 ? {} : { resolveAssignedProject: this.#resolveAssignedProject },
+          ...resolveStartCwd === void 0 ? {} : {
+            resolveStartCwd: ({ projectName }) => resolveStartCwd(projectName)
+          }
         })
       );
     } finally {
@@ -69910,12 +70251,42 @@ var CodexProjectRegistryResolver = class {
       }
       return void 0;
     }
+    if (isDefaultHomeWorkspace(project)) return projectlessProject();
     const migrationWorkspaceKey = await this.#legacyWorkspaceKey(project);
     return {
       projectName: project.name,
       localWorkspaceKey: `workspace_codex_${digest4(project.id).slice(0, 24)}`,
       ...migrationWorkspaceKey === void 0 ? {} : { migrationWorkspaceKey }
     };
+  }
+  async resolveAssignedProject(input) {
+    const snapshot = await this.#load();
+    const assignedId = snapshot.assignments.get(input.nativeThreadId);
+    if (assignedId === void 0) return void 0;
+    const project = snapshot.projects.get(assignedId);
+    if (project === void 0 || !containsRoot(project, input.cwd)) {
+      return void 0;
+    }
+    if (isDefaultHomeWorkspace(project)) return projectlessProject();
+    const migrationWorkspaceKey = await this.#legacyWorkspaceKey(project);
+    return {
+      projectName: project.name,
+      localWorkspaceKey: `workspace_codex_${digest4(project.id).slice(0, 24)}`,
+      ...migrationWorkspaceKey === void 0 ? {} : { migrationWorkspaceKey }
+    };
+  }
+  async resolveStartCwd(projectName) {
+    const snapshot = await this.#load();
+    if (!snapshot.available) return void 0;
+    const requestedName = projectName?.trim();
+    const named = requestedName === void 0 || requestedName === "" ? [] : [...snapshot.projects.values()].filter(
+      (project2) => project2.name.trim() === requestedName
+    );
+    const project = named.length === 1 ? named[0] : void 0;
+    if (project !== void 0 && isDefaultHomeWorkspace(project)) {
+      return void 0;
+    }
+    return project?.rootPaths.find((root) => root.trim() !== "");
   }
   async #legacyWorkspaceKey(project) {
     const root = project.rootPaths[0];
@@ -69941,6 +70312,17 @@ var CodexProjectRegistryResolver = class {
     return matches.length === 1 ? matches[0] : void 0;
   }
 };
+function projectlessProject() {
+  return {
+    projectName: "\u72EC\u7ACB\u4EFB\u52A1",
+    localWorkspaceKey: "workspace_codex_projectless"
+  };
+}
+function isDefaultHomeWorkspace(project) {
+  if (project.rootPaths.length !== 1) return false;
+  const home = (0, import_node_path9.normalize)((0, import_node_os3.homedir)());
+  return (0, import_node_path9.normalize)(project.rootPaths[0] ?? "") === home && project.name.trim() === (0, import_node_path9.basename)(home);
+}
 var EMPTY_SNAPSHOT = {
   available: false,
   projects: /* @__PURE__ */ new Map(),
@@ -70193,11 +70575,25 @@ var LocalOperationCoordinator = class {
     if (claimed.claimed) this.#schedule(claimed.record);
     return operationSnapshot(claimed.record);
   }
+  async readInput(operationId) {
+    assertOperationId(operationId);
+    const operations = await this.#store.load();
+    const existing = operations.find(
+      (entry) => entry.operationId === operationId
+    );
+    if (existing === void 0) {
+      throw new Error("local_operation_not_found");
+    }
+    return structuredClone(existing.input);
+  }
   async bootstrap() {
     const operations = await this.#store.load();
     return [...operations].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt)).map(operationSnapshot);
   }
   async acknowledge(operationId) {
+    return this.completeAwaitingAcknowledgement(operationId, {});
+  }
+  async completeAwaitingAcknowledgement(operationId, result2) {
     assertOperationId(operationId);
     return this.#store.transaction((current) => {
       const existing = current.find(
@@ -70217,6 +70613,10 @@ var LocalOperationCoordinator = class {
         status: "succeeded",
         phase: "succeeded",
         progress: 100,
+        result: {
+          ...existing.result ?? {},
+          ...structuredClone(result2)
+        },
         updatedAt: this.#now().toISOString()
       };
       return {
@@ -70229,6 +70629,11 @@ var LocalOperationCoordinator = class {
     while (this.#active.size > 0) {
       await Promise.all([...this.#active.values()]);
     }
+  }
+  async waitForIdle(operationId) {
+    assertOperationId(operationId);
+    await this.#active.get(operationId);
+    return this.status(operationId);
   }
   #claimIfAvailable(operation, now, allowRetry = false) {
     if (operation.status === "awaiting_ack" || operation.status === "succeeded" || operation.status === "failed" && (!allowRetry || operation.error?.retryable !== true)) {
@@ -70244,10 +70649,17 @@ var LocalOperationCoordinator = class {
     }
     const generation = (operation.owner?.generation ?? 0) + 1;
     const retryableOperation = withoutOperationError(operation);
+    const attempt = operation.attempt + 1;
+    const attemptReason = localOperationAttemptReason(operation);
     const claimed = {
       ...retryableOperation,
       status: "running",
-      attempt: operation.attempt + 1,
+      attempt,
+      attemptReason,
+      attemptHistory: [
+        ...operation.attemptHistory ?? [],
+        { attempt, reason: attemptReason, startedAt: now.toISOString() }
+      ],
       owner: {
         ownerId: this.#ownerId,
         generation,
@@ -70478,6 +70890,7 @@ function operationSnapshot(operation) {
     phase: operation.phase,
     progress: operation.progress,
     attempt: operation.attempt,
+    ...operation.attemptReason === void 0 ? {} : { attemptReason: operation.attemptReason },
     createdAt: operation.createdAt,
     updatedAt: operation.updatedAt,
     ...subject === void 0 ? {} : { subject },
@@ -70562,6 +70975,8 @@ function parseOperation(value) {
     throw new Error("local_operation_record_invalid");
   }
   const error51 = value.error === void 0 ? void 0 : parseOperationError(value.error);
+  const attemptReason = value.attemptReason === void 0 ? void 0 : parseAttemptReason(value.attemptReason);
+  const attemptHistory = value.attemptHistory === void 0 ? void 0 : parseAttemptHistory(value.attemptHistory);
   return {
     version: LOCAL_OPERATION_CONTRACT_VERSION,
     operationId: value.operationId,
@@ -70572,12 +70987,43 @@ function parseOperation(value) {
     phase: value.phase,
     progress: value.progress,
     attempt: value.attempt,
+    ...attemptReason === void 0 ? {} : { attemptReason },
+    ...attemptHistory === void 0 ? {} : { attemptHistory },
     owner,
     createdAt: value.createdAt,
     updatedAt: value.updatedAt,
     ...result2 === void 0 ? {} : { result: structuredClone(result2) },
     ...error51 === void 0 ? {} : { error: error51 }
   };
+}
+function localOperationAttemptReason(operation) {
+  if (operation.attempt === 0) return "initial";
+  if (operation.status === "failed") return "user_retry";
+  if (operation.status === "running" && operation.owner !== null) {
+    return "lease_recovery";
+  }
+  return "process_recovery";
+}
+function parseAttemptReason(value) {
+  if (value !== "initial" && value !== "user_retry" && value !== "lease_recovery" && value !== "process_recovery") {
+    throw new Error("local_operation_record_invalid");
+  }
+  return value;
+}
+function parseAttemptHistory(value) {
+  if (!Array.isArray(value)) {
+    throw new Error("local_operation_record_invalid");
+  }
+  return value.map((entry) => {
+    if (!isRecord3(entry) || typeof entry.attempt !== "number" || !Number.isSafeInteger(entry.attempt) || entry.attempt < 1 || !isIsoDate2(entry.startedAt)) {
+      throw new Error("local_operation_record_invalid");
+    }
+    return {
+      attempt: entry.attempt,
+      reason: parseAttemptReason(entry.reason),
+      startedAt: entry.startedAt
+    };
+  });
 }
 function parseOwner(value) {
   if (value === null) return null;
@@ -70749,6 +71195,205 @@ function isMissing5(error51) {
   return isRecord4(error51) && error51.code === "ENOENT";
 }
 
+// connectors/agenthall-codex-mcp/src/host-continuation-tickets.ts
+var import_node_crypto19 = require("node:crypto");
+var import_promises13 = require("node:fs/promises");
+var STORE_VERSION2 = 1;
+var DEFAULT_TTL_MS = 10 * 60 * 1e3;
+var MAX_TICKETS = 100;
+var JsonHostContinuationTicketStore = class {
+  constructor(path, options = {}) {
+    this.path = path;
+    this.#now = options.now ?? (() => /* @__PURE__ */ new Date());
+    this.#ttlMs = options.ttlMs ?? DEFAULT_TTL_MS;
+    if (!Number.isSafeInteger(this.#ttlMs) || this.#ttlMs < 1e3) {
+      throw new Error("host_continuation_ticket_ttl_invalid");
+    }
+  }
+  #now;
+  #ttlMs;
+  async prepare(input) {
+    validateName(input.taskId, "task");
+    validateName(input.checkpointId, "checkpoint");
+    validateName(input.taskName, "task_name");
+    validateName(input.projectName, "project_name");
+    return this.#transaction((tickets) => {
+      const now = this.#now();
+      const existing = [...tickets].reverse().find(
+        (entry) => entry.taskId === input.taskId && entry.checkpointId === input.checkpointId && new Date(entry.expiresAt).getTime() >= now.getTime()
+      );
+      if (existing !== void 0) {
+        return { tickets, value: view(existing) };
+      }
+      const created = {
+        ticket: `hostct_${(0, import_node_crypto19.randomBytes)(24).toString("hex")}`,
+        ...input,
+        status: "prepared",
+        createdAt: now.toISOString(),
+        expiresAt: new Date(now.getTime() + this.#ttlMs).toISOString()
+      };
+      return {
+        tickets: [...tickets, created].slice(-MAX_TICKETS),
+        value: view(created)
+      };
+    });
+  }
+  async claim(ticket) {
+    validateTicket(ticket);
+    return this.#transaction((tickets) => {
+      const index = tickets.findIndex((entry) => entry.ticket === ticket);
+      if (index < 0) throw new Error("host_continuation_ticket_unavailable");
+      const current = tickets[index];
+      this.#assertFresh(current);
+      if (current.status === "attached") {
+        return { tickets, value: { ...view(current), status: "attached" } };
+      }
+      if (current.status === "claimed") {
+        return {
+          tickets,
+          value: { ...view(current), status: "already_claimed" }
+        };
+      }
+      const claimed = {
+        ...current,
+        status: "claimed",
+        claimedAt: this.#now().toISOString()
+      };
+      return {
+        tickets: replaceAt(tickets, index, claimed),
+        value: { ...view(claimed), status: "ready_to_create" }
+      };
+    });
+  }
+  async attach(input) {
+    validateTicket(input.ticket);
+    validateName(input.nativeThreadId, "thread");
+    return this.#transaction((tickets) => {
+      const index = tickets.findIndex((entry) => entry.ticket === input.ticket);
+      if (index < 0) throw new Error("host_continuation_ticket_unavailable");
+      const current = tickets[index];
+      this.#assertFresh(current);
+      if (current.status === "prepared") {
+        throw new Error("host_continuation_ticket_not_claimed");
+      }
+      if (current.status === "attached") {
+        if (current.nativeThreadId !== input.nativeThreadId || current.destinationKind !== void 0 && current.destinationKind !== input.destinationKind) {
+          throw new Error("host_continuation_ticket_thread_conflict");
+        }
+        return {
+          tickets,
+          value: {
+            ...view(current),
+            status: "attached",
+            nativeThreadId: input.nativeThreadId
+          }
+        };
+      }
+      const attached = {
+        ...current,
+        status: "attached",
+        nativeThreadId: input.nativeThreadId,
+        destinationKind: input.destinationKind,
+        attachedAt: this.#now().toISOString()
+      };
+      return {
+        tickets: replaceAt(tickets, index, attached),
+        value: {
+          ...view(attached),
+          status: "attached",
+          nativeThreadId: input.nativeThreadId
+        }
+      };
+    });
+  }
+  #assertFresh(ticket) {
+    if (new Date(ticket.expiresAt).getTime() < this.#now().getTime()) {
+      throw new Error("host_continuation_ticket_expired");
+    }
+  }
+  async #transaction(update) {
+    return withPrivateJsonLock(
+      this.path,
+      async () => {
+        const current = await this.#load();
+        const next = update(current);
+        await atomicWritePrivateJson(this.path, {
+          version: STORE_VERSION2,
+          tickets: next.tickets
+        });
+        return next.value;
+      },
+      { timeoutCode: "host_continuation_ticket_store_lock_timeout" }
+    );
+  }
+  async #load() {
+    try {
+      const parsed = JSON.parse(await (0, import_promises13.readFile)(this.path, "utf8"));
+      if (!isRecord5(parsed) || parsed.version !== STORE_VERSION2) return [];
+      if (!Array.isArray(parsed.tickets)) return [];
+      return parsed.tickets.map(parseTicket);
+    } catch (error51) {
+      if (isRecord5(error51) && error51.code === "ENOENT") return [];
+      throw error51;
+    }
+  }
+};
+function parseTicket(input) {
+  if (!isRecord5(input)) throw new Error("host_continuation_ticket_invalid");
+  const status = input.status;
+  if (status !== "prepared" && status !== "claimed" && status !== "attached") {
+    throw new Error("host_continuation_ticket_invalid");
+  }
+  for (const key of [
+    "ticket",
+    "taskId",
+    "checkpointId",
+    "taskName",
+    "projectName",
+    "createdAt",
+    "expiresAt"
+  ]) {
+    if (typeof input[key] !== "string" || input[key].length === 0) {
+      throw new Error("host_continuation_ticket_invalid");
+    }
+  }
+  const nativeThreadId = input.nativeThreadId;
+  if (status === "attached" && typeof nativeThreadId !== "string") {
+    throw new Error("host_continuation_ticket_invalid");
+  }
+  if (input.destinationKind !== void 0 && input.destinationKind !== "named_project" && input.destinationKind !== "projectless") {
+    throw new Error("host_continuation_ticket_invalid");
+  }
+  return input;
+}
+function view(input) {
+  return {
+    ticket: input.ticket,
+    taskId: input.taskId,
+    checkpointId: input.checkpointId,
+    taskName: input.taskName,
+    projectName: input.projectName,
+    ...input.nativeThreadId === void 0 ? {} : { nativeThreadId: input.nativeThreadId },
+    ...input.destinationKind === void 0 ? {} : { destinationKind: input.destinationKind }
+  };
+}
+function replaceAt(values, index, value) {
+  return values.map((entry, current) => current === index ? value : entry);
+}
+function validateTicket(ticket) {
+  if (!/^hostct_[a-f0-9]{48}$/u.test(ticket)) {
+    throw new Error("host_continuation_ticket_invalid");
+  }
+}
+function validateName(value, kind) {
+  if (value.trim() === "" || value.length > 512) {
+    throw new Error(`host_continuation_${kind}_invalid`);
+  }
+}
+function isRecord5(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
 // connectors/agenthall-codex-mcp/src/runtime.ts
 var AgentHallMcpRuntime = class {
   #baseUrl;
@@ -70767,6 +71412,7 @@ var AgentHallMcpRuntime = class {
   #operationCoordinator;
   #operationAccountScope;
   #operationEndpointId;
+  #hostContinuationTickets;
   #pairings = /* @__PURE__ */ new Map();
   #drafts = /* @__PURE__ */ new Map();
   #connectionActionTokens = /* @__PURE__ */ new Map();
@@ -71181,7 +71827,7 @@ var AgentHallMcpRuntime = class {
       );
       const context = await client.handoffContext(connection.connectionId);
       const createdAt = this.#now();
-      const handoffId = `handoff_${(0, import_node_crypto19.randomUUID)().replaceAll("-", "")}`;
+      const handoffId = `handoff_${(0, import_node_crypto20.randomUUID)().replaceAll("-", "")}`;
       const masterKey = localMasterKey(client.connectorCredentials());
       try {
         const artifact = await prepareAttachmentDraft({
@@ -71315,6 +71961,21 @@ var AgentHallMcpRuntime = class {
       action: "save"
     });
   }
+  async saveCurrentContextTask(requestMeta) {
+    return this.#protect(async () => {
+      const nativeThreadId = codexCurrentThreadIdFromMeta(requestMeta);
+      const selected = await (await this.#context()).selectLocalTaskByNativeThreadId(nativeThreadId);
+      const started = await this.#startContextSaveOperationValue({
+        taskToken: selected.taskToken,
+        nativeUpdatedAt: selected.updatedAt,
+        action: "save_current"
+      });
+      const terminal = await this.#requireOperations().waitForIdle(
+        started.operationId
+      );
+      return { ...terminal };
+    });
+  }
   async resolveContextSaveReview(taskToken, decision, nativeUpdatedAt) {
     return this.#startContextSaveOperation({
       taskToken,
@@ -71324,32 +71985,33 @@ var AgentHallMcpRuntime = class {
     });
   }
   #startContextSaveOperation(input) {
-    return this.#protect(async () => {
-      if (!Number.isSafeInteger(input.nativeUpdatedAt)) {
-        throw new Error("context_save_revision_invalid");
+    return this.#protect(async () => ({
+      ...await this.#startContextSaveOperationValue(input)
+    }));
+  }
+  async #startContextSaveOperationValue(input) {
+    if (!Number.isSafeInteger(input.nativeUpdatedAt)) {
+      throw new Error("context_save_revision_invalid");
+    }
+    await this.#context();
+    return this.#requireOperations().start({
+      operationKey: localOperationKey({
+        accountScope: this.#operationAccountScope,
+        endpointId: this.#operationEndpointId,
+        kind: "context_save",
+        subjectId: `${input.taskToken}:${input.action}:${input.decision ?? "none"}`,
+        checkpointId: String(input.nativeUpdatedAt),
+        hostKind: this.#connectorType
+      }),
+      kind: "context_save",
+      input: {
+        taskId: `${input.taskToken}:${input.action}:${input.decision ?? "none"}`,
+        checkpointId: String(input.nativeUpdatedAt),
+        taskToken: input.taskToken,
+        nativeUpdatedAt: input.nativeUpdatedAt,
+        action: input.action,
+        ...input.decision === void 0 ? {} : { decision: input.decision }
       }
-      await this.#context();
-      return {
-        ...await this.#requireOperations().start({
-          operationKey: localOperationKey({
-            accountScope: this.#operationAccountScope,
-            endpointId: this.#operationEndpointId,
-            kind: "context_save",
-            subjectId: `${input.taskToken}:${input.action}:${input.decision ?? "none"}`,
-            checkpointId: String(input.nativeUpdatedAt),
-            hostKind: this.#connectorType
-          }),
-          kind: "context_save",
-          input: {
-            taskId: `${input.taskToken}:${input.action}:${input.decision ?? "none"}`,
-            checkpointId: String(input.nativeUpdatedAt),
-            taskToken: input.taskToken,
-            nativeUpdatedAt: input.nativeUpdatedAt,
-            action: input.action,
-            ...input.decision === void 0 ? {} : { decision: input.decision }
-          }
-        })
-      };
     });
   }
   async settleContextSavedLocalRevision(settlementToken, nativeUpdatedAt) {
@@ -71446,6 +72108,141 @@ var AgentHallMcpRuntime = class {
           kind: "context_continue",
           input
         })
+      };
+    });
+  }
+  async prepareHostContextContinuation(input) {
+    return this.#protect(async () => {
+      const context = await this.#context();
+      const task = (await context.listCloudTasks()).find(
+        (entry) => entry.taskId === input.taskId
+      );
+      if (task === void 0) throw new Error("context_cloud_task_unavailable");
+      const checkpoint = (await context.listCloudCheckpoints(input.taskId)).find((entry) => entry.checkpointId === input.checkpointId);
+      if (checkpoint === void 0) {
+        throw new Error("context_checkpoint_unavailable");
+      }
+      const prepared = await this.#requireHostContinuationTickets().prepare({
+        taskId: task.taskId,
+        checkpointId: checkpoint.checkpointId,
+        taskName: task.taskDisplayName,
+        projectName: task.projectDisplayName
+      });
+      return {
+        status: "host_action_required",
+        ticket: prepared.ticket,
+        prompt: [
+          `AgentHall continuation ticket: ${prepared.ticket}`,
+          "Follow the installed AgentHall open-agenthall skill host-continuation workflow exactly.",
+          "Do not create a second task when the ticket is already claimed or attached."
+        ].join("\n")
+      };
+    });
+  }
+  async claimHostContextContinuation(ticket) {
+    return this.#protect(async () => {
+      await this.#context();
+      const claimed = await this.#requireHostContinuationTickets().claim(ticket);
+      return {
+        status: claimed.status,
+        ticket: claimed.ticket,
+        taskName: claimed.taskName,
+        projectName: claimed.projectName,
+        creationMode: "project_or_projectless",
+        nextAction: claimed.status === "ready_to_create" ? "create_destination_task_wait_attach_send_complete" : claimed.status === "attached" ? "wait_for_existing_operation" : "do_not_create_another_task"
+      };
+    });
+  }
+  async attachHostContextContinuation(input) {
+    return this.#protect(async () => {
+      const context = await this.#context();
+      const claimed = await this.#requireHostContinuationTickets().claim(
+        input.ticket
+      );
+      await context.verifyHostContinuationThread({
+        nativeThreadId: input.nativeThreadId,
+        projectName: claimed.projectName,
+        destinationKind: input.destinationKind
+      });
+      const prepared = await context.prepareHostWriterContinuation({
+        taskId: claimed.taskId,
+        checkpointId: claimed.checkpointId,
+        nativeThreadId: input.nativeThreadId,
+        destinationKind: input.destinationKind
+      });
+      const attached = await this.#requireHostContinuationTickets().attach(input);
+      const operationKey = localOperationKey({
+        accountScope: this.#operationAccountScope,
+        endpointId: this.#operationEndpointId,
+        kind: "context_continue",
+        subjectId: attached.taskId,
+        checkpointId: attached.checkpointId,
+        hostKind: this.#connectorType
+      });
+      const operations = this.#requireOperations();
+      const started = await operations.start({
+        operationKey,
+        kind: "context_continue",
+        input: {
+          taskId: attached.taskId,
+          checkpointId: attached.checkpointId,
+          nativeThreadId: attached.nativeThreadId,
+          injectionMode: "host_writer",
+          ...prepared.baselineTurnId === void 0 ? {} : { baselineTurnId: prepared.baselineTurnId }
+        }
+      });
+      return {
+        ...await operations.waitForIdle(started.operationId),
+        hostWriterAction: {
+          nativeThreadId: attached.nativeThreadId,
+          prompt: prepared.prompt
+        }
+      };
+    });
+  }
+  async completeHostContextContinuation(input) {
+    return this.#protect(async () => {
+      const context = await this.#context();
+      const attached = await this.#requireHostContinuationTickets().claim(
+        input.ticket
+      );
+      if (attached.status !== "attached" || attached.nativeThreadId !== input.nativeThreadId) {
+        throw new Error("host_continuation_ticket_thread_conflict");
+      }
+      const operations = this.#requireOperations();
+      const operationKey = localOperationKey({
+        accountScope: this.#operationAccountScope,
+        endpointId: this.#operationEndpointId,
+        kind: "context_continue",
+        subjectId: attached.taskId,
+        checkpointId: attached.checkpointId,
+        hostKind: this.#connectorType
+      });
+      const operationId = `localop_${(0, import_node_crypto20.createHash)("sha256").update(operationKey).digest("hex").slice(0, 24)}`;
+      const operation = await operations.status(operationId);
+      if (operation.status === "succeeded") return { ...operation };
+      if (operation.status !== "awaiting_ack") {
+        throw new Error("host_continuation_operation_not_ready");
+      }
+      const operationInput = contextContinueInput({
+        input: await operations.readInput(operation.operationId)
+      });
+      if (operationInput.injectionMode !== "host_writer" || operationInput.nativeThreadId !== input.nativeThreadId) {
+        throw new Error("host_continuation_operation_not_ready");
+      }
+      const baselineTurnId = operationInput.baselineTurnId;
+      const completed = await context.completeHostWriterContinuation({
+        taskId: attached.taskId,
+        checkpointId: attached.checkpointId,
+        nativeThreadId: input.nativeThreadId,
+        destinationKind: attached.destinationKind ?? "named_project",
+        ...typeof baselineTurnId === "string" ? { baselineTurnId } : {}
+      });
+      return {
+        ...await operations.completeAwaitingAcknowledgement(
+          operation.operationId,
+          completed
+        )
       };
     });
   }
@@ -71615,6 +72412,8 @@ var AgentHallMcpRuntime = class {
       }),
       resolveWorkspaceKey: (cwd) => workspaceKeys.resolve(cwd),
       resolveProject: (input) => projectRegistry.resolve(input),
+      resolveAssignedProject: (input) => projectRegistry.resolveAssignedProject(input),
+      resolveStartCwd: (projectName) => projectRegistry.resolveStartCwd(projectName),
       appServer: () => CodexStdioAppServerClient.start({
         cwd: this.#currentCwd,
         experimentalApi: true,
@@ -71623,6 +72422,13 @@ var AgentHallMcpRuntime = class {
     });
     this.#operationAccountScope = accountStorage.accountScope;
     this.#operationEndpointId = accountStorage.endpointId;
+    this.#hostContinuationTickets = new JsonHostContinuationTicketStore(
+      (0, import_node_path11.join)(
+        this.#credentialDirectory,
+        `${this.#profile}.${accountStorage.accountScope}.host-continuation-tickets.json`
+      ),
+      { now: this.#now }
+    );
     this.#operationCoordinator = new LocalOperationCoordinator({
       store: new JsonLocalOperationStore(
         (0, import_node_path11.join)(
@@ -71666,31 +72472,52 @@ var AgentHallMcpRuntime = class {
         const selected = available?.find(
           (task) => task.taskToken === input.taskToken
         );
-        if (selected?.updatedAt !== input.nativeUpdatedAt) {
+        if (selected === void 0) {
           throw new Error("context_task_selection_expired");
         }
-        await checkpoint("saving_context", 38);
+        await checkpoint("saving_context", 38, {
+          selectedNativeUpdatedAt: selected.updatedAt
+        });
         const saved = input.action === "resolve" ? await this.#contextCoordinator?.resolveSaveReview(
           input.taskToken,
           input.decision
-        ) : await this.#contextCoordinator?.saveLocalTask(input.taskToken);
+        ) : await this.#contextCoordinator?.saveLocalTask(
+          input.taskToken,
+          input.action === "save_current" ? { linkDecision: "keep_separate" } : {}
+        );
         if (saved === void 0) {
           throw new Error("local_operation_context_unavailable");
         }
         await checkpoint("saved_context_verified", 94);
-        return { ...saved };
+        return { ...saved, savedLocalRevision: selected.updatedAt };
       }
     );
     this.#operationCoordinator.register(
       "context_continue",
       async ({ operation, checkpoint }) => {
         const input = contextContinueInput(operation);
-        const state = operationResultState(operation);
+        if (input.injectionMode === "host_writer") {
+          await checkpoint("host_writer_attached", 28, {
+            nativeThreadId: input.nativeThreadId,
+            ...input.baselineTurnId === void 0 ? {} : { baselineTurnId: input.baselineTurnId }
+          });
+          return {
+            awaitAcknowledgement: true,
+            phase: "awaiting_host_writer_turn",
+            progress: 58,
+            result: {
+              nativeThreadId: input.nativeThreadId,
+              ...input.baselineTurnId === void 0 ? {} : { baselineTurnId: input.baselineTurnId }
+            }
+          };
+        }
+        const state = operationResultState(operation) ?? (input.nativeThreadId === void 0 ? void 0 : { nativeThreadId: input.nativeThreadId });
         const continued = await this.#contextCoordinator?.continueFromCloud(
-          input,
+          { taskId: input.taskId, checkpointId: input.checkpointId },
           void 0,
           {
             ...state === void 0 ? {} : { state },
+            ...input.nativeThreadId === void 0 ? {} : { precreatedByHost: true },
             checkpoint: (phase, progress, checkpointState) => checkpoint(phase, progress, { ...checkpointState }).then(
               () => void 0
             )
@@ -71714,6 +72541,12 @@ var AgentHallMcpRuntime = class {
       throw new Error("local_operation_coordinator_unavailable");
     }
     return this.#operationCoordinator;
+  }
+  #requireHostContinuationTickets() {
+    if (this.#hostContinuationTickets === void 0) {
+      throw new Error("host_continuation_ticket_store_unavailable");
+    }
+    return this.#hostContinuationTickets;
   }
   async #finishWidgetPairing(client, pending) {
     const credentials = await client.exchange(pending.pairing, pending);
@@ -71797,7 +72630,7 @@ var AgentHallMcpRuntime = class {
   #connectionActionToken(connectionId) {
     const existing = this.#connectionTokensById.get(connectionId);
     if (existing !== void 0) return existing;
-    const token = `connection_action_${(0, import_node_crypto19.randomUUID)().replaceAll("-", "")}`;
+    const token = `connection_action_${(0, import_node_crypto20.randomUUID)().replaceAll("-", "")}`;
     this.#connectionTokensById.set(connectionId, token);
     this.#connectionActionTokens.set(token, connectionId);
     return token;
@@ -71816,12 +72649,119 @@ async function semanticRecipientResult(client, expression) {
   );
   return { connections, totalMatches: connections.length };
 }
+function codexCurrentThreadIdFromMeta(meta3) {
+  if (meta3 === null || typeof meta3 !== "object" || Array.isArray(meta3)) {
+    throw new Error("context_current_task_identity_unavailable");
+  }
+  const record4 = meta3;
+  const snake = typeof record4.thread_id === "string" ? record4.thread_id.trim() : "";
+  const camel = typeof record4.threadId === "string" ? record4.threadId.trim() : "";
+  if (snake.length > 0 && camel.length > 0 && snake !== camel) {
+    throw new Error("context_current_task_identity_conflict");
+  }
+  const nativeThreadId = snake || camel;
+  if (nativeThreadId.length === 0) {
+    throw new Error("context_current_task_identity_unavailable");
+  }
+  return nativeThreadId;
+}
 function mapExpectedLocalError(error51) {
   if (error51 instanceof HandoffConfirmationStaleError) {
     return {
       code: "CONFIRMATION_EXPIRED",
       retryable: true,
       action: "preview_again"
+    };
+  }
+  if (error51 instanceof Error && error51.message === "context_current_task_identity_unavailable") {
+    return {
+      code: "CODEX_CURRENT_TASK_ID_UNAVAILABLE",
+      retryable: true,
+      action: "retry"
+    };
+  }
+  if (error51 instanceof Error && error51.message === "context_current_task_identity_conflict") {
+    return {
+      code: "CODEX_CURRENT_TASK_ID_CONFLICT",
+      retryable: true,
+      action: "retry"
+    };
+  }
+  if (error51 instanceof Error && error51.message === "context_current_task_unavailable") {
+    return {
+      code: "CODEX_CURRENT_TASK_UNAVAILABLE",
+      retryable: true,
+      action: "retry"
+    };
+  }
+  if (error51 instanceof Error && error51.message === "context_task_selection_expired") {
+    return {
+      code: "CONTEXT_TASK_SELECTION_EXPIRED",
+      retryable: true,
+      action: "retry"
+    };
+  }
+  if (error51 instanceof Error && (error51.message === "app_server_thread_resume_unavailable" || error51.message === "app_server_thread_resume_invalid")) {
+    return {
+      code: "CODEX_THREAD_RESUME_UNAVAILABLE",
+      retryable: true,
+      action: "retry"
+    };
+  }
+  if (error51 instanceof Error && error51.message === "app_server_thread_read_unavailable") {
+    return {
+      code: "CODEX_THREAD_READ_UNAVAILABLE",
+      retryable: true,
+      action: "retry"
+    };
+  }
+  if (error51 instanceof Error && error51.message === "app_server_thread_busy") {
+    return {
+      code: "CODEX_THREAD_BUSY",
+      retryable: true,
+      action: "retry"
+    };
+  }
+  if (error51 instanceof Error && error51.message === "app_server_turn_start_failed") {
+    return {
+      code: "CODEX_TURN_START_FAILED",
+      retryable: true,
+      action: "retry"
+    };
+  }
+  if (error51 instanceof Error && error51.message === "app_server_turn_start_invalid") {
+    return {
+      code: "CODEX_TURN_START_INVALID",
+      retryable: true,
+      action: "retry"
+    };
+  }
+  if (error51 instanceof Error && error51.message === "app_server_host_writer_prompt_unconfirmed") {
+    return {
+      code: "CODEX_CONTEXT_PROMPT_UNCONFIRMED",
+      retryable: true,
+      action: "retry"
+    };
+  }
+  if (error51 instanceof Error && (error51.message === "app_server_turn_final_unconfirmed" || error51.message === "app_server_turn_incomplete" || error51.message === "app_server_host_writer_baseline_unavailable" || error51.message === "app_server_host_writer_final_unconfirmed" || error51.message === "app_server_host_writer_turn_unconfirmed")) {
+    return {
+      code: "CODEX_TURN_FINAL_UNCONFIRMED",
+      retryable: true,
+      action: "retry"
+    };
+  }
+  if (error51 instanceof Error && error51.message === "host_continuation_operation_not_ready") {
+    return {
+      code: "CODEX_HOST_WRITER_OPERATION_NOT_READY",
+      retryable: true,
+      action: "retry"
+    };
+  }
+  if (error51 instanceof Error && (error51.message === "app_server_visible_project_unavailable" || error51.message === "app_server_thread_project_not_visible")) {
+    return {
+      code: "CODEX_VISIBLE_PROJECT_UNAVAILABLE",
+      retryable: true,
+      action: "retry"
     };
   }
   if (error51 instanceof Error && (error51.message.startsWith("app_server_") || "code" in error51 && (error51.code === "EACCES" || error51.code === "EPERM"))) {
@@ -71836,17 +72776,26 @@ function mapExpectedLocalError(error51) {
 function contextContinueInput(operation) {
   const taskId = operation.input.taskId;
   const checkpointId = operation.input.checkpointId;
-  if (typeof taskId !== "string" || taskId.length === 0 || typeof checkpointId !== "string" || checkpointId.length === 0) {
+  const nativeThreadId = operation.input.nativeThreadId;
+  const injectionMode = operation.input.injectionMode;
+  const baselineTurnId = operation.input.baselineTurnId;
+  if (typeof taskId !== "string" || taskId.length === 0 || typeof checkpointId !== "string" || checkpointId.length === 0 || nativeThreadId !== void 0 && (typeof nativeThreadId !== "string" || nativeThreadId.length === 0) || injectionMode !== void 0 && injectionMode !== "host_writer" || baselineTurnId !== void 0 && (typeof baselineTurnId !== "string" || baselineTurnId.length === 0) || injectionMode === "host_writer" && nativeThreadId === void 0) {
     throw new Error("local_operation_input_invalid");
   }
-  return { taskId, checkpointId };
+  return {
+    taskId,
+    checkpointId,
+    ...nativeThreadId === void 0 ? {} : { nativeThreadId },
+    ...injectionMode === void 0 ? {} : { injectionMode },
+    ...baselineTurnId === void 0 ? {} : { baselineTurnId }
+  };
 }
 function contextSaveInput(operation) {
   const taskToken = operation.input.taskToken;
   const nativeUpdatedAt = operation.input.nativeUpdatedAt;
   const action = operation.input.action;
   const decision = operation.input.decision;
-  if (typeof taskToken !== "string" || taskToken.length === 0 || !Number.isSafeInteger(nativeUpdatedAt) || action !== "save" && action !== "resolve" || action === "resolve" && decision !== "continue_existing" && decision !== "keep_separate") {
+  if (typeof taskToken !== "string" || taskToken.length === 0 || !Number.isSafeInteger(nativeUpdatedAt) || action !== "save" && action !== "save_current" && action !== "resolve" || action === "resolve" && decision !== "continue_existing" && decision !== "keep_separate") {
     throw new Error("local_operation_input_invalid");
   }
   return {
@@ -71992,7 +72941,7 @@ function safeIsoDateTime(value) {
 
 // connectors/agenthall-codex-mcp/src/server.ts
 var import_meta = {};
-var VERSION = "0.3.1-alpha.84";
+var VERSION = "0.3.1-alpha.103";
 var MODULE_URL = import_meta.url || (0, import_node_url.pathToFileURL)((0, import_node_path12.resolve)(process.argv[1] ?? ".")).href;
 var SIDEBAR_TEMPLATE_URI = `ui://agenthall/sidebar-v${VERSION}.html`;
 var HANDOFF_CONFIRMATION_TEMPLATE_URI = "ui://agenthall/handoff-confirmation-v4.html";
@@ -72237,6 +73186,7 @@ var localOperationSchema = object2({
   phase: string2(),
   progress: number2().int().min(0).max(100),
   attempt: number2().int().nonnegative(),
+  attemptReason: _enum2(["initial", "user_retry", "lease_recovery", "process_recovery"]).optional(),
   createdAt: string2().datetime({ offset: true }),
   updatedAt: string2().datetime({ offset: true }),
   subject: object2({
@@ -72251,6 +73201,40 @@ var localOperationSchema = object2({
   }).optional()
 });
 var continueContextOutputSchema = successOutputSchema(localOperationSchema);
+var prepareHostContinuationOutputSchema = successOutputSchema(
+  object2({
+    status: literal("host_action_required"),
+    ticket: string2().regex(/^hostct_[a-f0-9]{48}$/u),
+    prompt: string2().min(1)
+  })
+);
+var claimHostContinuationOutputSchema = successOutputSchema(
+  object2({
+    status: _enum2(["ready_to_create", "already_claimed", "attached"]),
+    ticket: string2().regex(/^hostct_[a-f0-9]{48}$/u),
+    taskName: string2().min(1),
+    projectName: string2().min(1),
+    creationMode: literal("project_or_projectless"),
+    nextAction: _enum2([
+      "create_destination_task_wait_attach_send_complete",
+      "do_not_create_another_task",
+      "wait_for_existing_operation"
+    ])
+  })
+);
+var attachHostContinuationOutputSchema = successOutputSchema(
+  lazy(
+    () => localOperationSchema.extend({
+      hostWriterAction: object2({
+        nativeThreadId: string2().min(1),
+        prompt: string2().min(1)
+      })
+    })
+  )
+);
+var completeHostContinuationOutputSchema = successOutputSchema(
+  lazy(() => localOperationSchema)
+);
 var localOperationStatusOutputSchema = successOutputSchema(localOperationSchema);
 var localOperationBootstrapOutputSchema = successOutputSchema(
   object2({ operations: array(localOperationSchema) })
@@ -72311,17 +73295,26 @@ var CODEX_CONTEXT_TOOL_NAMES = Object.freeze([
   "agenthall_context_endpoints",
   "agenthall_context_endpoint_remove",
   "agenthall_context_cloud_checkpoints",
+  "agenthall_context_host_prepare",
   "agenthall_context_continue",
   "agenthall_context_restore_preview",
   "agenthall_context_restore_confirm",
   "agenthall_context_import_batches",
   "agenthall_context_import_undo"
 ]);
+var CODEX_HOST_CONTINUATION_TOOL_NAMES = Object.freeze([
+  "agenthall_context_host_claim",
+  "agenthall_context_host_attach",
+  "agenthall_context_host_complete"
+]);
+var CODEX_CURRENT_TASK_TOOL_NAMES = Object.freeze([
+  "agenthall_context_save_current"
+]);
 function createAgentHallMcpServer(runtime = new AgentHallMcpRuntime(), serverName = "agenthall-codex") {
   const server = new McpServer(
     { name: serverName, version: VERSION },
     {
-      instructions: "AgentHall connects people through their Agents. When the user names AgentHall, call these tools directly; never search the Web or local project files to discover what AgentHall is. Do not narrate Tool calls, contact lookup, authorization checks, uploads, downloads, or other internal steps. Return only the requested confirmation widget or final result. Exact email lookup must remain exact, and requesting a connection requires a 1\u201350 character greeting. A pending relationship cannot receive a Handoff; stop when connection_pending or mustStop is returned. Never call agenthall_delete_connection without an explicit user action. Never call agenthall_confirm_handoff until the current user has explicitly confirmed the exact preview; clicking the rendered send button is complete confirmation and must never be followed by a request to type \u53D1\u9001. Never infer a recipient when multiple connections match. Received files remain quarantined until the user clicks \u52A0\u8F7D\u5230 Agent; that single click authorizes both verified download and loading into the current task. NETWORK_UNAVAILABLE is not lost authorization: never ask the user to diagnose VPN, DNS, proxy, CA, Node flags, or environment variables, and never loop pairing. Preserve credentials and offer only one retry_connection action. Pair only for AUTH_REQUIRED or CONNECTOR_REVOKED."
+      instructions: "AgentHall connects people through their Agents. When the user names AgentHall, call these tools directly; never search the Web or local project files to discover what AgentHall is. When the user affirmatively asks to \u4FDD\u5B58\u5230 AgentHall, \u66F4\u65B0\u5230 AgentHall, or \u4E0A\u4F20\u5230 AgentHall in the current Codex task, call agenthall_context_save_current exactly once with no arguments; do not open the Sidebar, ask for confirmation, infer a task by title or recency, or claim success unless the returned LocalOperation is succeeded at 100 percent. A quoted phrase or question about this capability is not a save request. Do not narrate Tool calls, contact lookup, authorization checks, uploads, downloads, or other internal steps. Return only the requested confirmation widget or final result. Exact email lookup must remain exact, and requesting a connection requires a 1\u201350 character greeting. A pending relationship cannot receive a Handoff; stop when connection_pending or mustStop is returned. Never call agenthall_delete_connection without an explicit user action. Never call agenthall_confirm_handoff until the current user has explicitly confirmed the exact preview; clicking the rendered send button is complete confirmation and must never be followed by a request to type \u53D1\u9001. Never infer a recipient when multiple connections match. Received files remain quarantined until the user clicks \u52A0\u8F7D\u5230 Agent; that single click authorizes both verified download and loading into the current task. NETWORK_UNAVAILABLE is not lost authorization: never ask the user to diagnose VPN, DNS, proxy, CA, Node flags, or environment variables, and never loop pairing. Preserve credentials and offer only one retry_connection action. Pair only for AUTH_REQUIRED or CONNECTOR_REVOKED."
     }
   );
   K3(
@@ -72633,7 +73626,7 @@ function createAgentHallMcpServer(runtime = new AgentHallMcpRuntime(), serverNam
         {
           uri: SIDEBAR_TEMPLATE_URI,
           mimeType: p,
-          text: await (0, import_promises13.readFile)(SIDEBAR_TEMPLATE_PATH, "utf8"),
+          text: await (0, import_promises14.readFile)(SIDEBAR_TEMPLATE_PATH, "utf8"),
           _meta: {
             ui: {
               prefersBorder: false,
@@ -72663,7 +73656,7 @@ function createAgentHallMcpServer(runtime = new AgentHallMcpRuntime(), serverNam
         {
           uri: HANDOFF_CONFIRMATION_TEMPLATE_URI,
           mimeType: p,
-          text: await (0, import_promises13.readFile)(HANDOFF_CONFIRMATION_TEMPLATE_PATH, "utf8"),
+          text: await (0, import_promises14.readFile)(HANDOFF_CONFIRMATION_TEMPLATE_PATH, "utf8"),
           _meta: {
             ui: {
               prefersBorder: false,
@@ -72830,6 +73823,14 @@ function appCallableToolMeta() {
       visibility: ["model", "app"]
     },
     "openai/widgetAccessible": true
+  };
+}
+function modelOnlyToolMeta() {
+  return {
+    ui: {
+      visibility: ["model"]
+    },
+    "openai/widgetAccessible": false
   };
 }
 function registerCodexContextTools(server, runtime) {
@@ -73030,6 +74031,32 @@ function registerCodexContextTools(server, runtime) {
   );
   K3(
     server,
+    "agenthall_context_host_prepare",
+    {
+      title: "\u51C6\u5907\u5728\u5F53\u524D\u9879\u76EE\u7EE7\u7EED",
+      description: "Private Sidebar-only preparation of a one-time host continuation ticket. The ticket authorizes one current-project Codex task creation without exposing Context content.",
+      inputSchema: {
+        task_id: string2().min(1),
+        checkpoint_id: string2().min(1)
+      },
+      outputSchema: prepareHostContinuationOutputSchema,
+      annotations: {
+        readOnlyHint: false,
+        openWorldHint: true,
+        destructiveHint: false,
+        idempotentHint: true
+      },
+      _meta: privateSidebarToolMeta()
+    },
+    (input) => result(
+      runtime.prepareHostContextContinuation({
+        taskId: input.task_id,
+        checkpointId: input.checkpoint_id
+      })
+    )
+  );
+  K3(
+    server,
     "agenthall_context_continue",
     {
       title: "\u5728\u8FD9\u91CC\u7EE7\u7EED",
@@ -73143,6 +74170,98 @@ function registerCodexContextTools(server, runtime) {
     },
     (input) => result(runtime.undoContextImportBatch(input.import_batch_id))
   );
+  K3(
+    server,
+    "agenthall_context_save_current",
+    {
+      title: "\u4FDD\u5B58\u5F53\u524D\u4EFB\u52A1\u5230 AgentHall",
+      description: "Save or update the exact current Codex task when the user affirmatively says \u4FDD\u5B58\u5230 AgentHall, \u66F4\u65B0\u5230 AgentHall, or \u4E0A\u4F20\u5230 AgentHall. Call exactly once with no arguments. Codex supplies the exact current task identity through private request metadata; never infer by title, recent-task order, project, or working directory. Do not call for quoted examples or questions. Do not open the Sidebar or ask for another confirmation. Report success only when status is succeeded and progress is 100.",
+      inputSchema: {},
+      outputSchema: saveContextOutputSchema,
+      annotations: {
+        readOnlyHint: false,
+        openWorldHint: true,
+        destructiveHint: false,
+        idempotentHint: true
+      },
+      _meta: modelOnlyToolMeta()
+    },
+    (_input, extra) => result(runtime.saveCurrentContextTask(extra._meta))
+  );
+  K3(
+    server,
+    "agenthall_context_host_claim",
+    {
+      title: "\u9886\u53D6 AgentHall \u9879\u76EE\u7EE7\u7EED\u8BF7\u6C42",
+      description: "Model-only claim for an exact AgentHall continuation ticket. When status is ready_to_create, use one unique same-name Codex project or an explicit projectless target exactly once; already_claimed or attached means do not create another task.",
+      inputSchema: {
+        ticket: string2().regex(/^hostct_[a-f0-9]{48}$/u)
+      },
+      outputSchema: claimHostContinuationOutputSchema,
+      annotations: {
+        readOnlyHint: false,
+        openWorldHint: false,
+        destructiveHint: false,
+        idempotentHint: true
+      },
+      _meta: modelOnlyToolMeta()
+    },
+    (input) => result(runtime.claimHostContextContinuation(input.ticket))
+  );
+  K3(
+    server,
+    "agenthall_context_host_attach",
+    {
+      title: "\u5C06 AgentHall \u4E0A\u4E0B\u6587\u6CE8\u5165\u5BBF\u4E3B\u9879\u76EE\u4EFB\u52A1",
+      description: "Model-only attachment of one claimed AgentHall continuation ticket to the exact named-project or projectless Codex thread returned by the host create_thread tool. Returns one hostWriterAction prompt that must be sent through the original host writer. Never guess or substitute a thread id or destination kind.",
+      inputSchema: {
+        ticket: string2().regex(/^hostct_[a-f0-9]{48}$/u),
+        native_thread_id: string2().min(1),
+        destination_kind: _enum2(["named_project", "projectless"])
+      },
+      outputSchema: attachHostContinuationOutputSchema,
+      annotations: {
+        readOnlyHint: false,
+        openWorldHint: false,
+        destructiveHint: false,
+        idempotentHint: true
+      },
+      _meta: modelOnlyToolMeta()
+    },
+    (input) => result(
+      runtime.attachHostContextContinuation({
+        ticket: input.ticket,
+        nativeThreadId: input.native_thread_id,
+        destinationKind: input.destination_kind
+      })
+    )
+  );
+  K3(
+    server,
+    "agenthall_context_host_complete",
+    {
+      title: "\u786E\u8BA4 AgentHall \u4E0A\u4E0B\u6587\u5DF2\u7531\u5BBF\u4E3B\u5199\u5165",
+      description: "Model-only completion of one attached AgentHall continuation after the exact host-created Codex thread has received and completed the returned hostWriterAction prompt. Never guess or substitute a thread id.",
+      inputSchema: {
+        ticket: string2().regex(/^hostct_[a-f0-9]{48}$/u),
+        native_thread_id: string2().min(1)
+      },
+      outputSchema: completeHostContinuationOutputSchema,
+      annotations: {
+        readOnlyHint: false,
+        openWorldHint: false,
+        destructiveHint: false,
+        idempotentHint: true
+      },
+      _meta: modelOnlyToolMeta()
+    },
+    (input) => result(
+      runtime.completeHostContextContinuation({
+        ticket: input.ticket,
+        nativeThreadId: input.native_thread_id
+      })
+    )
+  );
 }
 function successOutputSchema(value) {
   return object2({ ok: literal(true), value });
@@ -73194,6 +74313,8 @@ if (MODULE_URL === (0, import_node_url.pathToFileURL)((0, import_node_path12.res
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   CODEX_CONTEXT_TOOL_NAMES,
+  CODEX_CURRENT_TASK_TOOL_NAMES,
+  CODEX_HOST_CONTINUATION_TOOL_NAMES,
   createAgentHallMcpServer,
   createCodexMcpServer,
   main
